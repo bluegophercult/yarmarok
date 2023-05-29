@@ -4,10 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kaznasho/yarmarok/testinfra"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFirestore(t *testing.T) {
+	testinfra.SkipIfNotIntegrationRun(t)
 	instance, err := RunInstance(t)
 	require.NoError(t, err)
 
