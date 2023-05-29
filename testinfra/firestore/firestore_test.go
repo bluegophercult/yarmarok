@@ -13,8 +13,7 @@ func TestFirestore(t *testing.T) {
 	instance, err := RunInstance(t)
 	require.NoError(t, err)
 
-	firestoreClient, err := instance.Client()
-	require.NoError(t, err)
+	firestoreClient := instance.Client()
 
 	type object struct {
 		Field string `firestore:"test"`

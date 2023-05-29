@@ -16,6 +16,11 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+const (
+	defaultPort      = "8080"
+	defaultProjectID = "local-test-firestore-project-id"
+)
+
 //go:embed Dockerfile
 var dockerfile string
 
@@ -25,32 +30,12 @@ type Instance struct {
 	t         *testing.T
 	container testcontainers.Container
 	ip        string
-}
-
-// IP returns the ip of the emulator container.
-func (i *Instance) IP() string {
-	return i.ip
-}
-
-// Port returns the port to connect to.
-func (i *Instance) Port() string {
-	return "8080"
-}
-
-// Address returns the address of the emulator container.
-func (i *Instance) Address() string {
-	return fmt.Sprintf("%s:%s", i.IP(), i.Port())
-}
-
-// ProjectID returns the project id of the emulator.
-func (i *Instance) ProjectID() string {
-	return "local-test-firestore-project-id"
+	client    *firestore.Client
 }
 
 // Client returns a firestore client connected to the emulator.
-func (i *Instance) Client() (*firestore.Client, error) {
-	os.Setenv("FIRESTORE_EMULATOR_HOST", i.Address())
-	return firestore.NewClient(context.Background(), i.ProjectID())
+func (i *Instance) Client() *firestore.Client {
+	return i.client
 }
 
 // RunInstance runs a firestore emulator instance in a docker container.
@@ -96,10 +81,17 @@ func RunInstance(t *testing.T) (*Instance, error) {
 		return nil, fmt.Errorf("get container host: %w", err)
 	}
 
+	t.Setenv("FIRESTORE_EMULATOR_HOST", fmt.Sprintf("%s:%s", ip, "8080"))
+	client, err := firestore.NewClient(context.Background(), defaultProjectID)
+	if err != nil {
+		return nil, fmt.Errorf("create firestore client: %w", err)
+	}
+
 	instance := &Instance{
 		container: container,
 		ip:        ip,
 		t:         t,
+		client:    client,
 	}
 
 	t.Cleanup(func() {
