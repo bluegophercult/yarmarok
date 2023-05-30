@@ -37,9 +37,11 @@ func TestYarmarok(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	y.UserID = u.ID
+	created := []service.Yarmarok{*y}
+
 	t.Run("get", func(t *testing.T) {
 		y2, err := ys.Get(y.ID)
-		y.UserID = u.ID
 		require.NoError(t, err)
 		require.Equal(t, y, y2)
 	})
@@ -62,5 +64,28 @@ func TestYarmarok(t *testing.T) {
 		}
 		err = ys.Create(y2)
 		require.Error(t, err)
+	})
+
+	t.Run("create another", func(t *testing.T) {
+		y2 := &service.Yarmarok{
+			ID:        "yarmarok_id_2",
+			Name:      "yarmarok_name_2",
+			Note:      "yarmarok_note_2",
+			CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
+			UserID:    "to be replaced",
+		}
+
+		err = ys.Create(y2)
+		require.NoError(t, err)
+
+		y2.UserID = u.ID
+		created = append(created, *y2)
+	})
+
+	t.Run("list", func(t *testing.T) {
+		ys, err := ys.GetAll()
+		require.NoError(t, err)
+		require.Len(t, ys, 2)
+		require.Equal(t, created, ys)
 	})
 }

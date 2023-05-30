@@ -61,3 +61,24 @@ func (ys *FirestoreYarmarokStorage) Get(id string) (*service.Yarmarok, error) {
 
 	return &y, nil
 }
+
+// GetAll returns all yarmaroks per user.
+func (ys *FirestoreYarmarokStorage) GetAll() ([]service.Yarmarok, error) {
+	docs, err := ys.firestoreClient.Documents(context.Background()).GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("get documents: %w", err)
+	}
+
+	var yarmaroks []service.Yarmarok
+	for _, doc := range docs {
+		var y service.Yarmarok
+		err = doc.DataTo(&y)
+		if err != nil {
+			return nil, fmt.Errorf("decode document: %w", err)
+		}
+
+		yarmaroks = append(yarmaroks, y)
+	}
+
+	return yarmaroks, nil
+}
