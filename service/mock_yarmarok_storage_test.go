@@ -61,3 +61,18 @@ func (mr *MockYarmarokStorageMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockYarmarokStorage)(nil).Get), arg0)
 }
+
+// GetAll mocks base method.
+func (m *MockYarmarokStorage) GetAll() ([]Yarmarok, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll")
+	ret0, _ := ret[0].([]Yarmarok)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockYarmarokStorageMockRecorder) GetAll() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockYarmarokStorage)(nil).GetAll))
+}

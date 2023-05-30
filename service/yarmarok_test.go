@@ -93,6 +93,44 @@ func TestYarmarok(t *testing.T) {
 			assert.Equal(t, mockedYarmarok, res)
 		})
 	})
+
+	t.Run("list", func(t *testing.T) {
+		t.Run("error", func(t *testing.T) {
+			mockedErr := assert.AnError
+
+			storage.EXPECT().GetAll().Return(nil, mockedErr).Times(1)
+
+			res, err := manager.List()
+			assert.Error(t, err)
+			assert.Equal(t, mockedErr, err)
+			assert.Nil(t, res)
+		})
+
+		t.Run("success", func(t *testing.T) {
+			mockedYarmaroks := []Yarmarok{
+				{
+					ID:        "yarmarok_id_1",
+					Name:      "yarmarok_name_1",
+					Note:      "yarmarok_note_1",
+					CreatedAt: timeNow().UTC(),
+					UserID:    "user_id_1",
+				},
+				{
+					ID:        "yarmarok_id_2",
+					Name:      "yarmarok_name_2",
+					Note:      "yarmarok_note_2",
+					CreatedAt: timeNow().UTC(),
+					UserID:    "user_id_1",
+				},
+			}
+
+			storage.EXPECT().GetAll().Return(mockedYarmaroks, nil).Times(1)
+
+			res, err := manager.List()
+			assert.NoError(t, err)
+			assert.Equal(t, mockedYarmaroks, res)
+		})
+	})
 }
 
 var _ YarmarokService = &YarmarokManager{}

@@ -38,6 +38,7 @@ type YarmarokService interface {
 type YarmarokStorage interface {
 	Create(*Yarmarok) error
 	Get(id string) (*Yarmarok, error)
+	GetAll() ([]Yarmarok, error)
 }
 
 // YarmarokManager is an implementation of YarmarokService.
@@ -78,7 +79,7 @@ func (ym *YarmarokManager) Get(id string) (*Yarmarok, error) {
 
 // List lists yarmaroks in user's scope.
 func (ym *YarmarokManager) List() ([]Yarmarok, error) {
-	return nil, nil
+	return ym.yarmarokStorage.GetAll()
 }
 
 // YarmarokInitRequest is a request for initializing a yarmarok.
