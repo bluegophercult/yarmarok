@@ -8,6 +8,9 @@ import (
 var (
 	// ErrUserAlreadyExists is returned when a user already exists.
 	ErrUserAlreadyExists = errors.New("user already exists")
+
+	// ErrYarmarokAlreadyExists is returned when a yarmarok already exists.
+	ErrYarmarokAlreadyExists = errors.New("yarmarok already exists")
 )
 
 // User represents a user of the application.
@@ -19,6 +22,7 @@ type User struct {
 type UserStorage interface {
 	Create(User) error
 	Exists(id string) (bool, error)
+	YarmarokStorage(userID string) YarmarokStorage
 }
 
 // UserService is a service for users.

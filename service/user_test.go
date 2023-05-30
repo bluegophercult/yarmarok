@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//go:generate mockgen -destination=mock_user_test.go -package=service github.com/kaznasho/yarmarok/service UserStorage
+//go:generate mockgen -destination=mock_user_storage_test.go -package=service github.com/kaznasho/yarmarok/service UserStorage
 func TestInitUser(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -43,3 +43,5 @@ func TestInitUser(t *testing.T) {
 		})
 	})
 }
+
+var _ UserService = &UserManager{}

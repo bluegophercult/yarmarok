@@ -61,3 +61,17 @@ func (mr *MockUserStorageMockRecorder) Exists(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockUserStorage)(nil).Exists), arg0)
 }
+
+// YarmarokStorage mocks base method.
+func (m *MockUserStorage) YarmarokStorage(arg0 string) YarmarokStorage {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "YarmarokStorage", arg0)
+	ret0, _ := ret[0].(YarmarokStorage)
+	return ret0
+}
+
+// YarmarokStorage indicates an expected call of YarmarokStorage.
+func (mr *MockUserStorageMockRecorder) YarmarokStorage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "YarmarokStorage", reflect.TypeOf((*MockUserStorage)(nil).YarmarokStorage), arg0)
+}
