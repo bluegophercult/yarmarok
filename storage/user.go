@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	userCollection = "users"
+	userCollection     = "users"
+	yarmarokCollection = "yarmaroks"
 )
 
 // FirestoreUserStorage is a storage for users based on Firestore.
