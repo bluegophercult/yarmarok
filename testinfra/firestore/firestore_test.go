@@ -2,9 +2,9 @@ package firestore
 
 import (
 	"context"
+	"github.com/kaznasho/yarmarok/testinfra"
 	"testing"
 
-	"github.com/kaznasho/yarmarok/testinfra"
 	"github.com/stretchr/testify/require"
 )
 
