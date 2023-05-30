@@ -28,6 +28,7 @@ type UserStorage interface {
 // UserService is a service for users.
 type UserService interface {
 	InitUserIfNotExists(id string) error
+	YarmarokService(userID string) YarmarokService
 }
 
 // UserManager is an implementation of UserService.
@@ -54,4 +55,9 @@ func (um *UserManager) InitUserIfNotExists(id string) error {
 	}
 
 	return um.userStorage.Create(User{ID: id})
+}
+
+// YarmarokService is a service for yarmaroks.
+func (um *UserManager) YarmarokService(userID string) YarmarokService {
+	return NewYarmarokManager(um.userStorage.YarmarokStorage(userID))
 }

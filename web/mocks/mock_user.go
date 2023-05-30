@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	service "github.com/kaznasho/yarmarok/service"
 )
 
 // MockUserService is a mock of UserService interface.
@@ -45,4 +46,18 @@ func (m *MockUserService) InitUserIfNotExists(arg0 string) error {
 func (mr *MockUserServiceMockRecorder) InitUserIfNotExists(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitUserIfNotExists", reflect.TypeOf((*MockUserService)(nil).InitUserIfNotExists), arg0)
+}
+
+// YarmarokService mocks base method.
+func (m *MockUserService) YarmarokService(arg0 string) service.YarmarokService {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "YarmarokService", arg0)
+	ret0, _ := ret[0].(service.YarmarokService)
+	return ret0
+}
+
+// YarmarokService indicates an expected call of YarmarokService.
+func (mr *MockUserServiceMockRecorder) YarmarokService(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "YarmarokService", reflect.TypeOf((*MockUserService)(nil).YarmarokService), arg0)
 }

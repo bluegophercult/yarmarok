@@ -1,6 +1,8 @@
 package web
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -21,6 +23,7 @@ const googleUserIDHeader = "X-Goog-Authenticated-User-Id"
 var ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
 
 //go:generate mockgen -destination=mocks/mock_user.go -package=mocks github.com/kaznasho/yarmarok/service UserService
+//go:generate mockgen -destination=mocks/mock_yarmarok.go -package=mocks github.com/kaznasho/yarmarok/service YarmarokService
 func TestRouter(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -33,11 +36,26 @@ func TestRouter(t *testing.T) {
 
 	t.Run("create_yarmarok", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
-			req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+			initRequest := &service.YarmarokInitRequest{
+				Name: "yarmarok_1",
+				Note: "note_1",
+			}
+
+			encoded, err := json.Marshal(initRequest)
+			require.NoError(t, err)
+
+			body := bytes.NewReader(encoded)
+
+			req, err := http.NewRequest("POST", "/create-yarmarok", body)
 			require.NoError(t, err)
 
 			req.Header.Set(googleUserIDHeader, userID)
 			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+			ysMock := mocks.NewMockYarmarokService(ctrl)
+			us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+			ysMock.EXPECT().Init(initRequest).Return(&service.InitResult{}, nil)
 
 			writer := httptest.NewRecorder()
 			router.ServeHTTP(writer, req)
@@ -50,14 +68,14 @@ func TestRouter(t *testing.T) {
 // A convenient alias for chi.Router
 type Router struct {
 	chi.Router
-	userStorage service.UserService
+	userService service.UserService
 }
 
 // NewRouter creates a new Router
 func NewRouter(us service.UserService) (*Router, error) {
 	router := &Router{
 		Router:      chi.NewRouter(),
-		userStorage: us,
+		userService: us,
 	}
 
 	router.Use(router.applyUserIDMiddleware)
@@ -68,7 +86,34 @@ func NewRouter(us service.UserService) (*Router, error) {
 }
 
 func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
-	return
+	userID, err := extractUserID(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	yarmarokService := r.userService.YarmarokService(userID)
+
+	initRequest := &service.YarmarokInitRequest{}
+	err = json.NewDecoder(req.Body).Decode(initRequest)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp, err := yarmarokService.Init(initRequest)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (r *Router) applyUserIDMiddleware(next http.Handler) http.Handler {
@@ -79,7 +124,7 @@ func (r *Router) applyUserIDMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		err = r.userStorage.InitUserIfNotExists(userID)
+		err = r.userService.InitUserIfNotExists(userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
