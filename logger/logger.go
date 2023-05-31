@@ -15,6 +15,8 @@ type (
 	Level = logrus.Level
 	// Fields is a logger alias for logrus.Fields.
 	Fields = logrus.Fields
+	// Entry is a logger alias for logrus.Entry.
+	Entry = logrus.Entry
 )
 
 // Log levels.

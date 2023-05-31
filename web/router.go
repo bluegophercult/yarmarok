@@ -23,7 +23,7 @@ var ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
 type Router struct {
 	chi.Router
 	userService service.UserService
-	logger      *logger.Logger
+	logger      *logger.Entry
 }
 
 // NewRouter creates a new Router
@@ -31,9 +31,10 @@ func NewRouter(us service.UserService, logger *logger.Logger) (*Router, error) {
 	router := &Router{
 		Router:      chi.NewRouter(),
 		userService: us,
-		logger:      logger,
+		logger:      logger.WithField("component", "router"),
 	}
 
+	router.Use(router.applyLoggingMiddleware)
 	router.Use(router.applyUserMiddleware)
 
 	router.Post("/create-yarmarok", router.createYarmarok)
@@ -96,7 +97,7 @@ func (r *Router) applyUserMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (r *Router) applyLoginMiddleware(next http.Handler) http.Handler {
+func (r *Router) applyLoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		userID, _ := extractUserID(req)
 		requestID := uuid.New().String()
@@ -119,7 +120,6 @@ func (r *Router) applyLoginMiddleware(next http.Handler) http.Handler {
 			"request_id": requestID,
 			"user_id":    userID,
 		}).Info("request completed")
-
 	})
 }
 
