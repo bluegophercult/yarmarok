@@ -9,6 +9,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
 	"github.com/kaznasho/yarmarok/web/mocks"
 
@@ -25,7 +26,7 @@ func TestRouter(t *testing.T) {
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
 
-	router, err := NewRouter(us)
+	router, err := NewRouter(us, logger.NewNoOpLogger())
 	require.NoError(t, err)
 	require.NotNil(t, router)
 
@@ -44,7 +45,7 @@ func TestRouter(t *testing.T) {
 			req, err := http.NewRequest("POST", "/create-yarmarok", body)
 			require.NoError(t, err)
 
-			req.Header.Set(googleUserIDHeader, userID)
+			req.Header.Set(GoogleUserIDHeader, userID)
 			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
 
 			ysMock := mocks.NewMockYarmarokService(ctrl)
@@ -56,6 +57,49 @@ func TestRouter(t *testing.T) {
 			router.ServeHTTP(writer, req)
 			require.Equal(t, http.StatusOK, writer.Code)
 		})
+
+		t.Run("error", func(t *testing.T) {
+			initRequest := &service.YarmarokInitRequest{
+				Name: "yarmarok_1",
+				Note: "note_1",
+			}
+
+			encoded, err := json.Marshal(initRequest)
+			require.NoError(t, err)
+
+			body := bytes.NewReader(encoded)
+
+			req, err := http.NewRequest("POST", "/create-yarmarok", body)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, userID)
+			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+			ysMock := mocks.NewMockYarmarokService(ctrl)
+			us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+			mockedErr := assert.AnError
+			ysMock.EXPECT().Init(initRequest).Return(nil, mockedErr)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusInternalServerError, writer.Code)
+		})
+
+		t.Run("nil_body", func(t *testing.T) {
+			req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, userID)
+			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+			ysMock := mocks.NewMockYarmarokService(ctrl)
+			us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusBadRequest, writer.Code)
+		})
 	})
 }
 
@@ -65,7 +109,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
 
-	router, err := NewRouter(us)
+	router, err := NewRouter(us, logger.NewNoOpLogger())
 	require.NoError(t, err)
 	require.NotNil(t, router)
 
@@ -73,7 +117,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
 		require.NoError(t, err)
 
-		req.Header.Set(googleUserIDHeader, userID)
+		req.Header.Set(GoogleUserIDHeader, userID)
 		us.EXPECT().InitUserIfNotExists(userID).Return(nil)
 
 		stub := newHandlerStub()
@@ -107,7 +151,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 
 		mockedErr := errors.New("mocked error")
 
-		req.Header.Set(googleUserIDHeader, userID)
+		req.Header.Set(GoogleUserIDHeader, userID)
 		us.EXPECT().InitUserIfNotExists(userID).Return(mockedErr)
 
 		writer := httptest.NewRecorder()
