@@ -6,21 +6,16 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
-	"github.com/go-chi/chi"
 	"github.com/kaznasho/yarmarok/service"
 	"github.com/kaznasho/yarmarok/web/mocks"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-const googleUserIDHeader = "X-Goog-Authenticated-User-Id"
-
-// ErrAmbiguousUserIDHeader is returned when
-// the user id header is not set or is ambiguous.
-var ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
 
 //go:generate mockgen -destination=mocks/mock_user.go -package=mocks github.com/kaznasho/yarmarok/service UserService
 //go:generate mockgen -destination=mocks/mock_yarmarok.go -package=mocks github.com/kaznasho/yarmarok/service YarmarokService
@@ -61,90 +56,87 @@ func TestRouter(t *testing.T) {
 			router.ServeHTTP(writer, req)
 			require.Equal(t, http.StatusOK, writer.Code)
 		})
-
 	})
 }
 
-// A convenient alias for chi.Router
-type Router struct {
-	chi.Router
-	userService service.UserService
-}
+func TestApplyUserMiddleware(t *testing.T) {
+	ctrl := gomock.NewController(t)
 
-// NewRouter creates a new Router
-func NewRouter(us service.UserService) (*Router, error) {
-	router := &Router{
-		Router:      chi.NewRouter(),
-		userService: us,
-	}
+	us := mocks.NewMockUserService(ctrl)
+	userID := "user_id_1"
 
-	router.Use(router.applyUserIDMiddleware)
+	router, err := NewRouter(us)
+	require.NoError(t, err)
+	require.NotNil(t, router)
 
-	router.Post("/create-yarmarok", router.createYarmarok)
+	t.Run("success", func(t *testing.T) {
+		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		require.NoError(t, err)
 
-	return router, nil
-}
+		req.Header.Set(googleUserIDHeader, userID)
+		us.EXPECT().InitUserIfNotExists(userID).Return(nil)
 
-func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
-	userID, err := extractUserID(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+		stub := newHandlerStub()
+		handler := http.HandlerFunc(stub.ServeHTTP)
 
-	yarmarokService := r.userService.YarmarokService(userID)
+		writer := httptest.NewRecorder()
+		router.applyUserMiddleware(handler).ServeHTTP(writer, req)
+		require.Equal(t, http.StatusOK, writer.Code)
+		assert.True(t, stub.Called())
+	})
 
-	initRequest := &service.YarmarokInitRequest{}
-	err = json.NewDecoder(req.Body).Decode(initRequest)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	t.Run("no_user_id", func(t *testing.T) {
+		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		require.NoError(t, err)
 
-	resp, err := yarmarokService.Init(initRequest)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		stub := newHandlerStub()
+		handler := http.HandlerFunc(stub.ServeHTTP)
 
-	err = json.NewEncoder(w).Encode(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		writer := httptest.NewRecorder()
+		router.applyUserMiddleware(handler).ServeHTTP(writer, req)
+		require.Equal(t, http.StatusBadRequest, writer.Code)
+		assert.False(t, stub.Called())
+	})
 
-	w.WriteHeader(http.StatusOK)
-}
+	t.Run("error", func(t *testing.T) {
+		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		require.NoError(t, err)
 
-func (r *Router) applyUserIDMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		userID, err := extractUserID(req)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+		stub := newHandlerStub()
+		handler := http.HandlerFunc(stub.ServeHTTP)
 
-		err = r.userService.InitUserIfNotExists(userID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		mockedErr := errors.New("mocked error")
 
-		next.ServeHTTP(w, req)
+		req.Header.Set(googleUserIDHeader, userID)
+		us.EXPECT().InitUserIfNotExists(userID).Return(mockedErr)
+
+		writer := httptest.NewRecorder()
+		router.applyUserMiddleware(handler).ServeHTTP(writer, req)
+		require.Equal(t, http.StatusInternalServerError, writer.Code)
+		assert.False(t, stub.Called())
 	})
 }
 
-func extractUserID(r *http.Request) (string, error) {
-	ids := r.Header.Values(googleUserIDHeader)
+type HandlerStub struct {
+	called bool
+	once   sync.Once
+}
 
-	if len(ids) != 1 {
-		return "", ErrAmbiguousUserIDHeader
+func (h *HandlerStub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.once.Do(func() {
+		h.called = true
+	})
+}
+
+func (h *HandlerStub) Called() bool {
+	return h.called
+}
+
+func newHandlerStub() *HandlerStub {
+	handler := &HandlerStub{
+		once:   sync.Once{},
+		called: false,
 	}
 
-	id := ids[0]
-	if id == "" {
-		return "", ErrAmbiguousUserIDHeader
-	}
-
-	return id, nil
+	return handler
 }
