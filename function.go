@@ -6,6 +6,7 @@ import (
 )
 
 func init() {
-	// Register an HTTP function with the Functions Framework
-	functions.HTTP("Entrypoint", function.Entrypoint)
+	functions.HTTP("Entrypoint", Entrypoint)
 }
+
+var Entrypoint = function.Entrypoint
