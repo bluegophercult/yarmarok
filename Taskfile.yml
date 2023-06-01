@@ -1,10 +1,6 @@
 version: '3'
 
 tasks:
-  test:
-    cmds:
-      - go test ./...
-  
   generate:
     cmds:
       - go generate ./...
