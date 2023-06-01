@@ -3,6 +3,7 @@ package yarmarok
 import (
 	"testing"
 
+	"github.com/kaznasho/yarmarok/testinfra"
 	fsemulator "github.com/kaznasho/yarmarok/testinfra/firestore"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestCreateUser(t *testing.T) {
-	//testinfra.SkipIfNotIntegrationRun(t)
+	testinfra.SkipIfNotIntegrationRun(t)
 	user := User{ID: "123"}
 
 	firestoreInstance, err := fsemulator.RunInstance(t)

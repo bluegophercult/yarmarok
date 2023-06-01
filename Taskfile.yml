@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  test:
+    cmds:
+      - go test ./...
+  
+  generate:
+    cmds:
+      - go generate ./...
+
+  test:
+    cmds:
+      - go test -v ./...
+
+  integration-test:
+    cmds:
+      - RUN_INTEGRATION_TESTS=true go test -v ./...   

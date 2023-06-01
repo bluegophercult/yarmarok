@@ -70,3 +70,26 @@ The **Yarmarok** project includes the following functions:
 | `lot_view`                     | Displays details of a lot, including name, description, cost, and participant list.                                               |
 | `play_lot`                     | Performs the raffle for a lot, randomly selecting a winner based on the number of coupons.                                        |
 | `play_lot_additional_actions`  | Performs additional actions after the raffle, such as sending a message to the winner or saving the raffle results in a database. |
+
+
+## Running the project
+
+### Prerequisites
+
+- [Go](https://golang.org/doc/install)
+- [Task](https://taskfile.dev/#/installation)
+- [Docker](https://docs.docker.com/get-docker/)
+
+
+Quick install of go Task:
+```bash
+go install github.com/go-task/task/v3/cmd/task@latest
+```
+
+### Run tasks
+
+```bash
+task test # run tests
+task integration-test # run heavy integration tests
+task generate # generate mocks
+```
