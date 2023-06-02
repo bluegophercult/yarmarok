@@ -14,7 +14,7 @@ import (
 	"github.com/kaznasho/yarmarok/web"
 )
 
-const projectIDEnvVar = "GCP_PROJECT"
+const ProjectIDEnvVar = "GCP_PROJECT"
 
 // ErrEmptyProjectID is returned when the project id is empty.
 var ErrEmptyProjectID = errors.New("empty project id")
@@ -35,9 +35,9 @@ func Entrypoint(w http.ResponseWriter, r *http.Request) {
 
 // LoadRouter loads the router.
 func LoadRouter(log *logger.Logger) (*web.Router, error) {
-	projectID := os.Getenv(projectIDEnvVar)
+	projectID := os.Getenv(ProjectIDEnvVar)
 	if projectID == "" {
-		return nil, fmt.Errorf("%w: %s is not set", ErrEmptyProjectID, projectIDEnvVar)
+		return nil, fmt.Errorf("%w: %s is not set", ErrEmptyProjectID, ProjectIDEnvVar)
 	}
 
 	firestoreClient, err := firestore.NewClient(context.Background(), projectID)
