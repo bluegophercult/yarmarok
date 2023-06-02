@@ -38,6 +38,11 @@ func (i *Instance) Client() *firestore.Client {
 	return i.client
 }
 
+// ProjectID returns the project id of the emulator.
+func (i *Instance) ProjectID() string {
+	return defaultProjectID
+}
+
 // RunInstance runs a firestore emulator instance in a docker container.
 // The container is automatically cleaned up after the test.
 // Use only one instance per host, as the emulator does not support multiple instances.

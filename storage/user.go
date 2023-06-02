@@ -1,9 +1,10 @@
-package yarmarok
+package storage
 
 import (
 	"context"
-	"errors"
 	"fmt"
+
+	"github.com/kaznasho/yarmarok/service"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/grpc/codes"
@@ -11,24 +12,9 @@ import (
 )
 
 const (
-	userCollection = "users"
+	userCollection     = "users"
+	yarmarokCollection = "yarmaroks"
 )
-
-var (
-	// ErrUserAlreadyExists is returned when a user already exists.
-	ErrUserAlreadyExists = errors.New("user already exists")
-)
-
-// User represents a user of the application.
-type User struct {
-	ID string
-}
-
-// UserStorage is a storage for users.
-type UserStorage interface {
-	Create(User) error
-	Exists(id string) (bool, error)
-}
 
 // FirestoreUserStorage is a storage for users based on Firestore.
 type FirestoreUserStorage struct {
@@ -43,14 +29,14 @@ func NewFirestoreUserStorage(client *firestore.Client) *FirestoreUserStorage {
 }
 
 // Create creates a new user.
-func (us *FirestoreUserStorage) Create(u User) error {
+func (us *FirestoreUserStorage) Create(u service.User) error {
 	exists, err := us.Exists(u.ID)
 	if err != nil {
 		return fmt.Errorf("check user exists: %w", err)
 	}
 
 	if exists {
-		return ErrUserAlreadyExists
+		return service.ErrUserAlreadyExists
 	}
 
 	_, err = us.firestoreClient.Doc(u.ID).Set(context.Background(), u)
