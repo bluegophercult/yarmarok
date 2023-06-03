@@ -30,6 +30,21 @@ func TestRouter(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, router)
 
+	t.Run("panic_in_handler", func(t *testing.T) {
+		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		require.NoError(t, err)
+
+		req.Header.Set(GoogleUserIDHeader, userID)
+		us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+		ysMock := mocks.NewMockYarmarokService(ctrl)
+		us.EXPECT().YarmarokService(userID).Return(ysMock).Do(func(string) { panic("panic in handler") })
+
+		writer := httptest.NewRecorder()
+		router.ServeHTTP(writer, req)
+		require.Equal(t, http.StatusInternalServerError, writer.Code)
+	})
+
 	t.Run("create_yarmarok", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			initRequest := &service.YarmarokInitRequest{
@@ -86,8 +101,8 @@ func TestRouter(t *testing.T) {
 			require.Equal(t, http.StatusInternalServerError, writer.Code)
 		})
 
-		t.Run("nil_body", func(t *testing.T) {
-			req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		t.Run("empty_body", func(t *testing.T) {
+			req, err := http.NewRequest("POST", "/create-yarmarok", bytes.NewBuffer([]byte{}))
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -124,7 +139,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 		handler := http.HandlerFunc(stub.ServeHTTP)
 
 		writer := httptest.NewRecorder()
-		router.applyUserMiddleware(handler).ServeHTTP(writer, req)
+		router.userMiddleware(handler).ServeHTTP(writer, req)
 		require.Equal(t, http.StatusOK, writer.Code)
 		assert.True(t, stub.Called())
 	})
@@ -137,7 +152,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 		handler := http.HandlerFunc(stub.ServeHTTP)
 
 		writer := httptest.NewRecorder()
-		router.applyUserMiddleware(handler).ServeHTTP(writer, req)
+		router.userMiddleware(handler).ServeHTTP(writer, req)
 		require.Equal(t, http.StatusBadRequest, writer.Code)
 		assert.False(t, stub.Called())
 	})
@@ -155,7 +170,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 		us.EXPECT().InitUserIfNotExists(userID).Return(mockedErr)
 
 		writer := httptest.NewRecorder()
-		router.applyUserMiddleware(handler).ServeHTTP(writer, req)
+		router.userMiddleware(handler).ServeHTTP(writer, req)
 		require.Equal(t, http.StatusInternalServerError, writer.Code)
 		assert.False(t, stub.Called())
 	})

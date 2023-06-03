@@ -34,8 +34,9 @@ func NewRouter(us service.UserService, logger *logger.Logger) (*Router, error) {
 		logger:      logger.WithField("component", "router"),
 	}
 
-	router.Use(router.applyLoggingMiddleware)
-	router.Use(router.applyUserMiddleware)
+	router.Use(router.loggingMiddleware)
+	router.Use(router.recoverMiddleware)
+	router.Use(router.userMiddleware)
 
 	router.Post("/create-yarmarok", router.createYarmarok)
 
@@ -52,11 +53,6 @@ func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
 	yarmarokService := r.userService.YarmarokService(userID)
 
 	initRequest := &service.YarmarokInitRequest{}
-
-	if req.Body == nil {
-		http.Error(w, "request body is empty", http.StatusBadRequest)
-		return
-	}
 
 	err = json.NewDecoder(req.Body).Decode(initRequest)
 	if err != nil {
@@ -79,7 +75,7 @@ func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (r *Router) applyUserMiddleware(next http.Handler) http.Handler {
+func (r *Router) userMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		userID, err := extractUserID(req)
 		if err != nil {
@@ -97,7 +93,7 @@ func (r *Router) applyUserMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (r *Router) applyLoggingMiddleware(next http.Handler) http.Handler {
+func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		userID, _ := extractUserID(req)
 		requestID := uuid.New().String()
@@ -120,6 +116,23 @@ func (r *Router) applyLoggingMiddleware(next http.Handler) http.Handler {
 			"request_id": requestID,
 			"user_id":    userID,
 		}).Info("request completed")
+	})
+}
+
+func (R *Router) recoverMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				R.logger.WithFields(logger.Fields{
+					"uri":    req.RequestURI,
+					"method": req.Method,
+					"error":  err,
+				}).Error("panic recovered")
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+		}()
+
+		next.ServeHTTP(w, req)
 	})
 }
 
