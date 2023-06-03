@@ -22,7 +22,13 @@ func TestParticipantStorage(t *testing.T) {
 	err = us.Create(u)
 	require.NoError(t, err)
 
-	ps := us.ParticipantStorage(u.ID)
+	y := service.Yarmarok{ID: "yarmarok_id_1"}
+	ys := NewFirestoreYarmarokStorage(us.firestoreClient.Doc(u.ID).Collection(yarmarokCollection), y.ID)
+
+	err = ys.Create(&y)
+	require.NoError(t, err)
+
+	ps := ys.ParticipantStorage(y.ID)
 
 	p := service.Participant{
 		ID:         "participant_id_1",

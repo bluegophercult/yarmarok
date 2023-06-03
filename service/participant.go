@@ -26,3 +26,11 @@ type ParticipantStorage interface {
 	GetAll() ([]Participant, error)
 	Exists(id string) (bool, error)
 }
+
+type ParticipantManager struct {
+	participantStorage ParticipantStorage
+}
+
+func NewParticipantManager(ps ParticipantStorage) *ParticipantManager {
+	return &ParticipantManager{participantStorage: ps}
+}

@@ -7,23 +7,21 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
-const ()
-
 // FirestoreParticipantStorage is a storage for yarmaroks based on Firestore.
 type FirestoreParticipantStorage struct {
-	userID          string
+	yarmarokID      string
 	firestoreClient *firestore.CollectionRef
 }
 
 // ParticipantStorage returns a participant storage.
-func (us *FirestoreUserStorage) ParticipantStorage(userID string) *FirestoreParticipantStorage {
-	return NewFirestoreParticipantStorage(us.firestoreClient.Doc(userID).Collection(participantCollection), userID)
+func (ys *FirestoreYarmarokStorage) ParticipantStorage(yarmarokID string) *FirestoreParticipantStorage {
+	return NewFirestoreParticipantStorage(ys.firestoreClient.Doc(yarmarokID).Collection(participantCollection), yarmarokID)
 }
 
 // NewFirestoreParticipantStorage creates a new FirestoreParticipantStorage.
-func NewFirestoreParticipantStorage(client *firestore.CollectionRef, userID string) *FirestoreParticipantStorage {
+func NewFirestoreParticipantStorage(client *firestore.CollectionRef, yarmarokID string) *FirestoreParticipantStorage {
 	return &FirestoreParticipantStorage{
-		userID:          userID,
+		yarmarokID:      yarmarokID,
 		firestoreClient: client,
 	}
 }
