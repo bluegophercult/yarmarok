@@ -19,7 +19,7 @@ tasks:
   archive:
     deps: [clean]
     cmds:
-      - zip -r $ZIP_NAME .
+      -  git archive --format=zip -o $ZIP_NAME HEAD
 
   clean:
     cmds:
