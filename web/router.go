@@ -27,11 +27,16 @@ type Router struct {
 }
 
 // NewRouter creates a new Router
-func NewRouter(us service.UserService, logger *logger.Logger) (*Router, error) {
+func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 	router := &Router{
 		Router:      chi.NewRouter(),
 		userService: us,
-		logger:      logger.WithField("component", "router"),
+		logger: log.WithFields(
+			logger.Fields{
+				"component": "router",
+				"trace_id":  uuid.New().String(),
+			},
+		),
 	}
 
 	router.Use(router.loggingMiddleware)
@@ -52,15 +57,72 @@ func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
 
 	yarmarokService := r.userService.YarmarokService(userID)
 
-	initRequest := &service.YarmarokInitRequest{}
+	m := methodHandler[
+		*service.YarmarokInitRequest,
+		*service.InitResult,
+	](
+		yarmarokService.Init,
+	).WithLogger(r.logger)
 
-	err = json.NewDecoder(req.Body).Decode(initRequest)
+	m.ServeHTTP(w, req)
+}
+
+// noRequestMethodHandler is a wrapper around a service method
+// that converts a no request method to an http handler.
+type noRequestMethodHandler[Response any] func() (Response, error)
+
+func (m noRequestMethodHandler[Response]) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	emptyRequestWrapper := func(struct{}) (Response, error) {
+		return m()
+	}
+
+	h := methodHandler[
+		struct{},
+		Response,
+	](
+		emptyRequestWrapper,
+	)
+
+	h.ServeHTTP(w, req)
+}
+
+// methodHandler is a wrapper around a service method
+// that converts that method to an http handler.
+type methodHandler[Request any, Response any] func(Request) (Response, error)
+
+func (m methodHandler[Request, Response]) WithLogger(log *logger.Entry) methodHandler[Request, Response] {
+	return func(req Request) (Response, error) {
+		log.WithFields(
+			logger.Fields{
+				"request": req,
+			},
+		).Debug("request")
+
+		resp, err := m(req)
+		if err != nil {
+			log.WithError(err).Error("request failed")
+		}
+
+		log.WithFields(
+			logger.Fields{
+				"response": resp,
+			},
+		).Debug("response")
+
+		return resp, err
+	}
+}
+
+func (m methodHandler[Request, Response]) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	request := new(Request)
+
+	err := json.NewDecoder(req.Body).Decode(request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	resp, err := yarmarokService.Init(initRequest)
+	resp, err := m(*request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,7 +158,6 @@ func (r *Router) userMiddleware(next http.Handler) http.Handler {
 func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		userID, _ := extractUserID(req)
-		requestID := uuid.New().String()
 
 		start := time.Now()
 		duration := time.Since(start)
@@ -107,15 +168,16 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 
 		responseMetric := lrw.ResponseMetric()
 
-		r.logger.WithFields(logger.Fields{
-			"uri":        req.RequestURI,
-			"method":     req.Method,
-			"status":     responseMetric.Status,
-			"duration":   duration,
-			"size":       responseMetric.Size,
-			"request_id": requestID,
-			"user_id":    userID,
-		}).Info("request completed")
+		r.logger.WithFields(
+			logger.Fields{
+				"uri":      req.RequestURI,
+				"method":   req.Method,
+				"status":   responseMetric.Status,
+				"duration": duration,
+				"size":     responseMetric.Size,
+				"user_id":  userID,
+			},
+		).Info("request completed")
 	})
 }
 
