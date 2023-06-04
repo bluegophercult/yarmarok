@@ -91,7 +91,7 @@ func dummyRequest(t *testing.T) *http.Request {
 	jsonBody, err := json.Marshal(yarmarokInit)
 	require.NoError(t, err)
 
-	req, err := http.NewRequest(http.MethodPost, "/create-yarmarok", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, web.YarmaroksPath, bytes.NewBuffer(jsonBody))
 	require.NoError(t, err)
 
 	req.Header.Set(web.GoogleUserIDHeader, "user_id_1")

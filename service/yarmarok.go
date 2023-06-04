@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,7 +32,7 @@ type Yarmarok struct {
 type YarmarokService interface {
 	Init(*YarmarokInitRequest) (*InitResult, error)
 	Get(id string) (*Yarmarok, error)
-	List() ([]Yarmarok, error)
+	List() (*YarmarokListResponse, error)
 }
 
 // YarmarokStorage is a storage for yarmaroks.
@@ -78,8 +79,15 @@ func (ym *YarmarokManager) Get(id string) (*Yarmarok, error) {
 }
 
 // List lists yarmaroks in user's scope.
-func (ym *YarmarokManager) List() ([]Yarmarok, error) {
-	return ym.yarmarokStorage.GetAll()
+func (ym *YarmarokManager) List() (*YarmarokListResponse, error) {
+	yarmaroks, err := ym.yarmarokStorage.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("get all yarmaroks: %w", err)
+	}
+
+	return &YarmarokListResponse{
+		Yarmaroks: yarmaroks,
+	}, nil
 }
 
 // YarmarokInitRequest is a request for initializing a yarmarok.
@@ -91,4 +99,9 @@ type YarmarokInitRequest struct {
 // InitResult is a generic result of entity initialization.
 type InitResult struct {
 	ID string
+}
+
+// YarmarokListResponse is a response for listing yarmaroks.
+type YarmarokListResponse struct {
+	Yarmaroks []Yarmarok
 }
