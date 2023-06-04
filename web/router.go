@@ -10,6 +10,10 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
+const (
+	YarmaroksPath = "/yarmaroks"
+)
+
 // ErrAmbiguousUserIDHeader is returned when
 // the user id header is not set or is ambiguous.
 var ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
@@ -39,8 +43,8 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 	router.Use(router.recoverMiddleware)
 	router.Use(router.userMiddleware)
 
-	router.Post("/create-yarmarok", router.createYarmarok)
-	router.Get("/list-yarmaroks", router.listYarmaroks)
+	router.Post(YarmaroksPath, router.createYarmarok)
+	router.Get(YarmaroksPath, router.listYarmaroks)
 
 	return router, nil
 }

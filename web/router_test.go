@@ -34,7 +34,7 @@ func TestRouter(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("panic_in_handler", func(t *testing.T) {
-		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		req, err := http.NewRequest("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, userID)
@@ -60,7 +60,7 @@ func TestRouter(t *testing.T) {
 
 			body := bytes.NewReader(encoded)
 
-			req, err := http.NewRequest("POST", "/create-yarmarok", body)
+			req, err := http.NewRequest("POST", YarmaroksPath, body)
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -87,7 +87,7 @@ func TestRouter(t *testing.T) {
 
 			body := bytes.NewReader(encoded)
 
-			req, err := http.NewRequest("POST", "/create-yarmarok", body)
+			req, err := http.NewRequest("POST", YarmaroksPath, body)
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -105,7 +105,7 @@ func TestRouter(t *testing.T) {
 		})
 
 		t.Run("empty_body", func(t *testing.T) {
-			req, err := http.NewRequest("POST", "/create-yarmarok", bytes.NewBuffer([]byte{}))
+			req, err := http.NewRequest("POST", YarmaroksPath, bytes.NewBuffer([]byte{}))
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -146,7 +146,7 @@ func TestRouter(t *testing.T) {
 				},
 			}
 
-			req, err := http.NewRequest("GET", "/list-yarmaroks", emptyBody())
+			req, err := http.NewRequest("GET", YarmaroksPath, emptyBody())
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -166,7 +166,7 @@ func TestRouter(t *testing.T) {
 		})
 
 		t.Run("error", func(t *testing.T) {
-			req, err := http.NewRequest("GET", "/list-yarmaroks", emptyBody())
+			req, err := http.NewRequest("GET", YarmaroksPath, emptyBody())
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -196,7 +196,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		req, err := http.NewRequest("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, userID)
@@ -212,7 +212,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	})
 
 	t.Run("no_user_id", func(t *testing.T) {
-		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		req, err := http.NewRequest("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
@@ -225,7 +225,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		req, err := http.NewRequest("POST", "/create-yarmarok", nil)
+		req, err := http.NewRequest("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
