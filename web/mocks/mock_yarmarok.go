@@ -65,10 +65,10 @@ func (mr *MockYarmarokServiceMockRecorder) Init(arg0 interface{}) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockYarmarokService) List() ([]service.Yarmarok, error) {
+func (m *MockYarmarokService) List() (*service.YarmarokListResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List")
-	ret0, _ := ret[0].([]service.Yarmarok)
+	ret0, _ := ret[0].(*service.YarmarokListResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

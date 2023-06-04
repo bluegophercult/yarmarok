@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
@@ -116,6 +119,70 @@ func TestRouter(t *testing.T) {
 			require.Equal(t, http.StatusBadRequest, writer.Code)
 		})
 	})
+
+	t.Run("list_yarmaroks", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			dummyTime := time.Now().UTC()
+			expected := &service.YarmarokListResponse{
+				Yarmaroks: []service.Yarmarok{
+					{
+						ID:        "yarmarok_id_1",
+						Name:      "yarmarok_1",
+						Note:      "note_1",
+						CreatedAt: dummyTime,
+					},
+					{
+						ID:        "yarmarok_id_2",
+						Name:      "yarmarok_2",
+						Note:      "note_2",
+						CreatedAt: dummyTime,
+					},
+					{
+						ID:        "yarmarok_id_3",
+						Name:      "yarmarok_3",
+						Note:      "note_3",
+						CreatedAt: dummyTime,
+					},
+				},
+			}
+
+			req, err := http.NewRequest("GET", "/list-yarmaroks", emptyBody())
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, userID)
+			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+			ysMock := mocks.NewMockYarmarokService(ctrl)
+			us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+			ysMock.EXPECT().List().Return(expected, nil)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusOK, writer.Code)
+
+			assertJSONResponse(t, expected, writer.Body)
+
+		})
+
+		t.Run("error", func(t *testing.T) {
+			req, err := http.NewRequest("GET", "/list-yarmaroks", emptyBody())
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, userID)
+			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+			ysMock := mocks.NewMockYarmarokService(ctrl)
+			us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+			mockedErr := assert.AnError
+			ysMock.EXPECT().List().Return(nil, mockedErr)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusInternalServerError, writer.Code)
+		})
+	})
 }
 
 func TestApplyUserMiddleware(t *testing.T) {
@@ -198,4 +265,21 @@ func newHandlerStub() *HandlerStub {
 	}
 
 	return handler
+}
+
+func emptyBody() io.Reader {
+	return bytes.NewReader([]byte{})
+}
+
+func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
+	t.Helper()
+
+	actualJSON, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
+
+	expectedJSON, err := json.Marshal(expected)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
+
 }

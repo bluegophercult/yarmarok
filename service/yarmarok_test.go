@@ -102,7 +102,7 @@ func TestYarmarok(t *testing.T) {
 
 			res, err := manager.List()
 			assert.Error(t, err)
-			assert.Equal(t, mockedErr, err)
+			assert.ErrorIs(t, err, mockedErr)
 			assert.Nil(t, res)
 		})
 
@@ -124,11 +124,15 @@ func TestYarmarok(t *testing.T) {
 				},
 			}
 
+			expected := &YarmarokListResponse{
+				Yarmaroks: mockedYarmaroks,
+			}
+
 			storage.EXPECT().GetAll().Return(mockedYarmaroks, nil).Times(1)
 
 			res, err := manager.List()
 			assert.NoError(t, err)
-			assert.Equal(t, mockedYarmaroks, res)
+			assert.Equal(t, expected, res)
 		})
 	})
 }
