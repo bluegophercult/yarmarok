@@ -2,8 +2,10 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"github.com/go-chi/chi"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -23,11 +25,14 @@ import (
 
 //go:generate mockgen -destination=mocks/mock_user.go -package=mocks github.com/kaznasho/yarmarok/service UserService
 //go:generate mockgen -destination=mocks/mock_yarmarok.go -package=mocks github.com/kaznasho/yarmarok/service YarmarokService
+//go:generate mockgen -destination=mocks/mock_participant.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantService
+
 func TestRouter(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
+	yarmarokID := "yarmarok_id_1"
 
 	router, err := NewRouter(us, logger.NewNoOpLogger())
 	require.NoError(t, err)
@@ -183,6 +188,41 @@ func TestRouter(t *testing.T) {
 			require.Equal(t, http.StatusInternalServerError, writer.Code)
 		})
 	})
+
+	t.Run("create_participant", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			request := &service.ParticipantInitRequest{
+				Name:  "yarmarok_1",
+				Phone: "123456789",
+				Notes: "note_1",
+			}
+
+			encoded, err := json.Marshal(request)
+			require.NoError(t, err)
+
+			body := bytes.NewReader(encoded)
+
+			req, err := http.NewRequest("POST", joinPath(YarmaroksPath, yarmarokID, ParticipantsPath), body)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, userID)
+			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+			ysMock := mocks.NewMockYarmarokService(ctrl)
+			us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+			psMock := mocks.NewMockParticipantService(ctrl)
+			ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+			expect := &service.InitResult{ID: "participant_id_1"}
+			psMock.EXPECT().Add(request).Return(expect, nil)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusOK, writer.Code)
+		})
+	})
+
 }
 
 func TestApplyUserMiddleware(t *testing.T) {
@@ -282,4 +322,87 @@ func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
 
 	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 
+}
+
+func TestJoinPath(t *testing.T) {
+	testCases := []struct {
+		input    []string
+		expected string
+	}{
+		{[]string{"path", "subpath", "subsubpath"}, "/path/subpath/subsubpath"},
+		{[]string{"/", "path", "/subpath/", "/subsubpath"}, "/path/subpath/subsubpath"},
+		{[]string{"path"}, "/path"},
+		{[]string{"/"}, "/"},
+	}
+
+	for _, testCase := range testCases {
+		result := joinPath(testCase.input...)
+		if result != testCase.expected {
+			t.Errorf("joinPath(%v) = %v, expected %v", testCase.input, result, testCase.expected)
+		}
+	}
+}
+
+func TestParticipantMiddleware(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	us := mocks.NewMockUserService(ctrl)
+	ps := mocks.NewMockParticipantService(ctrl)
+
+	router, err := NewRouter(us, logger.NewNoOpLogger())
+	require.NoError(t, err)
+	require.NotNil(t, router)
+
+	t.Run("success", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/yarmaroks/123/participants", nil)
+		require.NoError(t, err)
+
+		req.Header.Set(GoogleUserIDHeader, "user_id_1")
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add("yarmarok_id", "123")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx))
+
+		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			participantService, ok := req.Context().Value("participantService").(service.ParticipantService)
+			require.True(t, ok)
+			assert.Equal(t, ps, participantService)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		router.participantMiddleware(nextHandler).ServeHTTP(httptest.NewRecorder(), req)
+	})
+
+	t.Run("missing_user_id", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/yarmaroks/123/participants", nil)
+		require.NoError(t, err)
+
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add("yarmarok_id", "123")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx))
+
+		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			t.Error("Next handler should not be called")
+		})
+
+		recorder := httptest.NewRecorder()
+		router.participantMiddleware(nextHandler).ServeHTTP(recorder, req)
+
+		assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	})
+
+	t.Run("missing_yarmarok_id", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/yarmaroks//participants", nil)
+		require.NoError(t, err)
+
+		req.Header.Set(GoogleUserIDHeader, "user_id_1")
+
+		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			t.Error("Next handler should not be called")
+		})
+
+		recorder := httptest.NewRecorder()
+		router.participantMiddleware(nextHandler).ServeHTTP(recorder, req)
+
+		assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	})
 }

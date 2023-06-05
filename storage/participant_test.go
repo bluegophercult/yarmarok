@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"github.com/kaznasho/yarmarok/testinfra"
 	"testing"
 
 	"github.com/kaznasho/yarmarok/service"
@@ -11,7 +10,7 @@ import (
 )
 
 func TestParticipantStorage(t *testing.T) {
-	testinfra.SkipIfNotIntegrationRun(t)
+	//testinfra.SkipIfNotIntegrationRun(t)
 
 	firestoreInstance, err := fsemulator.RunInstance(t)
 	require.NoError(t, err)
@@ -31,16 +30,14 @@ func TestParticipantStorage(t *testing.T) {
 	ps := ys.ParticipantStorage(y.ID)
 
 	p := service.Participant{
-		ID:         "participant_id_1",
-		YarmarokID: "yarmarok_id_1",
-		Name:       "Participant 1",
-		Phone:      "123456789",
-		Email:      "participant1@example.com",
-		Notes:      "Participant 1 notes",
+		ID:    "participant_id_1",
+		Name:  "Participant 1",
+		Phone: "123456789",
+		Notes: "Participant 1 notes",
 	}
 
 	t.Run("create", func(t *testing.T) {
-		err = ps.Create(p)
+		err = ps.Create(&p)
 		require.NoError(t, err)
 	})
 
@@ -59,13 +56,13 @@ func TestParticipantStorage(t *testing.T) {
 	})
 
 	t.Run("create again", func(t *testing.T) {
-		err = ps.Create(p)
+		err = ps.Create(&p)
 		require.ErrorIs(t, err, service.ErrParticipantAlreadyExists)
 	})
 
 	t.Run("update", func(t *testing.T) {
 		p.Name = "Updated Participant 1"
-		err = ps.Update(p)
+		err = ps.Update(&p)
 		require.NoError(t, err)
 
 		p2, err := ps.Get(p.ID)
@@ -85,14 +82,12 @@ func TestParticipantStorage(t *testing.T) {
 	t.Run("get all", func(t *testing.T) {
 		for i := 2; i <= 5; i++ {
 			p := service.Participant{
-				ID:         fmt.Sprintf("participant_id_%d", i),
-				YarmarokID: "yarmarok_id_1",
-				Name:       fmt.Sprintf("Participant %d", i),
-				Phone:      fmt.Sprintf("12345678%d", i),
-				Email:      fmt.Sprintf("participant%d@example.com", i),
-				Notes:      fmt.Sprintf("Participant %d notes", i),
+				ID:    fmt.Sprintf("participant_id_%d", i),
+				Name:  fmt.Sprintf("Participant %d", i),
+				Phone: fmt.Sprintf("12345678%d", i),
+				Notes: fmt.Sprintf("Participant %d notes", i),
 			}
-			err = ps.Create(p)
+			err = ps.Create(&p)
 			require.NoError(t, err)
 			created = append(created, p)
 		}

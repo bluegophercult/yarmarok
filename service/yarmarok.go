@@ -33,6 +33,7 @@ type YarmarokService interface {
 	Init(*YarmarokInitRequest) (*InitResult, error)
 	Get(id string) (*Yarmarok, error)
 	List() (*YarmarokListResponse, error)
+	ParticipantService(id string) ParticipantService
 }
 
 // YarmarokStorage is a storage for yarmaroks.
@@ -40,6 +41,7 @@ type YarmarokStorage interface {
 	Create(*Yarmarok) error
 	Get(id string) (*Yarmarok, error)
 	GetAll() ([]Yarmarok, error)
+	ParticipantStorage(id string) ParticipantStorage
 }
 
 // YarmarokManager is an implementation of YarmarokService.
@@ -104,4 +106,9 @@ type InitResult struct {
 // YarmarokListResponse is a response for listing yarmaroks.
 type YarmarokListResponse struct {
 	Yarmaroks []Yarmarok
+}
+
+// ParticipantService is a service for participants.
+func (ym *YarmarokManager) ParticipantService(id string) ParticipantService {
+	return NewParticipantManager(ym.yarmarokStorage.ParticipantStorage(id))
 }

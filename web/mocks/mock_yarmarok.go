@@ -78,3 +78,17 @@ func (mr *MockYarmarokServiceMockRecorder) List() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockYarmarokService)(nil).List))
 }
+
+// ParticipantService mocks base method.
+func (m *MockYarmarokService) ParticipantService(arg0 string) service.ParticipantService {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ParticipantService", arg0)
+	ret0, _ := ret[0].(service.ParticipantService)
+	return ret0
+}
+
+// ParticipantService indicates an expected call of ParticipantService.
+func (mr *MockYarmarokServiceMockRecorder) ParticipantService(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParticipantService", reflect.TypeOf((*MockYarmarokService)(nil).ParticipantService), arg0)
+}

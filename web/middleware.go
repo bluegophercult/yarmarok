@@ -1,6 +1,10 @@
 package web
 
 import (
+	"context"
+	"errors"
+	"github.com/go-chi/chi"
+	"github.com/kaznasho/yarmarok/service"
 	"net/http"
 	"time"
 
@@ -72,11 +76,11 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (R *Router) recoverMiddleware(next http.Handler) http.Handler {
+func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				R.logger.WithFields(logger.Fields{
+				r.logger.WithFields(logger.Fields{
 					"uri":    req.RequestURI,
 					"method": req.Method,
 					"error":  err,
@@ -87,4 +91,41 @@ func (R *Router) recoverMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, req)
 	})
+}
+
+type ctxKey int
+
+const participantServiceKey ctxKey = iota + 1
+
+func (r *Router) participantMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		userID, err := extractUserID(req)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		yarmarokID := chi.URLParam(req, yarmarokIDPath)
+		if yarmarokID == "" {
+			http.Error(w, ErrMissingID.Error(), http.StatusBadRequest)
+			return
+		}
+
+		participantService := r.userService.
+			YarmarokService(userID).
+			ParticipantService(yarmarokID)
+
+		ctx := context.WithValue(req.Context(), participantServiceKey, participantService)
+		next.ServeHTTP(w, req.WithContext(ctx))
+	})
+}
+
+func (r *Router) getParticipantService(ctx context.Context) (service.ParticipantService, error) {
+	val := ctx.Value(participantServiceKey)
+	svc, ok := val.(service.ParticipantService)
+	if !ok {
+		return nil, errors.New("participant service not found")
+	}
+
+	return svc, nil
 }
