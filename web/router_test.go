@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/go-chi/chi"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +12,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/go-chi/chi"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
@@ -34,7 +35,7 @@ func TestRouter(t *testing.T) {
 	userID := "user_id_1"
 	yarmarokID := "yarmarok_id_1"
 
-	router, err := NewRouter(us, logger.NewNoOpLogger())
+	router, err := NewRouter(us, logger.NewLogger(logger.LevelDebug))
 	require.NoError(t, err)
 	require.NotNil(t, router)
 
@@ -202,7 +203,9 @@ func TestRouter(t *testing.T) {
 
 			body := bytes.NewReader(encoded)
 
-			req, err := http.NewRequest("POST", joinPath(YarmaroksPath, yarmarokID, ParticipantsPath), body)
+			path := joinPath(YarmaroksPath, yarmarokID, ParticipantsPath)
+
+			req, err := http.NewRequest("POST", path, body)
 			require.NoError(t, err)
 
 			req.Header.Set(GoogleUserIDHeader, userID)
@@ -345,9 +348,15 @@ func TestJoinPath(t *testing.T) {
 
 func TestParticipantMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	userID := "user_id_1"
+	yarmarokID := "yarmarok_id_1"
 
 	us := mocks.NewMockUserService(ctrl)
+	ys := mocks.NewMockYarmarokService(ctrl)
 	ps := mocks.NewMockParticipantService(ctrl)
+
+	us.EXPECT().YarmarokService(userID).Return(ys).AnyTimes()
+	ys.EXPECT().ParticipantService(yarmarokID).Return(ps).AnyTimes()
 
 	router, err := NewRouter(us, logger.NewNoOpLogger())
 	require.NoError(t, err)
@@ -357,13 +366,13 @@ func TestParticipantMiddleware(t *testing.T) {
 		req, err := http.NewRequest("GET", "/yarmaroks/123/participants", nil)
 		require.NoError(t, err)
 
-		req.Header.Set(GoogleUserIDHeader, "user_id_1")
+		req.Header.Set(GoogleUserIDHeader, userID)
 		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add("yarmarok_id", "123")
+		chiCtx.URLParams.Add("yarmarok_id", yarmarokID)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx))
 
 		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			participantService, ok := req.Context().Value("participantService").(service.ParticipantService)
+			participantService, ok := req.Context().Value(participantServiceKey).(service.ParticipantService)
 			require.True(t, ok)
 			assert.Equal(t, ps, participantService)
 			w.WriteHeader(http.StatusOK)
@@ -377,7 +386,7 @@ func TestParticipantMiddleware(t *testing.T) {
 		require.NoError(t, err)
 
 		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add("yarmarok_id", "123")
+		chiCtx.URLParams.Add("yarmarok_id", yarmarokID)
 		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx))
 
 		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -394,7 +403,7 @@ func TestParticipantMiddleware(t *testing.T) {
 		req, err := http.NewRequest("GET", "/yarmaroks//participants", nil)
 		require.NoError(t, err)
 
-		req.Header.Set(GoogleUserIDHeader, "user_id_1")
+		req.Header.Set(GoogleUserIDHeader, userID)
 
 		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			t.Error("Next handler should not be called")

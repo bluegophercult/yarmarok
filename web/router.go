@@ -2,12 +2,13 @@ package web
 
 import (
 	"errors"
+	"net/http"
+	"path"
+
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
-	"net/http"
-	"path"
 )
 
 const (
@@ -16,8 +17,10 @@ const (
 )
 
 const (
-	yarmarokIDPath    = "/{yarmarok_id}"
-	participantIDPath = "/{participant_id}"
+	yarmarokIDPath     = "/{yarmarok_id}"
+	yarmarokIDParam    = "yarmarok_id"
+	participantIDPath  = "/{participant_id}"
+	participantIDParam = "participant_id"
 )
 
 var (

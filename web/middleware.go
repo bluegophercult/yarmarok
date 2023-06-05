@@ -3,10 +3,11 @@ package web
 import (
 	"context"
 	"errors"
-	"github.com/go-chi/chi"
-	"github.com/kaznasho/yarmarok/service"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi"
+	"github.com/kaznasho/yarmarok/service"
 
 	"github.com/kaznasho/yarmarok/logger"
 )
@@ -105,7 +106,7 @@ func (r *Router) participantMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		yarmarokID := chi.URLParam(req, yarmarokIDPath)
+		yarmarokID := chi.URLParam(req, yarmarokIDParam)
 		if yarmarokID == "" {
 			http.Error(w, ErrMissingID.Error(), http.StatusBadRequest)
 			return
