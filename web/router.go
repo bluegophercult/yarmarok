@@ -17,10 +17,12 @@ const (
 )
 
 const (
-	yarmarokIDPath     = "/{yarmarok_id}"
 	yarmarokIDParam    = "yarmarok_id"
-	participantIDPath  = "/{participant_id}"
 	participantIDParam = "participant_id"
+)
+
+const (
+	yarmarokIDPlaceholder = "{" + yarmarokIDParam + "}"
 )
 
 var (
@@ -63,7 +65,7 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 	})
 
 	router.With(router.participantMiddleware).
-		Route(joinPath(YarmaroksPath, yarmarokIDPath, ParticipantsPath), func(subRouter chi.Router) {
+		Route(joinPath(YarmaroksPath, yarmarokIDPlaceholder, ParticipantsPath), func(subRouter chi.Router) {
 			subRouter.Post("/", router.createParticipant)
 			subRouter.Put("/", router.updateParticipant)
 			subRouter.Get("/", router.listParticipants)

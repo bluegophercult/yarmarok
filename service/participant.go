@@ -15,7 +15,7 @@ type Participant struct {
 	ID        string
 	Name      string
 	Phone     string
-	Notes     string
+	Note      string
 	CreatedAt time.Time
 }
 
@@ -83,14 +83,14 @@ func (pm *ParticipantManager) List() (*ParticipantListResponse, error) {
 type ParticipantInitRequest struct {
 	Name  string
 	Phone string
-	Notes string
+	Note  string
 }
 
 type ParticipantEditRequest struct {
 	ID    string
 	Name  string
 	Phone string
-	Notes string
+	Note  string
 }
 
 // ParticipantListResponse is a response for listing participants.
@@ -108,7 +108,7 @@ func toParticipant(p *ParticipantInitRequest) *Participant {
 		ID:        stringUUID(),
 		Name:      p.Name,
 		Phone:     p.Phone,
-		Notes:     p.Notes,
+		Note:      p.Note,
 		CreatedAt: timeNow(),
 	}
 }

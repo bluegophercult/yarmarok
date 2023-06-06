@@ -33,7 +33,6 @@ func TestRouter(t *testing.T) {
 
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
-	yarmarokID := "yarmarok_id_1"
 
 	router, err := NewRouter(us, logger.NewLogger(logger.LevelDebug))
 	require.NoError(t, err)
@@ -190,39 +189,241 @@ func TestRouter(t *testing.T) {
 		})
 	})
 
-	t.Run("create_participant", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			request := &service.ParticipantInitRequest{
-				Name:  "yarmarok_1",
-				Phone: "123456789",
-				Notes: "note_1",
-			}
+	t.Run("PARTICIPANT_ENDPOINT", func(t *testing.T) {
+		userID := "user_id_1"
+		yarmarokID := "yarmarok_id_1"
+		participantPath := joinPath(YarmaroksPath, yarmarokID, ParticipantsPath)
 
-			encoded, err := json.Marshal(request)
-			require.NoError(t, err)
+		t.Run("create_participant", func(t *testing.T) {
+			t.Run("success", func(t *testing.T) {
+				participantInitRequest := &service.ParticipantInitRequest{
+					Name: "participant_1",
+					Note: "note_1",
+				}
 
-			body := bytes.NewReader(encoded)
+				encoded, err := json.Marshal(participantInitRequest)
+				require.NoError(t, err)
 
-			path := joinPath(YarmaroksPath, yarmarokID, ParticipantsPath)
+				body := bytes.NewReader(encoded)
 
-			req, err := http.NewRequest("POST", path, body)
-			require.NoError(t, err)
+				req, err := http.NewRequest("POST", participantPath, body)
+				require.NoError(t, err)
 
-			req.Header.Set(GoogleUserIDHeader, userID)
-			us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
 
-			ysMock := mocks.NewMockYarmarokService(ctrl)
-			us.EXPECT().YarmarokService(userID).Return(ysMock)
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
 
-			psMock := mocks.NewMockParticipantService(ctrl)
-			ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
 
-			expect := &service.InitResult{ID: "participant_id_1"}
-			psMock.EXPECT().Add(request).Return(expect, nil)
+				expect := &service.InitResult{ID: "participant_id_1"}
+				psMock.EXPECT().Add(participantInitRequest).Return(expect, nil)
 
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusOK, writer.Code)
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusOK, writer.Code)
+			})
+
+			t.Run("error", func(t *testing.T) {
+				participantInitRequest := &service.ParticipantInitRequest{
+					Name: "participant_1",
+					Note: "note_1",
+				}
+
+				encoded, err := json.Marshal(participantInitRequest)
+				require.NoError(t, err)
+
+				body := bytes.NewReader(encoded)
+
+				req, err := http.NewRequest("POST", participantPath, body)
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				psMock.EXPECT().Add(participantInitRequest).Return(nil, errors.New("test error"))
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
+			})
+
+			t.Run("empty_body", func(t *testing.T) {
+				req, err := http.NewRequest("POST", participantPath, emptyBody())
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusBadRequest, writer.Code)
+			})
+		})
+
+		t.Run("edit_participant", func(t *testing.T) {
+			t.Run("success", func(t *testing.T) {
+				participantEditRequest := &service.ParticipantEditRequest{
+					ID:   "participant_id_1",
+					Name: "participant_1",
+					Note: "note_1",
+				}
+
+				encoded, err := json.Marshal(participantEditRequest)
+				require.NoError(t, err)
+
+				body := bytes.NewReader(encoded)
+
+				req, err := http.NewRequest("PUT", participantPath, body)
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				psMock.EXPECT().Edit(participantEditRequest).Return(&service.Response{}, nil)
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusOK, writer.Code)
+			})
+
+			t.Run("error", func(t *testing.T) {
+				participantEditRequest := &service.ParticipantEditRequest{
+					ID:   "participant_id_1",
+					Name: "participant_1",
+					Note: "note_1",
+				}
+
+				encoded, err := json.Marshal(participantEditRequest)
+				require.NoError(t, err)
+
+				body := bytes.NewReader(encoded)
+
+				req, err := http.NewRequest("PUT", participantPath, body)
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				psMock.EXPECT().Edit(participantEditRequest).Return(nil, errors.New("test error"))
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
+			})
+
+			t.Run("empty_body", func(t *testing.T) {
+				req, err := http.NewRequest("PUT", participantPath, emptyBody())
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusBadRequest, writer.Code)
+			})
+		})
+
+		t.Run("list_participants", func(t *testing.T) {
+			t.Run("success", func(t *testing.T) {
+				dummyTime := time.Now().UTC()
+				expected := &service.ParticipantListResponse{
+					Participants: []service.Participant{
+						{
+							ID:        "participant_id_1",
+							Name:      "participant_1",
+							Phone:     "1323456789",
+							Note:      "",
+							CreatedAt: dummyTime,
+						},
+						{
+							ID:        "participant_id_2",
+							Name:      "participant_2",
+							Phone:     "1323456789",
+							Note:      "-",
+							CreatedAt: dummyTime,
+						},
+						{
+							ID:        "participant_id_3",
+							Name:      "participant_3",
+							Phone:     "1323456789",
+							Note:      "bla bla bla",
+							CreatedAt: dummyTime,
+						},
+					},
+				}
+
+				req, err := http.NewRequest("GET", participantPath, emptyBody())
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				psMock.EXPECT().List().Return(expected, nil)
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusOK, writer.Code)
+			})
+
+			t.Run("error", func(t *testing.T) {
+				req, err := http.NewRequest("GET", participantPath, nil)
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, userID)
+				us.EXPECT().InitUserIfNotExists(userID).Return(nil)
+
+				ysMock := mocks.NewMockYarmarokService(ctrl)
+				us.EXPECT().YarmarokService(userID).Return(ysMock)
+
+				psMock := mocks.NewMockParticipantService(ctrl)
+				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+				psMock.EXPECT().List().Return(nil, errors.New("test error"))
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
+			})
 		})
 	})
 
