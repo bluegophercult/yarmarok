@@ -8,7 +8,7 @@ import (
 
 //go:generate mockgen -destination=mock_participant_storage_test.go -package=service github.com/kaznasho/yarmarok/service ParticipantStorage
 
-func TestParticipantManager_Add(t *testing.T) {
+func TestParticipantManagerAdd(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -22,7 +22,7 @@ func TestParticipantManager_Add(t *testing.T) {
 		_, err := participantManager.Add(&ParticipantInitRequest{
 			Name:  "John Doe",
 			Phone: "1234567890",
-			Notes: "Test participant",
+			Note:  "Test participant",
 		})
 
 		assert.NoError(t, err)
@@ -34,14 +34,14 @@ func TestParticipantManager_Add(t *testing.T) {
 		_, err := participantManager.Add(&ParticipantInitRequest{
 			Name:  "John Doe",
 			Phone: "1234567890",
-			Notes: "Test participant",
+			Note:  "Test participant",
 		})
 
 		assert.ErrorIs(t, err, ErrParticipantAlreadyExists)
 	})
 }
 
-func TestParticipantManager_Edit(t *testing.T) {
+func TestParticipantManagerEdit(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -71,7 +71,7 @@ func TestParticipantManager_Edit(t *testing.T) {
 	})
 }
 
-func TestParticipantManager_List(t *testing.T) {
+func TestParticipantManagerList(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
