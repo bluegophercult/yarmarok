@@ -86,12 +86,8 @@ type ParticipantInitRequest struct {
 	Note  string
 }
 
-type ParticipantEditRequest struct {
-	ID    string
-	Name  string
-	Phone string
-	Note  string
-}
+// ParticipantEditRequest is a request for updating a participant.
+type ParticipantEditRequest Participant
 
 // ParticipantListResponse is a response for listing participants.
 type ParticipantListResponse struct {

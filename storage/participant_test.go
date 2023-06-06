@@ -3,13 +3,14 @@ package storage
 import (
 	"fmt"
 	"github.com/kaznasho/yarmarok/service"
+	"github.com/kaznasho/yarmarok/testinfra"
 	fsemulator "github.com/kaznasho/yarmarok/testinfra/firestore"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestParticipantStorage(t *testing.T) {
-	//testinfra.SkipIfNotIntegrationRun(t)
+	testinfra.SkipIfNotIntegrationRun(t)
 
 	firestoreInstance, err := fsemulator.RunInstance(t)
 	require.NoError(t, err)
