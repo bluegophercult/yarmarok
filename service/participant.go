@@ -48,7 +48,7 @@ func NewParticipantManager(ps ParticipantStorage) *ParticipantManager {
 // Add creates a new participant
 func (pm *ParticipantManager) Add(p *ParticipantInitRequest) (*InitResult, error) {
 	participant := toParticipant(p)
-	if err := pm.participantStorage.Create(participant); err == nil {
+	if err := pm.participantStorage.Create(participant); err != nil {
 		return nil, err
 	}
 

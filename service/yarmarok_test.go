@@ -12,10 +12,11 @@ import (
 
 func TestYarmarok(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	storage := NewMockYarmarokStorage(ctrl)
+	storageMock := NewMockYarmarokStorage(ctrl)
 
-	manager := NewYarmarokManager(storage)
+	manager := NewYarmarokManager(storageMock)
 
 	t.Run("init", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
@@ -26,7 +27,7 @@ func TestYarmarok(t *testing.T) {
 
 			mockedErr := assert.AnError
 
-			storage.EXPECT().Create(gomock.Any()).Return(mockedErr).Times(1)
+			storageMock.EXPECT().Create(gomock.Any()).Return(mockedErr).Times(1)
 
 			res, err := manager.Init(&req)
 			assert.Error(t, err)
@@ -53,7 +54,7 @@ func TestYarmarok(t *testing.T) {
 				CreatedAt: mockedTime,
 			}
 
-			storage.EXPECT().Create(mockedYarmarok).Return(nil).Times(1)
+			storageMock.EXPECT().Create(mockedYarmarok).Return(nil).Times(1)
 
 			res, err := manager.Init(&req)
 			assert.NoError(t, err)
@@ -67,7 +68,7 @@ func TestYarmarok(t *testing.T) {
 
 			mockedErr := assert.AnError
 
-			storage.EXPECT().Get(id).Return(nil, mockedErr).Times(1)
+			storageMock.EXPECT().Get(id).Return(nil, mockedErr).Times(1)
 
 			res, err := manager.Get(id)
 			assert.Error(t, err)
@@ -86,7 +87,7 @@ func TestYarmarok(t *testing.T) {
 				UserID:    "user_id_1",
 			}
 
-			storage.EXPECT().Get(id).Return(mockedYarmarok, nil).Times(1)
+			storageMock.EXPECT().Get(id).Return(mockedYarmarok, nil).Times(1)
 
 			res, err := manager.Get(id)
 			assert.NoError(t, err)
@@ -98,7 +99,7 @@ func TestYarmarok(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
 			mockedErr := assert.AnError
 
-			storage.EXPECT().GetAll().Return(nil, mockedErr).Times(1)
+			storageMock.EXPECT().GetAll().Return(nil, mockedErr).Times(1)
 
 			res, err := manager.List()
 			assert.Error(t, err)
@@ -128,7 +129,7 @@ func TestYarmarok(t *testing.T) {
 				Yarmaroks: mockedYarmaroks,
 			}
 
-			storage.EXPECT().GetAll().Return(mockedYarmaroks, nil).Times(1)
+			storageMock.EXPECT().GetAll().Return(mockedYarmaroks, nil).Times(1)
 
 			res, err := manager.List()
 			assert.NoError(t, err)
