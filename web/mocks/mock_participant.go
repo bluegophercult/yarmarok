@@ -35,7 +35,7 @@ func (m *MockParticipantService) EXPECT() *MockParticipantServiceMockRecorder {
 }
 
 // Add mocks base method.
-func (m *MockParticipantService) Add(arg0 *service.ParticipantInitRequest) (*service.InitResult, error) {
+func (m *MockParticipantService) Add(arg0 *service.ParticipantAddRequest) (*service.InitResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", arg0)
 	ret0, _ := ret[0].(*service.InitResult)
@@ -50,10 +50,10 @@ func (mr *MockParticipantServiceMockRecorder) Add(arg0 interface{}) *gomock.Call
 }
 
 // Edit mocks base method.
-func (m *MockParticipantService) Edit(arg0 *service.ParticipantEditRequest) (*service.Response, error) {
+func (m *MockParticipantService) Edit(arg0 *service.ParticipantEditRequest) (*service.EditResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Edit", arg0)
-	ret0, _ := ret[0].(*service.Response)
+	ret0, _ := ret[0].(*service.EditResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -65,10 +65,10 @@ func (mr *MockParticipantServiceMockRecorder) Edit(arg0 interface{}) *gomock.Cal
 }
 
 // List mocks base method.
-func (m *MockParticipantService) List() (*service.ParticipantListResponse, error) {
+func (m *MockParticipantService) List() (*service.ParticipantListResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List")
-	ret0, _ := ret[0].(*service.ParticipantListResponse)
+	ret0, _ := ret[0].(*service.ParticipantListResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -92,6 +92,11 @@ func (ym *YarmarokManager) List() (*YarmarokListResponse, error) {
 	}, nil
 }
 
+// ParticipantService is a service for participants.
+func (ym *YarmarokManager) ParticipantService(id string) ParticipantService {
+	return NewParticipantManager(ym.yarmarokStorage.ParticipantStorage(id))
+}
+
 // YarmarokInitRequest is a request for initializing a yarmarok.
 type YarmarokInitRequest struct {
 	Name string
@@ -103,12 +108,14 @@ type InitResult struct {
 	ID string
 }
 
+type AddResult = InitResult
+
+// Result is a generic result.
+type Result struct {
+	Message string
+}
+
 // YarmarokListResponse is a response for listing yarmaroks.
 type YarmarokListResponse struct {
 	Yarmaroks []Yarmarok
-}
-
-// ParticipantService is a service for participants.
-func (ym *YarmarokManager) ParticipantService(id string) ParticipantService {
-	return NewParticipantManager(ym.yarmarokStorage.ParticipantStorage(id))
 }

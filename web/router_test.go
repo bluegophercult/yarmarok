@@ -195,7 +195,7 @@ func TestRouter(t *testing.T) {
 
 		t.Run("create_participant", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
-				participantInitRequest := &service.ParticipantInitRequest{
+				participantInitRequest := &service.ParticipantAddRequest{
 					Name: "participant_1",
 					Note: "note_1",
 				}
@@ -226,7 +226,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				participantInitRequest := &service.ParticipantInitRequest{
+				participantInitRequest := &service.ParticipantAddRequest{
 					Name: "participant_1",
 					Note: "note_1",
 				}
@@ -299,7 +299,7 @@ func TestRouter(t *testing.T) {
 				psMock := mocks.NewMockParticipantService(ctrl)
 				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
 
-				psMock.EXPECT().Edit(participantEditRequest).Return(&service.Response{}, nil)
+				psMock.EXPECT().Edit(participantEditRequest).Return(&service.Result{}, nil)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -359,7 +359,7 @@ func TestRouter(t *testing.T) {
 		t.Run("list_participants", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
 				dummyTime := time.Now().UTC()
-				expected := &service.ParticipantListResponse{
+				expected := &service.ParticipantListResult{
 					Participants: []service.Participant{
 						{
 							ID:        "participant_id_1",
