@@ -36,7 +36,7 @@ type ParticipantListResult struct {
 
 // ParticipantService is a service for participants.
 type ParticipantService interface {
-	Add(p *ParticipantAddRequest) (*InitResult, error)
+	Add(p *ParticipantAddRequest) (*AddResult, error)
 	Edit(p *ParticipantEditRequest) (*Result, error)
 	List() (*ParticipantListResult, error)
 }
@@ -61,13 +61,13 @@ func NewParticipantManager(ps ParticipantStorage) *ParticipantManager {
 }
 
 // Add creates a new participant
-func (pm *ParticipantManager) Add(p *ParticipantAddRequest) (*InitResult, error) {
+func (pm *ParticipantManager) Add(p *ParticipantAddRequest) (*AddResult, error) {
 	participant := toParticipant(p)
 	if err := pm.participantStorage.Create(participant); err != nil {
 		return nil, err
 	}
 
-	return &InitResult{ID: participant.ID}, nil
+	return &AddResult{ID: participant.ID}, nil
 }
 
 // Edit updates a participant

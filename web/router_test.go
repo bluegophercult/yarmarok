@@ -2,8 +2,10 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"github.com/go-chi/chi"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -430,6 +432,7 @@ func TestRouter(t *testing.T) {
 
 func TestApplyUserMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
@@ -544,4 +547,76 @@ func TestJoinPath(t *testing.T) {
 			t.Errorf("joinPath(%v) = %v, expected %v", testCase.input, result, testCase.expected)
 		}
 	}
+}
+
+func TestGeParticipantService(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	userID := "user_id_1"
+	yarmarokID := "yarmarok_id_1"
+
+	usMock := mocks.NewMockUserService(ctrl)
+	ysMock := mocks.NewMockYarmarokService(ctrl)
+	psMock := mocks.NewMockParticipantService(ctrl)
+
+	usMock.EXPECT().InitUserIfNotExists(userID).Return(nil).AnyTimes()
+	usMock.EXPECT().YarmarokService(userID).Return(ysMock).AnyTimes()
+
+	router, err := NewRouter(usMock, logger.NewLogger(logger.LevelDebug))
+
+	require.NoError(t, err)
+	require.NotNil(t, router)
+
+	t.Run("success", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
+		require.NoError(t, err)
+
+		req.Header.Set(GoogleUserIDHeader, userID)
+
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add(yarmarokIDParam, yarmarokID)
+
+		ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+
+		ctx := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(ctx)
+
+		ps, err := router.getParticipantService(req)
+		assert.NoError(t, err)
+		assert.Equal(t, ps, psMock)
+	})
+
+	t.Run("missing_user_id", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
+		require.NoError(t, err)
+
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add(yarmarokIDParam, yarmarokID)
+
+		ctx := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(ctx)
+
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("missing_yarmarok_id", func(t *testing.T) {
+		req, err := http.NewRequest("GET", "/yarmaroks//participants", nil)
+		require.NoError(t, err)
+
+		req.Header.Set(GoogleUserIDHeader, userID)
+
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add(yarmarokIDParam, "")
+
+		ctx := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(ctx)
+
+		ps, err := router.getParticipantService(req)
+		assert.Nil(t, ps)
+		assert.ErrorIs(t, err, ErrMissingID)
+	})
 }

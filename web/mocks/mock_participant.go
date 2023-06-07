@@ -50,10 +50,10 @@ func (mr *MockParticipantServiceMockRecorder) Add(arg0 interface{}) *gomock.Call
 }
 
 // Edit mocks base method.
-func (m *MockParticipantService) Edit(arg0 *service.ParticipantEditRequest) (*service.EditResult, error) {
+func (m *MockParticipantService) Edit(arg0 *service.ParticipantEditRequest) (*service.Result, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Edit", arg0)
-	ret0, _ := ret[0].(*service.EditResult)
+	ret0, _ := ret[0].(*service.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

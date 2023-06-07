@@ -143,7 +143,7 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 	}
 
 	yarmarokID, err := extractParam(req, yarmarokIDParam)
-	if err != nil {
+	if err != nil || yarmarokID == "" {
 		return nil, ErrMissingID
 	}
 
