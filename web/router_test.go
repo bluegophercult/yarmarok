@@ -2,18 +2,14 @@ package web
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"sync"
 	"testing"
 	"time"
-
-	"github.com/go-chi/chi"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
@@ -490,76 +486,6 @@ func TestApplyUserMiddleware(t *testing.T) {
 	})
 }
 
-func TestParticipantMiddleware(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	userID := "user_id_1"
-	yarmarokID := "yarmarok_id_1"
-
-	us := mocks.NewMockUserService(ctrl)
-	ys := mocks.NewMockYarmarokService(ctrl)
-	ps := mocks.NewMockParticipantService(ctrl)
-
-	us.EXPECT().YarmarokService(userID).Return(ys).AnyTimes()
-	ys.EXPECT().ParticipantService(yarmarokID).Return(ps).AnyTimes()
-
-	router, err := NewRouter(us, logger.NewNoOpLogger())
-	require.NoError(t, err)
-	require.NotNil(t, router)
-
-	t.Run("success", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/yarmaroks/123/participants", nil)
-		require.NoError(t, err)
-
-		req.Header.Set(GoogleUserIDHeader, userID)
-		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add("yarmarok_id", yarmarokID)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx))
-
-		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			participantService, ok := req.Context().Value(participantServiceKey).(service.ParticipantService)
-			require.True(t, ok)
-			assert.Equal(t, ps, participantService)
-			w.WriteHeader(http.StatusOK)
-		})
-
-		router.participantMiddleware(nextHandler).ServeHTTP(httptest.NewRecorder(), req)
-	})
-
-	t.Run("missing_user_id", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/yarmaroks/123/participants", nil)
-		require.NoError(t, err)
-
-		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add("yarmarok_id", yarmarokID)
-		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx))
-
-		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			t.Error("Next handler should not be called")
-		})
-
-		recorder := httptest.NewRecorder()
-		router.participantMiddleware(nextHandler).ServeHTTP(recorder, req)
-
-		assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	})
-
-	t.Run("missing_yarmarok_id", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/yarmaroks//participants", nil)
-		require.NoError(t, err)
-
-		req.Header.Set(GoogleUserIDHeader, userID)
-
-		nextHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			t.Error("Next handler should not be called")
-		})
-
-		recorder := httptest.NewRecorder()
-		router.participantMiddleware(nextHandler).ServeHTTP(recorder, req)
-
-		assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	})
-}
-
 type HandlerStub struct {
 	called bool
 	once   sync.Once
@@ -591,7 +517,7 @@ func emptyBody() io.Reader {
 func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
 	t.Helper()
 
-	actualJSON, err := ioutil.ReadAll(body)
+	actualJSON, err := io.ReadAll(body)
 	require.NoError(t, err)
 
 	expectedJSON, err := json.Marshal(expected)

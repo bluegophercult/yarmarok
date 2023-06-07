@@ -2,6 +2,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"path"
 
@@ -64,12 +65,11 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 		subRouter.Get("/", router.listYarmaroks)
 	})
 
-	router.With(router.participantMiddleware).
-		Route(joinPath(YarmaroksPath, yarmarokIDPlaceholder, ParticipantsPath), func(subRouter chi.Router) {
-			subRouter.Post("/", router.createParticipant)
-			subRouter.Put("/", router.updateParticipant)
-			subRouter.Get("/", router.listParticipants)
-		})
+	router.Route(joinPath(YarmaroksPath, yarmarokIDPlaceholder, ParticipantsPath), func(subRouter chi.Router) {
+		subRouter.Post("/", router.createParticipant)
+		subRouter.Put("/", router.updateParticipant)
+		subRouter.Get("/", router.listParticipants)
+	})
 
 	return router, nil
 }
@@ -103,7 +103,7 @@ func (r *Router) listYarmaroks(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req.Context())
+	participantService, err := r.getParticipantService(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -113,7 +113,7 @@ func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req.Context())
+	participantService, err := r.getParticipantService(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -123,7 +123,7 @@ func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req.Context())
+	participantService, err := r.getParticipantService(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -134,4 +134,44 @@ func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 
 func joinPath(args ...string) string {
 	return path.Clean("/" + path.Join(args...))
+}
+
+func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
+	userID, err := extractUserID(req)
+	if err != nil {
+		return nil, err
+	}
+
+	yarmarokID, err := extractParam(req, yarmarokIDParam)
+	if err != nil {
+		return nil, ErrMissingID
+	}
+
+	participantService := r.userService.YarmarokService(userID).ParticipantService(yarmarokID)
+
+	return participantService, nil
+}
+
+func extractUserID(r *http.Request) (string, error) {
+	ids := r.Header.Values(GoogleUserIDHeader)
+
+	if len(ids) != 1 {
+		return "", ErrAmbiguousUserIDHeader
+	}
+
+	id := ids[0]
+	if id == "" {
+		return "", ErrAmbiguousUserIDHeader
+	}
+
+	return id, nil
+}
+
+func extractParam(req *http.Request, param string) (string, error) {
+	val := chi.URLParam(req, param)
+	if param == "" {
+		return "", fmt.Errorf("missing param: %s", param)
+	}
+
+	return val, nil
 }
