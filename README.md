@@ -5,7 +5,19 @@ The project aimed at organizing local street fairs or bazaars to collect funds f
 support.
 It provides a platform for managing lots, participants, donations, and raffles.
 
-## Entities and value objects.
+## Entities and value objects
+
+```mermaid
+graph LR
+    O["Organizer"] -- "Organizes" --> R["Raffle"]
+R -- "Contains" --> P["Prize"]
+R -- "Involves" --> C["Contributor"]
+C -- "Makes" --> D["Donation"]
+D -- "For" --> P
+P -- "Has" --> D
+P -- "Won by" --> W["Winner"]
+C -- "Promoted to" --> W
+```
 
 ### Organizer
 
@@ -19,32 +31,35 @@ A raffle represents the overall event and the collection of lots and participant
 - `Organizer`: The org of raffle.
 - `Name`: The name of the raffle.
 - `Description`: Optional description of the raffle.
-- `Lots`: The list of lots associated with the raffle.
-- `Participants`: The list of participants associated with the raffle.
-- `CreatedAt`: The date of raffle creation.
+- `Prizes`: The list of prizes associated with the raffle.
+- `Contributors`: The list of contributors associated with the raffle.
+- `Date`: The date of raffle creation.
 
-### Lot
+### Prize
 
 - `ID`: Unique identifier for the lot.
 - `Name`: Name of the lot.
 - `TicketCost`: The cost of a single ticket for the lot.
-- `Description`:  Optional description of the lot.
-- `Donations`: List of participants who have made contributions for this lot.
+- `Description`:  Optional description of the prize.
+- `Donations`: List of contributors who have made donation for this lot.
 - `Winner`: The winner of the raffle for this lot. **Field is not finalized.**
+- `Date`: The date of prize creation.
 
-### Participant
+### Contributor
 
 - `ID`: Unique identifier for the participant.
 - `Name`: Name of the participant.
 - `Phone`: Phone number of the participant.
 - `Note`: Optional note about the participant.
+- `Date`: The date of contributor creation.
 
 ### Donation
 
 - `ID`: Unique identifier for the donation.
-- `LotID`: ID of the lot for which the donation was made.
-- `ParticipantID`: ID of the participant who made the donation.
+- `PrizeID`: ID of the lot for which the donation was made.
+- `ContributorID`: ID of the contributor who made the donation.
 - `Amount`: Amount of money transferred for the donation.
+- `Date`: The date of the donation.
 
 ## Running the project
 
@@ -55,8 +70,8 @@ A raffle represents the overall event and the collection of lots and participant
 - [Docker](https://docs.docker.com/get-docker/)
 - [Mockgen](https://github.com/golang/mock#installation)
 
-
 Quick install of go Task:
+
 ```bash
 go install github.com/go-task/task/v3/cmd/task@latest
 ```
