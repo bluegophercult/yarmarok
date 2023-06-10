@@ -5,7 +5,25 @@ The project aimed at organizing local street fairs or bazaars to collect funds f
 support.
 It provides a platform for managing lots, participants, donations, and raffles.
 
+## Application Flow
+
+```mermaid
+---
+title: Flow
+---
+graph LR
+    O[Organizer] -- organizes --> R[Raffle]
+    R -- contains --> P[Prize]
+    R -- involves --> C[Contributor]
+    C -- makes --> D[Donation]
+    D -- for --> P
+    P -- has --> D
+    P -- won_by --> W[Winner]
+    C -- promoted_to --> W
+```
+
 ## Entities and value objects
+
 ### Organizer
 
 - **ID**: Unique identifier of user account.
@@ -48,34 +66,20 @@ A raffle represents the overall event and the collection of lots and participant
 - `Amount`: Amount of money transferred for the donation.
 - `Date`: The date of the donation.
 
-### Diagrams
-```mermaid
----
-title: Flow
----
-graph LR
-    O[Organizer] -- organizes --> R[Raffle]
-    R -- contains --> P[Prize]
-    R -- involves --> C[Contributor]
-    C -- makes --> D[Donation]
-    D -- for --> P
-    P -- has --> D
-    P -- won_by --> W[Winner]
-    C -- promoted_to --> W
-```
+### Relationships
 
 ```mermaid
 ---
-title: Relationships 
+title: Relationships
 ---
 erDiagram
     Organizer {
-        string ID 
+        string ID
     }
 
     Raffle {
         string ID
-        string OrganizerID 
+        string OrganizerID
         string Name
         timestamp Date
         rize Prizes[]
@@ -97,29 +101,30 @@ erDiagram
     Contributor {
         string ID
         string Name
-        string Phone UK 
+        string Phone UK
         DateTime Date
         Donation Donations[]
         string Note
-        time Date 
+        time Date
     }
 
     Donation {
         string ID
         string PrizeID
-        string ContributorID 
+        string ContributorID
         int Amount
         time Date
     }
 
-    Organizer ||--o{ Raffle : organizes
-    Raffle ||--|| Prize : contains
-    Raffle ||--o{ Contributor : involves
-    Contributor ||--o{ Donation : makes
-    Prize ||--o{ Donation : for
-    Prize ||--|| Winner : won_by
-    Contributor ||--|| Winner : promoted_to
+    Organizer ||--o{ Raffle: organizes
+    Raffle ||--|| Prize: contains
+    Raffle ||--o{ Contributor: involves
+    Contributor ||--o{ Donation: makes
+    Prize ||--o{ Donation: for
+    Prize ||--|| Winner: won_by
+    Contributor ||--|| Winner: promoted_to
 ```
+
 ## Running the project
 
 ### Prerequisites
