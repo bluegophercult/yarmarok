@@ -6,19 +6,6 @@ support.
 It provides a platform for managing lots, participants, donations, and raffles.
 
 ## Entities and value objects
-
-```mermaid
-graph LR
-    O["Organizer"] -- "Organizes" --> R["Raffle"]
-R -- "Contains" --> P["Prize"]
-R -- "Involves" --> C["Contributor"]
-C -- "Makes" --> D["Donation"]
-D -- "For" --> P
-P -- "Has" --> D
-P -- "Won by" --> W["Winner"]
-C -- "Promoted to" --> W
-```
-
 ### Organizer
 
 - **ID**: Unique identifier of user account.
@@ -61,6 +48,78 @@ A raffle represents the overall event and the collection of lots and participant
 - `Amount`: Amount of money transferred for the donation.
 - `Date`: The date of the donation.
 
+### Diagrams
+```mermaid
+---
+title: Flow
+---
+graph LR
+    O[Organizer] -- organizes --> R[Raffle]
+    R -- contains --> P[Prize]
+    R -- involves --> C[Contributor]
+    C -- makes --> D[Donation]
+    D -- for --> P
+    P -- has --> D
+    P -- won_by --> W[Winner]
+    C -- promoted_to --> W
+```
+
+```mermaid
+---
+title: Relationships 
+---
+erDiagram
+    Organizer {
+        string ID 
+    }
+
+    Raffle {
+        string ID
+        string OrganizerID 
+        string Name
+        timestamp Date
+        rize Prizes[]
+        Contributor Contributors[]
+        string Description
+        time Date
+    }
+
+    Prize {
+        string ID
+        string Name
+        int TicketCost
+        string Donations[]
+        Contributor Winner
+        string Description
+        time Date
+    }
+
+    Contributor {
+        string ID
+        string Name
+        string Phone UK 
+        DateTime Date
+        Donation Donations[]
+        string Note
+        time Date 
+    }
+
+    Donation {
+        string ID
+        string PrizeID
+        string ContributorID 
+        int Amount
+        time Date
+    }
+
+    Organizer ||--o{ Raffle : organizes
+    Raffle ||--|| Prize : contains
+    Raffle ||--o{ Contributor : involves
+    Contributor ||--o{ Donation : makes
+    Prize ||--o{ Donation : for
+    Prize ||--|| Winner : won_by
+    Contributor ||--|| Winner : promoted_to
+```
 ## Running the project
 
 ### Prerequisites
