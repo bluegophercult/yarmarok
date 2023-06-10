@@ -120,9 +120,7 @@ erDiagram
     Raffle ||--|| Prize: contains
     Raffle ||--o{ Contributor: involves
     Contributor ||--o{ Donation: makes
-    Prize ||--o{ Donation: for
-    Prize ||--|| Winner: won_by
-    Contributor ||--|| Winner: promoted_to
+    Prize ||--o{  Donation: for
 ```
 
 ## Running the project
