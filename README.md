@@ -81,21 +81,17 @@ erDiagram
         string ID
         string OrganizerID
         string Name
-        timestamp Date
-        rize Prizes[]
-        Contributor Contributors[]
         string Description
-        time Date
+        time CreatedAt
     }
 
     Prize {
         string ID
         string Name
         int TicketCost
-        string Donations[]
         Contributor Winner
         string Description
-        time Date
+        time CreatedAt
     }
 
     Contributor {
@@ -103,9 +99,8 @@ erDiagram
         string Name
         string Phone UK
         DateTime Date
-        Donation Donations[]
         string Note
-        time Date
+        time CreatedAt
     }
 
     Donation {
@@ -113,14 +108,14 @@ erDiagram
         string PrizeID
         string ContributorID
         int Amount
-        time Date
+        time CreatedAt
     }
 
     Organizer ||--o{ Raffle: organizes
-    Raffle ||--|| Prize: contains
+    Raffle ||--o{ Prize: contains
     Raffle ||--o{ Contributor: involves
     Contributor ||--o{ Donation: makes
-    Prize ||--o{  Donation: for
+    Prize ||--o{ Donation: for
 ```
 
 ## Running the project
