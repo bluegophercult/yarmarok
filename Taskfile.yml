@@ -1,5 +1,8 @@
 version: '3'
 
+env:
+  ZIP_NAME: yarmarok-api.zip
+
 tasks:
   generate:
     cmds:
@@ -12,3 +15,14 @@ tasks:
   integration-test:
     cmds:
       - RUN_INTEGRATION_TESTS=true go test -v ./...   
+  
+  archive:
+    deps: [clean]
+    cmds:
+      -  git archive --format=zip -o $ZIP_NAME HEAD
+
+  clean:
+    cmds:
+      - rm $ZIP_NAME
+    status:
+      - "[ ! -f $ZIP_NAME ]" 
