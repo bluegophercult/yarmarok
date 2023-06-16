@@ -20,10 +20,10 @@ jobs:
       id: 'deploy'
       uses: 'google-github-actions/deploy-cloud-functions@v1'
       with:
-        name: 'Entrypoint'
+        name: 'yarmarok-api'
         runtime: 'go120'
         project_id: 'yarmarok-387414'
-        entry_point: 'yarmarok.Entrypoint'
+        entry_point: 'Entrypoint'
         service_account_email: 'yarmarok-cloug-functions-api@yarmarok-387414.iam.gserviceaccount.com'
         memory_mb: '128'
 
