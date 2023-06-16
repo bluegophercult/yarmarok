@@ -26,6 +26,12 @@ jobs:
         entry_point: 'Entrypoint'
         service_account_email: 'yarmarok-cloug-functions-api@yarmarok-387414.iam.gserviceaccount.com'
         memory_mb: '128'
+        region: 'europe-central2'
+        env_vars: 'GCP_PROJECT=yarmarok-387414'
+        timeout: 30
+        min_instances: 0
+        max_instances: 4
+        ingress_settings: ALLOW_INTERNAL_ONLY
 
     - name: Test deployed function URL
       id: 'test'
