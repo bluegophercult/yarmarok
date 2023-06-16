@@ -98,7 +98,6 @@ erDiagram
         string ID
         string Name
         string Phone UK
-        DateTime Date
         string Note
         time CreatedAt
     }
