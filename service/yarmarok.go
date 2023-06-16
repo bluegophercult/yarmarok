@@ -7,6 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	// StatusSuccess is a success status sent by the service to the client.
+	StatusSuccess = "success"
+	// StatusError is an error status sent by the service to the client.
+	StatusError = "error"
+)
+
 // stringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
 var stringUUID = func() string {
@@ -108,11 +115,9 @@ type InitResult struct {
 	ID string
 }
 
-type AddResult = InitResult
-
-// Result is a generic result.
+// Result is a generic result with status.
 type Result struct {
-	Message string
+	Status string
 }
 
 // YarmarokListResponse is a response for listing yarmaroks.

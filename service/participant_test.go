@@ -10,7 +10,6 @@ import (
 
 func TestParticipantManagerAdd(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	storageMock := NewMockParticipantStorage(ctrl)
 	manager := NewParticipantManager(storageMock)
@@ -47,7 +46,6 @@ func TestParticipantManagerAdd(t *testing.T) {
 
 func TestParticipantManagerEdit(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	storageMock := NewMockParticipantStorage(ctrl)
 	manager := NewParticipantManager(storageMock)
@@ -74,7 +72,6 @@ func TestParticipantManagerEdit(t *testing.T) {
 
 func TestParticipantManagerList(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	storageMock := NewMockParticipantStorage(ctrl)
 	manager := NewParticipantManager(storageMock)

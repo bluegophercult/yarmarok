@@ -28,7 +28,6 @@ import (
 
 func TestRouter(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
@@ -432,7 +431,6 @@ func TestRouter(t *testing.T) {
 
 func TestApplyUserMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
@@ -551,7 +549,6 @@ func TestJoinPath(t *testing.T) {
 
 func TestGeParticipantService(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	userID := "user_id_1"
 	yarmarokID := "yarmarok_id_1"
