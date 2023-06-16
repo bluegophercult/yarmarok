@@ -1,0 +1,30 @@
+name: Deploy Cloud Function
+
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: 'ubuntu-latest'
+
+    steps:
+    - uses: 'actions/checkout@v3'
+
+    - name: Setup GCP Service Account
+      id: 'auth'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCP_FUNCTION_DEPLOYMENT_SA }}'
+
+    - name: Deploy Cloud Function
+      id: 'deploy'
+      uses: 'google-github-actions/deploy-cloud-functions@v1'
+      with:
+        name: 'Entrypoint'
+        runtime: 'go120'
+        project_id: 'yarmarok-387414'
+        entry_point: 'yarmarok.Entrypoint'
+
+    - name: Test deployed function URL
+      id: 'test'
+      run: 'curl "${{ steps.deploy.outputs.url }}"'
