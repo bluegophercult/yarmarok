@@ -24,6 +24,8 @@ jobs:
         runtime: 'go120'
         project_id: 'yarmarok-387414'
         entry_point: 'yarmarok.Entrypoint'
+        service_account_email: 'yarmarok-cloug-functions-api@yarmarok-387414.iam.gserviceaccount.com'
+        memory_mb: '128'
 
     - name: Test deployed function URL
       id: 'test'
