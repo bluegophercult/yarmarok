@@ -7,6 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	// StatusSuccess is a success status sent by the service to the client.
+	StatusSuccess = "success"
+	// StatusError is an error status sent by the service to the client.
+	StatusError = "error"
+)
+
 // stringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
 var stringUUID = func() string {
@@ -33,6 +40,7 @@ type YarmarokService interface {
 	Init(*YarmarokInitRequest) (*InitResult, error)
 	Get(id string) (*Yarmarok, error)
 	List() (*YarmarokListResponse, error)
+	ParticipantService(id string) ParticipantService
 }
 
 // YarmarokStorage is a storage for yarmaroks.
@@ -40,6 +48,7 @@ type YarmarokStorage interface {
 	Create(*Yarmarok) error
 	Get(id string) (*Yarmarok, error)
 	GetAll() ([]Yarmarok, error)
+	ParticipantStorage(id string) ParticipantStorage
 }
 
 // YarmarokManager is an implementation of YarmarokService.
@@ -90,6 +99,11 @@ func (ym *YarmarokManager) List() (*YarmarokListResponse, error) {
 	}, nil
 }
 
+// ParticipantService is a service for participants.
+func (ym *YarmarokManager) ParticipantService(id string) ParticipantService {
+	return NewParticipantManager(ym.yarmarokStorage.ParticipantStorage(id))
+}
+
 // YarmarokInitRequest is a request for initializing a yarmarok.
 type YarmarokInitRequest struct {
 	Name string
@@ -99,6 +113,11 @@ type YarmarokInitRequest struct {
 // InitResult is a generic result of entity initialization.
 type InitResult struct {
 	ID string
+}
+
+// Result is a generic result with status.
+type Result struct {
+	Status string
 }
 
 // YarmarokListResponse is a response for listing yarmaroks.

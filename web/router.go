@@ -2,7 +2,9 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"path"
 
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
@@ -11,12 +13,27 @@ import (
 )
 
 const (
-	YarmaroksPath = "/yarmaroks"
+	YarmaroksPath    = "/yarmaroks"
+	ParticipantsPath = "/participants"
 )
 
-// ErrAmbiguousUserIDHeader is returned when
-// the user id header is not set or is ambiguous.
-var ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
+const (
+	yarmarokIDParam    = "yarmarok_id"
+	participantIDParam = "participant_id"
+)
+
+const (
+	yarmarokIDPlaceholder = "{" + yarmarokIDParam + "}"
+)
+
+var (
+	// ErrAmbiguousUserIDHeader is returned when
+	// the user id header is not set or is ambiguous.
+	ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
+
+	// ErrMissingID is returned when id is missing.
+	ErrMissingID = errors.New("missing id")
+)
 
 // Router is responsible for routing requests
 // to the corresponding services.
@@ -43,8 +60,16 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 	router.Use(router.recoverMiddleware)
 	router.Use(router.userMiddleware)
 
-	router.Post(YarmaroksPath, router.createYarmarok)
-	router.Get(YarmaroksPath, router.listYarmaroks)
+	router.Route(YarmaroksPath, func(subRouter chi.Router) {
+		subRouter.Post("/", router.createYarmarok)
+		subRouter.Get("/", router.listYarmaroks)
+	})
+
+	router.Route(joinPath(YarmaroksPath, yarmarokIDPlaceholder, ParticipantsPath), func(subRouter chi.Router) {
+		subRouter.Post("/", router.createParticipant)
+		subRouter.Put("/", router.updateParticipant)
+		subRouter.Get("/", router.listParticipants)
+	})
 
 	return router, nil
 }
@@ -75,4 +100,78 @@ func (r *Router) listYarmaroks(w http.ResponseWriter, req *http.Request) {
 	m := newNoRequestMethodHandler(yarmarokService.List, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
+}
+
+func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
+	participantService, err := r.getParticipantService(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newMethodHandler(participantService.Add, r.logger.Logger).ServeHTTP(w, req)
+}
+
+func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
+	participantService, err := r.getParticipantService(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newMethodHandler(participantService.Edit, r.logger.Logger).ServeHTTP(w, req)
+}
+
+func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
+	participantService, err := r.getParticipantService(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
+}
+
+func joinPath(args ...string) string {
+	return path.Clean("/" + path.Join(args...))
+}
+
+func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
+	userID, err := extractUserID(req)
+	if err != nil {
+		return nil, err
+	}
+
+	yarmarokID, err := extractParam(req, yarmarokIDParam)
+	if err != nil || yarmarokID == "" {
+		return nil, ErrMissingID
+	}
+
+	participantService := r.userService.YarmarokService(userID).ParticipantService(yarmarokID)
+
+	return participantService, nil
+}
+
+func extractUserID(r *http.Request) (string, error) {
+	ids := r.Header.Values(GoogleUserIDHeader)
+
+	if len(ids) != 1 {
+		return "", ErrAmbiguousUserIDHeader
+	}
+
+	id := ids[0]
+	if id == "" {
+		return "", ErrAmbiguousUserIDHeader
+	}
+
+	return id, nil
+}
+
+func extractParam(req *http.Request, param string) (string, error) {
+	val := chi.URLParam(req, param)
+	if param == "" {
+		return "", fmt.Errorf("missing param: %s", param)
+	}
+
+	return val, nil
 }

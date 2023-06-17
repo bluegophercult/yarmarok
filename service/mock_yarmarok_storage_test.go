@@ -76,3 +76,17 @@ func (mr *MockYarmarokStorageMockRecorder) GetAll() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockYarmarokStorage)(nil).GetAll))
 }
+
+// ParticipantStorage mocks base method.
+func (m *MockYarmarokStorage) ParticipantStorage(arg0 string) ParticipantStorage {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ParticipantStorage", arg0)
+	ret0, _ := ret[0].(ParticipantStorage)
+	return ret0
+}
+
+// ParticipantStorage indicates an expected call of ParticipantStorage.
+func (mr *MockYarmarokStorageMockRecorder) ParticipantStorage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParticipantStorage", reflect.TypeOf((*MockYarmarokStorage)(nil).ParticipantStorage), arg0)
+}

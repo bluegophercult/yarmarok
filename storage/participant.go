@@ -14,7 +14,7 @@ type FirestoreParticipantStorage struct {
 }
 
 // ParticipantStorage returns a participant storage.
-func (ys *FirestoreYarmarokStorage) ParticipantStorage(yarmarokID string) *FirestoreParticipantStorage {
+func (ys *FirestoreYarmarokStorage) ParticipantStorage(yarmarokID string) service.ParticipantStorage {
 	return NewFirestoreParticipantStorage(ys.firestoreClient.Doc(yarmarokID).Collection(participantCollection), yarmarokID)
 }
 
@@ -27,7 +27,7 @@ func NewFirestoreParticipantStorage(client *firestore.CollectionRef, yarmarokID 
 }
 
 // Create creates a new participant.
-func (ps *FirestoreParticipantStorage) Create(p service.Participant) error {
+func (ps *FirestoreParticipantStorage) Create(p *service.Participant) error {
 	exists, err := ps.Exists(p.ID)
 	if err != nil {
 		return fmt.Errorf("check participant exists: %w", err)
@@ -63,7 +63,7 @@ func (ps *FirestoreParticipantStorage) Get(id string) (*service.Participant, err
 }
 
 // Update updates an existing participant.
-func (ps *FirestoreParticipantStorage) Update(p service.Participant) error {
+func (ps *FirestoreParticipantStorage) Update(p *service.Participant) error {
 	exists, err := ps.Exists(p.ID)
 	if err != nil {
 		return fmt.Errorf("check participant exists: %w", err)

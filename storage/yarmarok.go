@@ -43,6 +43,7 @@ func (ys *FirestoreYarmarokStorage) Create(y *service.Yarmarok) error {
 	y.UserID = ys.userID
 
 	_, err = ys.firestoreClient.Doc(y.ID).Set(context.Background(), y)
+
 	return err
 }
 

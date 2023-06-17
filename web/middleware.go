@@ -31,21 +31,6 @@ func (r *Router) userMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func extractUserID(r *http.Request) (string, error) {
-	ids := r.Header.Values(GoogleUserIDHeader)
-
-	if len(ids) != 1 {
-		return "", ErrAmbiguousUserIDHeader
-	}
-
-	id := ids[0]
-	if id == "" {
-		return "", ErrAmbiguousUserIDHeader
-	}
-
-	return id, nil
-}
-
 func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		userID, _ := extractUserID(req)
@@ -72,11 +57,11 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (R *Router) recoverMiddleware(next http.Handler) http.Handler {
+func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				R.logger.WithFields(logger.Fields{
+				r.logger.WithFields(logger.Fields{
 					"uri":    req.RequestURI,
 					"method": req.Method,
 					"error":  err,
