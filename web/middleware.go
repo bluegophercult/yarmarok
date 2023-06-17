@@ -5,11 +5,16 @@ import (
 	"time"
 
 	"github.com/kaznasho/yarmarok/logger"
+	"github.com/rs/cors"
 )
 
-// GoogleUserIDHeader is the header that contains the user id
-// set by google identity aware proxy.
-const GoogleUserIDHeader = "X-Goog-Authenticated-User-Id"
+const (
+	// GoogleUserIDHeader is the header that contains the user id
+	// set by google identity aware proxy.
+	GoogleUserIDHeader = "X-Goog-Authenticated-User-Id"
+
+	defaultOrigin = "https://yarmarock.com.ua"
+)
 
 func (r *Router) userMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -72,4 +77,32 @@ func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, req)
 	})
+}
+
+func (r *Router) corsMiddleware(next http.Handler) http.Handler {
+	return cors.New(
+		cors.Options{
+			AllowedOrigins: []string{defaultOrigin},
+			AllowedMethods: []string{
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+			},
+
+			AllowedHeaders: []string{
+				"Accept",
+				"Authorization",
+				"Content-Type",
+				"X-CSRF-Token",
+				"X-Goog-Authenticated-User-Id",
+			},
+			ExposedHeaders:       []string{},
+			MaxAge:               0,
+			AllowPrivateNetwork:  false,
+			OptionsPassthrough:   false,
+			OptionsSuccessStatus: 0,
+			Debug:                false,
+		},
+	).Handler(next)
 }

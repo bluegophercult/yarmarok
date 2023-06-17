@@ -14,14 +14,10 @@ import (
 const (
 	YarmaroksPath    = "/yarmaroks"
 	ParticipantsPath = "/participants"
-)
 
-const (
 	yarmarokIDParam    = "yarmarok_id"
 	participantIDParam = "participant_id"
-)
 
-const (
 	yarmarokIDPlaceholder = "/{" + yarmarokIDParam + "}"
 )
 
@@ -55,6 +51,7 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 		),
 	}
 
+	router.Use(router.corsMiddleware)
 	router.Use(router.loggingMiddleware)
 	router.Use(router.recoverMiddleware)
 	router.Use(router.userMiddleware)
