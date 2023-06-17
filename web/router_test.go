@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/go-chi/chi"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"path"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/go-chi/chi"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
@@ -487,47 +489,6 @@ func TestApplyUserMiddleware(t *testing.T) {
 	})
 }
 
-type HandlerStub struct {
-	called bool
-	once   sync.Once
-}
-
-func (h *HandlerStub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.once.Do(func() {
-		h.called = true
-	})
-}
-
-func (h *HandlerStub) Called() bool {
-	return h.called
-}
-
-func newHandlerStub() *HandlerStub {
-	handler := &HandlerStub{
-		once:   sync.Once{},
-		called: false,
-	}
-
-	return handler
-}
-
-func emptyBody() io.Reader {
-	return bytes.NewReader([]byte{})
-}
-
-func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
-	t.Helper()
-
-	actualJSON, err := io.ReadAll(body)
-	require.NoError(t, err)
-
-	expectedJSON, err := json.Marshal(expected)
-	require.NoError(t, err)
-
-	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
-
-}
-
 func TestJoinPath(t *testing.T) {
 	testCases := []struct {
 		input    []string
@@ -616,4 +577,49 @@ func TestGeParticipantService(t *testing.T) {
 		assert.Nil(t, ps)
 		assert.ErrorIs(t, err, ErrMissingID)
 	})
+}
+
+func joinPath(args ...string) string {
+	return path.Clean("/" + path.Join(args...))
+}
+
+type HandlerStub struct {
+	called bool
+	once   sync.Once
+}
+
+func (h *HandlerStub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.once.Do(func() {
+		h.called = true
+	})
+}
+
+func (h *HandlerStub) Called() bool {
+	return h.called
+}
+
+func newHandlerStub() *HandlerStub {
+	handler := &HandlerStub{
+		once:   sync.Once{},
+		called: false,
+	}
+
+	return handler
+}
+
+func emptyBody() io.Reader {
+	return bytes.NewReader([]byte{})
+}
+
+func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
+	t.Helper()
+
+	actualJSON, err := io.ReadAll(body)
+	require.NoError(t, err)
+
+	expectedJSON, err := json.Marshal(expected)
+	require.NoError(t, err)
+
+	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
+
 }
