@@ -34,12 +34,12 @@ func TestRouter(t *testing.T) {
 	us := mocks.NewMockUserService(ctrl)
 	userID := "user_id_1"
 
-	router, err := NewRouter(us, logger.NewLogger(logger.LevelDebug))
+	router, err := NewRouter(us, logger.NewLogger(logger.LevelError))
 	require.NoError(t, err)
 	require.NotNil(t, router)
 
 	t.Run("panic_in_handler", func(t *testing.T) {
-		req, err := http.NewRequest("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, userID)
@@ -66,7 +66,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := http.NewRequest("POST", YarmaroksPath, body)
+				req, err := newRequestWithOrigin("POST", YarmaroksPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -93,7 +93,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := http.NewRequest("POST", YarmaroksPath, body)
+				req, err := newRequestWithOrigin("POST", YarmaroksPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -111,7 +111,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := http.NewRequest("POST", YarmaroksPath, bytes.NewBuffer([]byte{}))
+				req, err := newRequestWithOrigin("POST", YarmaroksPath, bytes.NewBuffer([]byte{}))
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -152,7 +152,7 @@ func TestRouter(t *testing.T) {
 					},
 				}
 
-				req, err := http.NewRequest("GET", YarmaroksPath, emptyBody())
+				req, err := newRequestWithOrigin("GET", YarmaroksPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -172,7 +172,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := http.NewRequest("GET", YarmaroksPath, emptyBody())
+				req, err := newRequestWithOrigin("GET", YarmaroksPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -208,7 +208,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := http.NewRequest("POST", participantPath, body)
+				req, err := newRequestWithOrigin("POST", participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -239,7 +239,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := http.NewRequest("POST", participantPath, body)
+				req, err := newRequestWithOrigin("POST", participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -259,7 +259,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := http.NewRequest("POST", participantPath, emptyBody())
+				req, err := newRequestWithOrigin("POST", participantPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -290,7 +290,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := http.NewRequest("PUT", participantPath, body)
+				req, err := newRequestWithOrigin("PUT", participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -321,7 +321,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := http.NewRequest("PUT", participantPath, body)
+				req, err := newRequestWithOrigin("PUT", participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -341,7 +341,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := http.NewRequest("PUT", participantPath, emptyBody())
+				req, err := newRequestWithOrigin("PUT", participantPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -388,7 +388,7 @@ func TestRouter(t *testing.T) {
 					},
 				}
 
-				req, err := http.NewRequest("GET", participantPath, emptyBody())
+				req, err := newRequestWithOrigin("GET", participantPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -408,7 +408,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := http.NewRequest("GET", participantPath, nil)
+				req, err := newRequestWithOrigin("GET", participantPath, nil)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, userID)
@@ -442,7 +442,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := http.NewRequest("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, userID)
@@ -458,7 +458,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	})
 
 	t.Run("no_user_id", func(t *testing.T) {
-		req, err := http.NewRequest("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
@@ -471,7 +471,7 @@ func TestApplyUserMiddleware(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		req, err := http.NewRequest("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
@@ -486,6 +486,44 @@ func TestApplyUserMiddleware(t *testing.T) {
 		router.userMiddleware(handler).ServeHTTP(writer, req)
 		require.Equal(t, http.StatusInternalServerError, writer.Code)
 		assert.False(t, stub.Called())
+	})
+}
+
+func TestCORSMiddleware(t *testing.T) {
+	router, err := NewRouter(nil, logger.NewNoOpLogger())
+	require.NoError(t, err)
+	require.NotNil(t, router)
+
+	t.Run("success", func(t *testing.T) {
+		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
+		require.NoError(t, err)
+
+		writer := httptest.NewRecorder()
+		router.corsMiddleware(newHandlerStub()).ServeHTTP(writer, req)
+		require.Equal(t, http.StatusOK, writer.Code)
+		require.Equal(t, defaultOrigin, writer.Header().Get("Access-Control-Allow-Origin"))
+	})
+
+	t.Run("no_origin", func(t *testing.T) {
+		req, err := http.NewRequest("POST", YarmaroksPath, emptyBody())
+		require.NoError(t, err)
+
+		writer := httptest.NewRecorder()
+		router.corsMiddleware(newHandlerStub()).ServeHTTP(writer, req)
+		require.Equal(t, http.StatusOK, writer.Code)
+		require.Equal(t, "", writer.Header().Get("Access-Control-Allow-Origin"))
+	})
+
+	t.Run("wrong_origin", func(t *testing.T) {
+		req, err := http.NewRequest("POST", YarmaroksPath, emptyBody())
+		require.NoError(t, err)
+
+		req.Header.Set("Origin", "wrong_origin")
+
+		writer := httptest.NewRecorder()
+		router.corsMiddleware(newHandlerStub()).ServeHTTP(writer, req)
+		require.Equal(t, http.StatusOK, writer.Code)
+		require.Equal(t, "", writer.Header().Get("Access-Control-Allow-Origin"))
 	})
 }
 
@@ -527,7 +565,7 @@ func TestGeParticipantService(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
+		req, err := newRequestWithOrigin("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, userID)
@@ -546,7 +584,7 @@ func TestGeParticipantService(t *testing.T) {
 	})
 
 	t.Run("missing_user_id", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
+		req, err := newRequestWithOrigin("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
 		require.NoError(t, err)
 
 		chiCtx := chi.NewRouteContext()
@@ -562,7 +600,7 @@ func TestGeParticipantService(t *testing.T) {
 	})
 
 	t.Run("missing_yarmarok_id", func(t *testing.T) {
-		req, err := http.NewRequest("GET", "/yarmaroks//participants", nil)
+		req, err := newRequestWithOrigin("GET", "/yarmaroks//participants", nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, userID)
@@ -622,4 +660,15 @@ func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
 
 	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 
+}
+
+func newRequestWithOrigin(method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Origin", defaultOrigin)
+
+	return req, nil
 }
