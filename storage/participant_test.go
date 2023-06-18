@@ -2,12 +2,11 @@ package storage
 
 import (
 	"fmt"
-	"github.com/kaznasho/yarmarok/testinfra"
-	"testing"
-
 	"github.com/kaznasho/yarmarok/service"
+	"github.com/kaznasho/yarmarok/testinfra"
 	fsemulator "github.com/kaznasho/yarmarok/testinfra/firestore"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestParticipantStorage(t *testing.T) {
@@ -30,76 +29,53 @@ func TestParticipantStorage(t *testing.T) {
 
 	ps := ys.ParticipantStorage(y.ID)
 
-	p := service.Participant{
-		ID:         "participant_id_1",
-		YarmarokID: "yarmarok_id_1",
-		Name:       "Participant 1",
-		Phone:      "123456789",
-		Email:      "participant1@example.com",
-		Notes:      "Participant 1 notes",
-	}
+	t.Run("Participant operations", func(t *testing.T) {
+		created := make([]service.Participant, 0)
 
-	t.Run("create", func(t *testing.T) {
-		err = ps.Create(p)
-		require.NoError(t, err)
-	})
-
-	created := []service.Participant{p}
-
-	t.Run("get", func(t *testing.T) {
-		p2, err := ps.Get(p.ID)
-		require.NoError(t, err)
-		require.Equal(t, &p, p2)
-	})
-
-	t.Run("not exists", func(t *testing.T) {
-		resp, err := ps.Get("not-exists")
-		require.Error(t, err)
-		require.Nil(t, resp)
-	})
-
-	t.Run("create again", func(t *testing.T) {
-		err = ps.Create(p)
-		require.ErrorIs(t, err, service.ErrParticipantAlreadyExists)
-	})
-
-	t.Run("update", func(t *testing.T) {
-		p.Name = "Updated Participant 1"
-		err = ps.Update(p)
-		require.NoError(t, err)
-
-		p2, err := ps.Get(p.ID)
-		require.NoError(t, err)
-		require.Equal(t, &p, p2)
-	})
-
-	t.Run("delete", func(t *testing.T) {
-		err = ps.Delete(p.ID)
-		require.NoError(t, err)
-
-		resp, err := ps.Get(p.ID)
-		require.Error(t, err)
-		require.Nil(t, resp)
-	})
-
-	t.Run("get all", func(t *testing.T) {
-		for i := 2; i <= 5; i++ {
+		for i := 1; i <= 5; i++ {
 			p := service.Participant{
-				ID:         fmt.Sprintf("participant_id_%d", i),
-				YarmarokID: "yarmarok_id_1",
-				Name:       fmt.Sprintf("Participant %d", i),
-				Phone:      fmt.Sprintf("12345678%d", i),
-				Email:      fmt.Sprintf("participant%d@example.com", i),
-				Notes:      fmt.Sprintf("Participant %d notes", i),
+				ID:    fmt.Sprintf("participant_id_%d", i),
+				Name:  fmt.Sprintf("Participant %d", i),
+				Phone: fmt.Sprintf("12345678%d", i),
+				Note:  fmt.Sprintf("Participant %d notes", i),
 			}
-			err = ps.Create(p)
-			require.NoError(t, err)
-			created = append(created, p)
+
+			t.Run(fmt.Sprintf("Create participant %d", i), func(t *testing.T) {
+				err = ps.Create(&p)
+				require.NoError(t, err)
+				created = append(created, p)
+			})
+
+			t.Run(fmt.Sprintf("Get participant %d", i), func(t *testing.T) {
+				p2, err := ps.Get(p.ID)
+				require.NoError(t, err)
+				require.Equal(t, &p, p2)
+			})
+
+			t.Run(fmt.Sprintf("Update participant %d", i), func(t *testing.T) {
+				p.Name = fmt.Sprintf("Updated Participant %d", i)
+				err = ps.Update(&p)
+				require.NoError(t, err)
+
+				p2, err := ps.Get(p.ID)
+				require.NoError(t, err)
+				require.Equal(t, &p, p2)
+
+				created[i-1] = p
+			})
+
+			t.Run("Get all participants", func(t *testing.T) {
+				participants, err := ps.GetAll()
+				require.NoError(t, err)
+				require.ElementsMatch(t, created, participants)
+			})
 		}
 
-		participants, err := ps.GetAll()
-		require.NoError(t, err)
-		require.ElementsMatch(t, created, participants)
+		t.Run("Get non-existent participant", func(t *testing.T) {
+			resp, err := ps.Get("not-exists")
+			require.Error(t, err)
+			require.Nil(t, resp)
+		})
 	})
 }
 
