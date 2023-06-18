@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
 
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
@@ -15,15 +14,11 @@ import (
 const (
 	YarmaroksPath    = "/yarmaroks"
 	ParticipantsPath = "/participants"
-)
 
-const (
 	yarmarokIDParam    = "yarmarok_id"
 	participantIDParam = "participant_id"
-)
 
-const (
-	yarmarokIDPlaceholder = "{" + yarmarokIDParam + "}"
+	yarmarokIDPlaceholder = "/{" + yarmarokIDParam + "}"
 )
 
 var (
@@ -56,20 +51,31 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 		),
 	}
 
+	router.Use(router.corsMiddleware)
 	router.Use(router.loggingMiddleware)
 	router.Use(router.recoverMiddleware)
 	router.Use(router.userMiddleware)
 
-	router.Route(YarmaroksPath, func(subRouter chi.Router) {
-		subRouter.Post("/", router.createYarmarok)
-		subRouter.Get("/", router.listYarmaroks)
-	})
-
-	router.Route(joinPath(YarmaroksPath, yarmarokIDPlaceholder, ParticipantsPath), func(subRouter chi.Router) {
-		subRouter.Post("/", router.createParticipant)
-		subRouter.Put("/", router.updateParticipant)
-		subRouter.Get("/", router.listParticipants)
-	})
+	router.Route(
+		YarmaroksPath,
+		func(yarmaroksRouter chi.Router) { // "/yarmaroks"
+			yarmaroksRouter.Post("/", router.createYarmarok)
+			yarmaroksRouter.Get("/", router.listYarmaroks)
+			yarmaroksRouter.Route(
+				yarmarokIDPlaceholder,
+				func(yarmarokIDRouter chi.Router) { // "/yarmaroks/{yarmarok_id}"
+					yarmarokIDRouter.Route(
+						ParticipantsPath,
+						func(participantsRouter chi.Router) { // "/yarmaroks/{yarmarok_id}/participants"
+							participantsRouter.Post("/", router.createParticipant)
+							participantsRouter.Put("/", router.updateParticipant)
+							participantsRouter.Get("/", router.listParticipants)
+						},
+					)
+				},
+			)
+		},
+	)
 
 	return router, nil
 }
@@ -130,10 +136,6 @@ func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 	}
 
 	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
-}
-
-func joinPath(args ...string) string {
-	return path.Clean("/" + path.Join(args...))
 }
 
 func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
