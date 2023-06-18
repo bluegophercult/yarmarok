@@ -19,7 +19,7 @@ const projectIDEnvVar = "GCP_PROJECT"
 // ErrEmptyProjectID is returned when the project id is empty.
 var ErrEmptyProjectID = errors.New("empty project id")
 
-// EntryPoint is the entry point for the cloud function.
+// Entrypoint is the entry point for the cloud function.
 func Entrypoint(w http.ResponseWriter, r *http.Request) {
 	log := logger.NewLogger(logger.LevelInfo)
 
@@ -45,9 +45,9 @@ func LoadRouter(log *logger.Logger) (*web.Router, error) {
 		return nil, err
 	}
 
-	userStorage := storage.NewFirestoreUserStorage(firestoreClient)
+	organizerStorage := storage.NewFirestoreOrganizerStorage(firestoreClient)
 
-	userService := service.NewUserManager(userStorage)
+	organizerService := service.NewOrganizerManager(organizerStorage)
 
-	return web.NewRouter(userService, log)
+	return web.NewRouter(organizerService, log)
 }

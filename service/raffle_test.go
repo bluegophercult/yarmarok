@@ -8,20 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//go:generate mockgen -destination=mock_yarmarok_storage_test.go -package=service github.com/kaznasho/yarmarok/service YarmarokStorage
+//go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
 
-func TestYarmarok(t *testing.T) {
+func TestRaffle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	storageMock := NewMockYarmarokStorage(ctrl)
+	storageMock := NewMockRaffleStorage(ctrl)
 
-	manager := NewYarmarokManager(storageMock)
+	manager := NewRaffleManager(storageMock)
 
 	t.Run("init", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			req := YarmarokInitRequest{
-				Name: "yarmarok_name_1",
-				Note: "yarmarok_note_1",
+			req := RaffleInitRequest{
+				Name: "raffle_name_1",
+				Note: "raffle_note_1",
 			}
 
 			mockedErr := assert.AnError
@@ -35,25 +35,25 @@ func TestYarmarok(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			req := YarmarokInitRequest{
-				Name: "yarmarok_name_1",
-				Note: "yarmarok_note_1",
+			req := RaffleInitRequest{
+				Name: "raffle_name_1",
+				Note: "raffle_note_1",
 			}
 
-			mockedID := "yarmarok_id_1"
+			mockedID := "raffle_id_1"
 			mockedTime := time.Now().UTC()
 
 			setUUIDMock(mockedID)
 			setTimeNowMock(mockedTime)
 
-			mockedYarmarok := &Yarmarok{
+			mockedRaffle := &Raffle{
 				ID:        mockedID,
 				Name:      req.Name,
 				Note:      req.Note,
 				CreatedAt: mockedTime,
 			}
 
-			storageMock.EXPECT().Create(mockedYarmarok).Return(nil).Times(1)
+			storageMock.EXPECT().Create(mockedRaffle).Return(nil).Times(1)
 
 			res, err := manager.Init(&req)
 			assert.NoError(t, err)
@@ -63,7 +63,7 @@ func TestYarmarok(t *testing.T) {
 
 	t.Run("get", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			id := "yarmarok_id_1"
+			id := "raffle_id_1"
 
 			mockedErr := assert.AnError
 
@@ -76,21 +76,21 @@ func TestYarmarok(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			id := "yarmarok_id_1"
+			id := "raffle_id_1"
 
-			mockedYarmarok := &Yarmarok{
-				ID:        id,
-				Name:      "yarmarok_name_1",
-				Note:      "yarmarok_note_1",
-				CreatedAt: timeNow().UTC(),
-				UserID:    "user_id_1",
+			mockedRaffle := &Raffle{
+				ID:          id,
+				Name:        "raffle_name_1",
+				Note:        "raffle_note_1",
+				CreatedAt:   timeNow().UTC(),
+				OrganizerID: "organizer_id_1",
 			}
 
-			storageMock.EXPECT().Get(id).Return(mockedYarmarok, nil).Times(1)
+			storageMock.EXPECT().Get(id).Return(mockedRaffle, nil).Times(1)
 
 			res, err := manager.Get(id)
 			assert.NoError(t, err)
-			assert.Equal(t, mockedYarmarok, res)
+			assert.Equal(t, mockedRaffle, res)
 		})
 	})
 
@@ -107,28 +107,28 @@ func TestYarmarok(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			mockedYarmaroks := []Yarmarok{
+			mockedRaffles := []Raffle{
 				{
-					ID:        "yarmarok_id_1",
-					Name:      "yarmarok_name_1",
-					Note:      "yarmarok_note_1",
-					CreatedAt: timeNow().UTC(),
-					UserID:    "user_id_1",
+					ID:          "raffle_id_1",
+					Name:        "raffle_name_1",
+					Note:        "raffle_note_1",
+					CreatedAt:   timeNow().UTC(),
+					OrganizerID: "organizer_id_1",
 				},
 				{
-					ID:        "yarmarok_id_2",
-					Name:      "yarmarok_name_2",
-					Note:      "yarmarok_note_2",
-					CreatedAt: timeNow().UTC(),
-					UserID:    "user_id_1",
+					ID:          "raffle_id_2",
+					Name:        "raffle_name_2",
+					Note:        "raffle_note_2",
+					CreatedAt:   timeNow().UTC(),
+					OrganizerID: "organizer_id_1",
 				},
 			}
 
-			expected := &YarmarokListResponse{
-				Yarmaroks: mockedYarmaroks,
+			expected := &RaffleListResponse{
+				Raffles: mockedRaffles,
 			}
 
-			storageMock.EXPECT().GetAll().Return(mockedYarmaroks, nil).Times(1)
+			storageMock.EXPECT().GetAll().Return(mockedRaffles, nil).Times(1)
 
 			res, err := manager.List()
 			assert.NoError(t, err)
@@ -137,7 +137,7 @@ func TestYarmarok(t *testing.T) {
 	})
 }
 
-var _ YarmarokService = &YarmarokManager{}
+var _ RaffleService = &RaffleManager{}
 
 func setUUIDMock(uuid string) {
 	stringUUID = func() string {

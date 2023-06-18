@@ -12,19 +12,19 @@ import (
 )
 
 const (
-	YarmaroksPath    = "/yarmaroks"
-	ParticipantsPath = "/participants"
+	RafflesPath      = "/raffles"
+	ContributorsPath = "/contributors"
 
-	yarmarokIDParam    = "yarmarok_id"
-	participantIDParam = "participant_id"
+	raffleIDParam      = "raffle_id"
+	contributorIDParam = "contributor_id"
 
-	yarmarokIDPlaceholder = "/{" + yarmarokIDParam + "}"
+	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
 )
 
 var (
-	// ErrAmbiguousUserIDHeader is returned when
-	// the user id header is not set or is ambiguous.
-	ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
+	// ErrAmbiguousOrganizerIDHeader is returned when
+	// the organizer id header is not set or is ambiguous.
+	ErrAmbiguousOrganizerIDHeader = errors.New("ambiguous organizer id format")
 
 	// ErrMissingID is returned when id is missing.
 	ErrMissingID = errors.New("missing id")
@@ -34,15 +34,15 @@ var (
 // to the corresponding services.
 type Router struct {
 	chi.Router
-	userService service.UserService
-	logger      *logger.Entry
+	organizerService service.OrganizerService
+	logger           *logger.Entry
 }
 
 // NewRouter creates a new Router
-func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
+func NewRouter(us service.OrganizerService, log *logger.Logger) (*Router, error) {
 	router := &Router{
-		Router:      chi.NewRouter(),
-		userService: us,
+		Router:           chi.NewRouter(),
+		organizerService: us,
 		logger: log.WithFields(
 			logger.Fields{
 				"component": "router",
@@ -54,116 +54,110 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 	router.Use(router.corsMiddleware)
 	router.Use(router.loggingMiddleware)
 	router.Use(router.recoverMiddleware)
-	router.Use(router.userMiddleware)
+	router.Use(router.organizerMiddleware)
 
-	router.Route(
-		YarmaroksPath,
-		func(yarmaroksRouter chi.Router) { // "/yarmaroks"
-			yarmaroksRouter.Post("/", router.createYarmarok)
-			yarmaroksRouter.Get("/", router.listYarmaroks)
-			yarmaroksRouter.Route(
-				yarmarokIDPlaceholder,
-				func(yarmarokIDRouter chi.Router) { // "/yarmaroks/{yarmarok_id}"
-					yarmarokIDRouter.Route(
-						ParticipantsPath,
-						func(participantsRouter chi.Router) { // "/yarmaroks/{yarmarok_id}/participants"
-							participantsRouter.Post("/", router.createParticipant)
-							participantsRouter.Put("/", router.updateParticipant)
-							participantsRouter.Get("/", router.listParticipants)
-						},
-					)
-				},
-			)
-		},
-	)
+	// "/raffles"
+	router.Route(RafflesPath, func(rafRouter chi.Router) {
+		rafRouter.Post("/", router.createRaffle)
+		rafRouter.Get("/", router.listRaffles)
+		// "/raffles/{raffle_id}"
+		rafRouter.Route(raffleIDPlaceholder, func(rafIDRouter chi.Router) {
+			// "/raffles/{raffle_id}/contributors"
+			rafIDRouter.Route(ContributorsPath, func(ctbRouter chi.Router) {
+				ctbRouter.Post("/", router.createContributor)
+				ctbRouter.Put("/", router.updateContributor)
+				ctbRouter.Get("/", router.listContributors)
+			})
+		})
+	})
 
 	return router, nil
 }
 
-func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
-	userID, err := extractUserID(req)
+func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
+	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	yarmarokService := r.userService.YarmarokService(userID)
+	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newMethodHandler(yarmarokService.Init, r.logger.Logger)
+	m := newMethodHandler(raffleService.Init, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
 }
 
-func (r *Router) listYarmaroks(w http.ResponseWriter, req *http.Request) {
-	userID, err := extractUserID(req)
+func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
+	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	yarmarokService := r.userService.YarmarokService(userID)
+	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newNoRequestMethodHandler(yarmarokService.List, r.logger.Logger)
+	m := newNoRequestMethodHandler(raffleService.List, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
 }
 
-func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+func (r *Router) createContributor(w http.ResponseWriter, req *http.Request) {
+	contributorService, err := r.getContributorService(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	newMethodHandler(participantService.Add, r.logger.Logger).ServeHTTP(w, req)
+	newMethodHandler(contributorService.Add, r.logger.Logger).ServeHTTP(w, req)
 }
 
-func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+func (r *Router) updateContributor(w http.ResponseWriter, req *http.Request) {
+	contributorService, err := r.getContributorService(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	newMethodHandler(participantService.Edit, r.logger.Logger).ServeHTTP(w, req)
+	newMethodHandler(contributorService.Edit, r.logger.Logger).ServeHTTP(w, req)
 }
 
-func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+func (r *Router) listContributors(w http.ResponseWriter, req *http.Request) {
+	contributorService, err := r.getContributorService(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
+	newNoRequestMethodHandler(contributorService.List, r.logger.Logger).ServeHTTP(w, req)
 }
 
-func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
-	userID, err := extractUserID(req)
+func (r *Router) getContributorService(req *http.Request) (service.ContributorService, error) {
+	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		return nil, err
 	}
 
-	yarmarokID, err := extractParam(req, yarmarokIDParam)
-	if err != nil || yarmarokID == "" {
+	raffleID, err := extractParam(req, raffleIDParam)
+	if err != nil || raffleID == "" {
 		return nil, ErrMissingID
 	}
 
-	participantService := r.userService.YarmarokService(userID).ParticipantService(yarmarokID)
+	contributorService := r.organizerService.RaffleService(organizerID).ContributorService(raffleID)
 
-	return participantService, nil
+	return contributorService, nil
 }
 
-func extractUserID(r *http.Request) (string, error) {
-	ids := r.Header.Values(GoogleUserIDHeader)
+func extractOrganizerID(r *http.Request) (string, error) {
+	ids := r.Header.Values(GoogleOrganizerIDHeader)
 
 	if len(ids) != 1 {
-		return "", ErrAmbiguousUserIDHeader
+		return "", ErrAmbiguousOrganizerIDHeader
 	}
 
 	id := ids[0]
 	if id == "" {
-		return "", ErrAmbiguousUserIDHeader
+		return "", ErrAmbiguousOrganizerIDHeader
 	}
 
 	return id, nil
