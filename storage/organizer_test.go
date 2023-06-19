@@ -11,37 +11,37 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateUser(t *testing.T) {
+func TestCreateOrganizer(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
-	u := service.User{ID: "123"}
+	org := service.Organizer{ID: "123"}
 
 	firestoreInstance, err := fsemulator.RunInstance(t)
 	require.NoError(t, err)
 
-	us := NewFirestoreUserStorage(firestoreInstance.Client())
+	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
 	t.Run("create", func(t *testing.T) {
 
-		err = us.Create(u)
+		err = os.Create(org)
 		require.NoError(t, err)
 	})
 
 	t.Run("exists", func(t *testing.T) {
-		exists, err := us.Exists(u.ID)
+		exists, err := os.Exists(org.ID)
 		assert.NoError(t, err)
 		assert.True(t, exists)
 	})
 
 	t.Run("not exists", func(t *testing.T) {
-		exists, err := us.Exists("not-exists")
+		exists, err := os.Exists("not-exists")
 		assert.NoError(t, err)
 		assert.False(t, exists)
 	})
 
 	t.Run("create again", func(t *testing.T) {
-		err = us.Create(u)
-		require.ErrorIs(t, err, service.ErrUserAlreadyExists)
+		err = os.Create(org)
+		require.ErrorIs(t, err, service.ErrOrganizerAlreadyExists)
 	})
 }
 
-var _ service.UserStorage = &FirestoreUserStorage{}
+var _ service.OrganizerStorage = &FirestoreOrganizerStorage{}

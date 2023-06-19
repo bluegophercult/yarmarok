@@ -22,9 +22,9 @@ const (
 )
 
 var (
-	// ErrAmbiguousUserIDHeader is returned when
-	// the user id header is not set or is ambiguous.
-	ErrAmbiguousUserIDHeader = errors.New("ambiguous user id format")
+	// ErrAmbiguousOrganizerIDHeader is returned when
+	// the organizer id header is not set or is ambiguous.
+	ErrAmbiguousOrganizerIDHeader = errors.New("ambiguous organizer id format")
 
 	// ErrMissingID is returned when id is missing.
 	ErrMissingID = errors.New("missing id")
@@ -34,15 +34,15 @@ var (
 // to the corresponding services.
 type Router struct {
 	chi.Router
-	userService service.UserService
-	logger      *logger.Entry
+	organizerService service.OrganizerService
+	logger           *logger.Entry
 }
 
 // NewRouter creates a new Router
-func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
+func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error) {
 	router := &Router{
-		Router:      chi.NewRouter(),
-		userService: us,
+		Router:           chi.NewRouter(),
+		organizerService: os,
 		logger: log.WithFields(
 			logger.Fields{
 				"component": "router",
@@ -54,7 +54,7 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 	router.Use(router.corsMiddleware)
 	router.Use(router.loggingMiddleware)
 	router.Use(router.recoverMiddleware)
-	router.Use(router.userMiddleware)
+	router.Use(router.organizerMiddleware)
 
 	router.Route(
 		YarmaroksPath,
@@ -81,13 +81,13 @@ func NewRouter(us service.UserService, log *logger.Logger) (*Router, error) {
 }
 
 func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
-	userID, err := extractUserID(req)
+	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	yarmarokService := r.userService.YarmarokService(userID)
+	yarmarokService := r.organizerService.YarmarokService(organizerID)
 
 	m := newMethodHandler(yarmarokService.Init, r.logger.Logger)
 
@@ -95,13 +95,13 @@ func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) listYarmaroks(w http.ResponseWriter, req *http.Request) {
-	userID, err := extractUserID(req)
+	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	yarmarokService := r.userService.YarmarokService(userID)
+	yarmarokService := r.organizerService.YarmarokService(organizerID)
 
 	m := newNoRequestMethodHandler(yarmarokService.List, r.logger.Logger)
 
@@ -139,7 +139,7 @@ func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
-	userID, err := extractUserID(req)
+	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		return nil, err
 	}
@@ -149,21 +149,21 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 		return nil, ErrMissingID
 	}
 
-	participantService := r.userService.YarmarokService(userID).ParticipantService(yarmarokID)
+	participantService := r.organizerService.YarmarokService(organizerID).ParticipantService(yarmarokID)
 
 	return participantService, nil
 }
 
-func extractUserID(r *http.Request) (string, error) {
-	ids := r.Header.Values(GoogleUserIDHeader)
+func extractOrganizerID(r *http.Request) (string, error) {
+	ids := r.Header.Values(GoogleOrganizerIDHeader)
 
 	if len(ids) != 1 {
-		return "", ErrAmbiguousUserIDHeader
+		return "", ErrAmbiguousOrganizerIDHeader
 	}
 
 	id := ids[0]
 	if id == "" {
-		return "", ErrAmbiguousUserIDHeader
+		return "", ErrAmbiguousOrganizerIDHeader
 	}
 
 	return id, nil

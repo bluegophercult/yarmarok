@@ -9,26 +9,26 @@ import (
 )
 
 const (
-	// GoogleUserIDHeader is the header that contains the user id
+	// GoogleOrganizerIDHeader is the header that contains the organizer id
 	// set by google identity aware proxy.
-	GoogleUserIDHeader = "X-Goog-Authenticated-User-Id"
+	GoogleOrganizerIDHeader = "X-Goog-Authenticated-Organizer-Id"
 
 	defaultOrigin = "https://yarmarock.com.ua"
 )
 
-func (r *Router) userMiddleware(next http.Handler) http.Handler {
+func (r *Router) organizerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		userID, err := extractUserID(req)
+		organizerID, err := extractOrganizerID(req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			r.logger.WithError(err).Error("failed to extract user id")
+			r.logger.WithError(err).Error("failed to extract organizer id")
 			return
 		}
 
-		err = r.userService.InitUserIfNotExists(userID)
+		err = r.organizerService.InitOrganizerIfNotExists(organizerID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			r.logger.WithError(err).Error("failed to init user")
+			r.logger.WithError(err).Error("failed to init organizer")
 			return
 		}
 
@@ -38,7 +38,7 @@ func (r *Router) userMiddleware(next http.Handler) http.Handler {
 
 func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		userID, _ := extractUserID(req)
+		organizerID, _ := extractOrganizerID(req)
 
 		start := time.Now()
 		duration := time.Since(start)
@@ -51,12 +51,12 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 
 		r.logger.WithFields(
 			logger.Fields{
-				"uri":      req.RequestURI,
-				"method":   req.Method,
-				"status":   responseMetric.Status,
-				"duration": duration,
-				"size":     responseMetric.Size,
-				"user_id":  userID,
+				"uri":          req.RequestURI,
+				"method":       req.Method,
+				"status":       responseMetric.Status,
+				"duration":     duration,
+				"size":         responseMetric.Size,
+				"organizer_id": organizerID,
 			},
 		).Info("request completed")
 	})
@@ -95,7 +95,7 @@ func (r *Router) corsMiddleware(next http.Handler) http.Handler {
 				"Authorization",
 				"Content-Type",
 				"X-CSRF-Token",
-				"X-Goog-Authenticated-User-Id",
+				"X-Goog-Authenticated-Organizer-Id",
 			},
 			ExposedHeaders:       []string{},
 			MaxAge:               0,

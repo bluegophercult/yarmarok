@@ -9,21 +9,21 @@ import (
 )
 
 // YarmarokStorage returns a storage for yarmaroks.
-func (us *FirestoreUserStorage) YarmarokStorage(userID string) service.YarmarokStorage {
-	return NewFirestoreYarmarokStorage(us.firestoreClient.Doc(userID).Collection(yarmarokCollection), userID)
+func (os *FirestoreOrganizerStorage) YarmarokStorage(organizerID string) service.YarmarokStorage {
+	return NewFirestoreYarmarokStorage(os.firestoreClient.Doc(organizerID).Collection(yarmarokCollection), organizerID)
 }
 
 // NewFirestoreYarmarokStorage creates a new FirestoreYarmarokStorage.
-func NewFirestoreYarmarokStorage(client *firestore.CollectionRef, userID string) *FirestoreYarmarokStorage {
+func NewFirestoreYarmarokStorage(client *firestore.CollectionRef, organizerID string) *FirestoreYarmarokStorage {
 	return &FirestoreYarmarokStorage{
-		userID:          userID,
+		organizerID:     organizerID,
 		firestoreClient: client,
 	}
 }
 
 // FirestoreYarmarokStorage is a storage for yarmaroks based on Firestore.
 type FirestoreYarmarokStorage struct {
-	userID          string
+	organizerID     string
 	firestoreClient *firestore.CollectionRef
 }
 
@@ -40,7 +40,7 @@ func (ys *FirestoreYarmarokStorage) Create(y *service.Yarmarok) error {
 		}
 	}
 
-	y.UserID = ys.userID
+	y.OrganizerID = ys.organizerID
 
 	_, err = ys.firestoreClient.Doc(y.ID).Set(context.Background(), y)
 
@@ -63,7 +63,7 @@ func (ys *FirestoreYarmarokStorage) Get(id string) (*service.Yarmarok, error) {
 	return &y, nil
 }
 
-// GetAll returns all yarmaroks per user.
+// GetAll returns all yarmaroks per organizer.
 func (ys *FirestoreYarmarokStorage) GetAll() ([]service.Yarmarok, error) {
 	docs, err := ys.firestoreClient.Documents(context.Background()).GetAll()
 	if err != nil {

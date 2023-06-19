@@ -79,11 +79,11 @@ func TestYarmarok(t *testing.T) {
 			id := "yarmarok_id_1"
 
 			mockedYarmarok := &Yarmarok{
-				ID:        id,
-				Name:      "yarmarok_name_1",
-				Note:      "yarmarok_note_1",
-				CreatedAt: timeNow().UTC(),
-				UserID:    "user_id_1",
+				ID:          id,
+				Name:        "yarmarok_name_1",
+				Note:        "yarmarok_note_1",
+				CreatedAt:   timeNow().UTC(),
+				OrganizerID: "organizer_id_1",
 			}
 
 			storageMock.EXPECT().Get(id).Return(mockedYarmarok, nil).Times(1)
@@ -109,18 +109,18 @@ func TestYarmarok(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			mockedYarmaroks := []Yarmarok{
 				{
-					ID:        "yarmarok_id_1",
-					Name:      "yarmarok_name_1",
-					Note:      "yarmarok_note_1",
-					CreatedAt: timeNow().UTC(),
-					UserID:    "user_id_1",
+					ID:          "yarmarok_id_1",
+					Name:        "yarmarok_name_1",
+					Note:        "yarmarok_note_1",
+					CreatedAt:   timeNow().UTC(),
+					OrganizerID: "organizer_id_1",
 				},
 				{
-					ID:        "yarmarok_id_2",
-					Name:      "yarmarok_name_2",
-					Note:      "yarmarok_note_2",
-					CreatedAt: timeNow().UTC(),
-					UserID:    "user_id_1",
+					ID:          "yarmarok_id_2",
+					Name:        "yarmarok_name_2",
+					Note:        "yarmarok_note_2",
+					CreatedAt:   timeNow().UTC(),
+					OrganizerID: "organizer_id_1",
 				},
 			}
 

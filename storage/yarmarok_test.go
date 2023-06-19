@@ -16,20 +16,20 @@ func TestYarmarok(t *testing.T) {
 	firestoreInstance, err := fsemulator.RunInstance(t)
 	require.NoError(t, err)
 
-	us := NewFirestoreUserStorage(firestoreInstance.Client())
+	orgStorage := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
-	u := service.User{ID: "user_id_1"}
-	err = us.Create(u)
+	org := service.Organizer{ID: "organizer_id_1"}
+	err = orgStorage.Create(org)
 	require.NoError(t, err)
 
-	ys := us.YarmarokStorage(u.ID)
+	ys := orgStorage.YarmarokStorage(org.ID)
 
 	y := &service.Yarmarok{
-		ID:        "yarmarok_id_1",
-		Name:      "yarmarok_name_1",
-		Note:      "yarmarok_note_1",
-		CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
-		UserID:    "to be replaced",
+		ID:          "yarmarok_id_1",
+		Name:        "yarmarok_name_1",
+		Note:        "yarmarok_note_1",
+		CreatedAt:   time.Now().UTC().Truncate(time.Millisecond),
+		OrganizerID: "to be replaced",
 	}
 
 	t.Run("create", func(t *testing.T) {
@@ -37,7 +37,7 @@ func TestYarmarok(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	y.UserID = u.ID
+	y.OrganizerID = org.ID
 	created := []service.Yarmarok{*y}
 
 	t.Run("get", func(t *testing.T) {
@@ -68,17 +68,17 @@ func TestYarmarok(t *testing.T) {
 
 	t.Run("create another", func(t *testing.T) {
 		y2 := &service.Yarmarok{
-			ID:        "yarmarok_id_2",
-			Name:      "yarmarok_name_2",
-			Note:      "yarmarok_note_2",
-			CreatedAt: time.Now().UTC().Truncate(time.Millisecond),
-			UserID:    "to be replaced",
+			ID:          "yarmarok_id_2",
+			Name:        "yarmarok_name_2",
+			Note:        "yarmarok_note_2",
+			CreatedAt:   time.Now().UTC().Truncate(time.Millisecond),
+			OrganizerID: "to be replaced",
 		}
 
 		err = ys.Create(y2)
 		require.NoError(t, err)
 
-		y2.UserID = u.ID
+		y2.OrganizerID = org.ID
 		created = append(created, *y2)
 	})
 

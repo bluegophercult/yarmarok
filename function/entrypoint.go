@@ -45,9 +45,9 @@ func LoadRouter(log *logger.Logger) (*web.Router, error) {
 		return nil, err
 	}
 
-	userStorage := storage.NewFirestoreUserStorage(firestoreClient)
+	organizerStorage := storage.NewFirestoreOrganizerStorage(firestoreClient)
 
-	userService := service.NewUserManager(userStorage)
+	organizerService := service.NewOrganizerManager(organizerStorage)
 
-	return web.NewRouter(userService, log)
+	return web.NewRouter(organizerService, log)
 }

@@ -28,11 +28,11 @@ var timeNow = func() time.Time {
 
 // Yarmarok represents a yarmarok.
 type Yarmarok struct {
-	ID        string
-	UserID    string
-	Name      string
-	CreatedAt time.Time
-	Note      string
+	ID          string
+	OrganizerID string
+	Name        string
+	CreatedAt   time.Time
+	Note        string
 }
 
 // YarmarokService is a service for yarmaroks.
@@ -87,7 +87,7 @@ func (ym *YarmarokManager) Get(id string) (*Yarmarok, error) {
 	return ym.yarmarokStorage.Get(id)
 }
 
-// List lists yarmaroks in user's scope.
+// List lists yarmaroks in organizer's scope.
 func (ym *YarmarokManager) List() (*YarmarokListResponse, error) {
 	yarmaroks, err := ym.yarmarokStorage.GetAll()
 	if err != nil {
