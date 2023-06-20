@@ -155,7 +155,7 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 }
 
 func extractOrganizerID(r *http.Request) (string, error) {
-	ids := r.Header.Values(GoogleOrganizerIDHeader)
+	ids := r.Header.Values(GoogleUserIDHeader)
 
 	if len(ids) != 1 {
 		return "", ErrAmbiguousOrganizerIDHeader

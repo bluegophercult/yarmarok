@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	// GoogleOrganizerIDHeader is the header that contains the organizer id
+	// GoogleUserIDHeader is the header that contains the organizer id
 	// set by google identity aware proxy.
-	GoogleOrganizerIDHeader = "X-Goog-Authenticated-Organizer-Id"
+	GoogleUserIDHeader = "X-Goog-Authenticated-User-Id"
 
 	defaultOrigin = "https://yarmarock.com.ua"
 )
