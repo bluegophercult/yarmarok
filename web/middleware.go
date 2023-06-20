@@ -95,7 +95,7 @@ func (r *Router) corsMiddleware(next http.Handler) http.Handler {
 				"Authorization",
 				"Content-Type",
 				"X-CSRF-Token",
-				"X-Goog-Authenticated-Organizer-Id",
+				"X-Goog-Authenticated-User-Id",
 			},
 			ExposedHeaders:       []string{},
 			MaxAge:               0,
