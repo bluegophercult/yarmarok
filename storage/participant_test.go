@@ -15,14 +15,14 @@ func TestParticipantStorage(t *testing.T) {
 	firestoreInstance, err := fsemulator.RunInstance(t)
 	require.NoError(t, err)
 
-	us := NewFirestoreUserStorage(firestoreInstance.Client())
+	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
-	u := service.User{ID: "user_id_1"}
-	err = us.Create(u)
+	org := service.Organizer{ID: "organizer_id_1"}
+	err = os.Create(org)
 	require.NoError(t, err)
 
 	y := service.Yarmarok{ID: "yarmarok_id_1"}
-	ys := NewFirestoreYarmarokStorage(us.firestoreClient.Doc(u.ID).Collection(yarmarokCollection), y.ID)
+	ys := NewFirestoreYarmarokStorage(os.firestoreClient.Doc(org.ID).Collection(yarmarokCollection), y.ID)
 
 	err = ys.Create(&y)
 	require.NoError(t, err)

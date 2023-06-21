@@ -94,7 +94,7 @@ func dummyRequest(t *testing.T) *http.Request {
 	req, err := http.NewRequest(http.MethodPost, web.YarmaroksPath, bytes.NewBuffer(jsonBody))
 	require.NoError(t, err)
 
-	req.Header.Set(web.GoogleUserIDHeader, "user_id_1")
+	req.Header.Set(web.GoogleUserIDHeader, "organizer_id_1")
 
 	return req
 }
