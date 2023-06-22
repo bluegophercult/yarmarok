@@ -31,8 +31,8 @@ type Raffle struct {
 	ID          string
 	OrganizerID string
 	Name        string
-	CreatedAt   time.Time
 	Note        string
+	CreatedAt   time.Time
 }
 
 // RaffleService is a service for raffles.
@@ -57,22 +57,22 @@ type RaffleManager struct {
 }
 
 // NewRaffleManager creates a new RaffleManager.
-func NewRaffleManager(ys RaffleStorage) *RaffleManager {
+func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 	return &RaffleManager{
-		raffleStorage: ys,
+		raffleStorage: rs,
 	}
 }
 
 // Init initializes a raffle.
-func (rm *RaffleManager) Init(y *RaffleInitRequest) (*InitResult, error) {
+func (rm *RaffleManager) Init(raf *RaffleInitRequest) (*InitResult, error) {
 	raffle := Raffle{
 		ID:        stringUUID(),
-		Name:      y.Name,
-		Note:      y.Note,
+		Name:      raf.Name,
+		Note:      raf.Note,
 		CreatedAt: timeNow(),
 	}
 
-	err := ym.raffleStorage.Create(&raffle)
+	err := rm.raffleStorage.Create(&raffle)
 	if err != nil {
 		return nil, err
 	}
@@ -84,12 +84,12 @@ func (rm *RaffleManager) Init(y *RaffleInitRequest) (*InitResult, error) {
 
 // Get returns a raffle by id.
 func (rm *RaffleManager) Get(id string) (*Raffle, error) {
-	return ym.raffleStorage.Get(id)
+	return rm.raffleStorage.Get(id)
 }
 
 // List lists raffles in organizer's scope.
 func (rm *RaffleManager) List() (*RaffleListResponse, error) {
-	raffles, err := ym.raffleStorage.GetAll()
+	raffles, err := rm.raffleStorage.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get all raffles: %w", err)
 	}
@@ -101,7 +101,7 @@ func (rm *RaffleManager) List() (*RaffleListResponse, error) {
 
 // ParticipantService is a service for participants.
 func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
-	return NewParticipantManager(ym.raffleStorage.ParticipantStorage(id))
+	return NewParticipantManager(rm.raffleStorage.ParticipantStorage(id))
 }
 
 // RaffleInitRequest is a request for initializing a raffle.

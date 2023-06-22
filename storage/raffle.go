@@ -28,8 +28,8 @@ type FirestoreRaffleStorage struct {
 }
 
 // Create creates a new raffle.
-func (ys *FirestoreRaffleStorage) Create(y *service.Raffle) error {
-	doc, err := ys.Get(y.ID)
+func (rs *FirestoreRaffleStorage) Create(raf *service.Raffle) error {
+	doc, err := rs.Get(raf.ID)
 	if !isNotFound(err) {
 		if err != nil {
 			return fmt.Errorf("check existence: %w", err)
@@ -40,45 +40,45 @@ func (ys *FirestoreRaffleStorage) Create(y *service.Raffle) error {
 		}
 	}
 
-	y.OrganizerID = ys.organizerID
+	raf.OrganizerID = rs.organizerID
 
-	_, err = ys.firestoreClient.Doc(y.ID).Set(context.Background(), y)
+	_, err = rs.firestoreClient.Doc(raf.ID).Set(context.Background(), raf)
 
 	return err
 }
 
 // Get returns a raffle with the given id.
-func (ys *FirestoreRaffleStorage) Get(id string) (*service.Raffle, error) {
-	doc, err := ys.firestoreClient.Doc(id).Get(context.Background())
+func (rs *FirestoreRaffleStorage) Get(id string) (*service.Raffle, error) {
+	doc, err := rs.firestoreClient.Doc(id).Get(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("get document: %w", err)
 	}
 
-	var y service.Raffle
-	err = doc.DataTo(&y)
+	var raf service.Raffle
+	err = doc.DataTo(&raf)
 	if err != nil {
 		return nil, fmt.Errorf("decode document: %w", err)
 	}
 
-	return &y, nil
+	return &raf, nil
 }
 
 // GetAll returns all raffles per organizer.
-func (ys *FirestoreRaffleStorage) GetAll() ([]service.Raffle, error) {
-	docs, err := ys.firestoreClient.Documents(context.Background()).GetAll()
+func (rs *FirestoreRaffleStorage) GetAll() ([]service.Raffle, error) {
+	docs, err := rs.firestoreClient.Documents(context.Background()).GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get documents: %w", err)
 	}
 
 	var raffles []service.Raffle
 	for _, doc := range docs {
-		var y service.Raffle
-		err = doc.DataTo(&y)
+		var raf service.Raffle
+		err = doc.DataTo(&raf)
 		if err != nil {
 			return nil, fmt.Errorf("decode document: %w", err)
 		}
 
-		raffles = append(raffles, y)
+		raffles = append(raffles, raf)
 	}
 
 	return raffles, nil

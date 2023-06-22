@@ -2,11 +2,12 @@ package storage
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/kaznasho/yarmarok/service"
 	"github.com/kaznasho/yarmarok/testinfra"
 	fsemulator "github.com/kaznasho/yarmarok/testinfra/firestore"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestParticipantStorage(t *testing.T) {
@@ -21,13 +22,13 @@ func TestParticipantStorage(t *testing.T) {
 	err = os.Create(org)
 	require.NoError(t, err)
 
-	y := service.Yarmarok{ID: "yarmarok_id_1"}
-	ys := NewFirestoreYarmarokStorage(os.firestoreClient.Doc(org.ID).Collection(yarmarokCollection), y.ID)
+	raf := service.Raffle{ID: "raffle_id_1"}
+	rs := NewFirestoreRaffleStorage(os.firestoreClient.Doc(org.ID).Collection(raffleCollection), raf.ID)
 
-	err = ys.Create(&y)
+	err = rs.Create(&raf)
 	require.NoError(t, err)
 
-	ps := ys.ParticipantStorage(y.ID)
+	ps := rs.ParticipantStorage(raf.ID)
 
 	t.Run("Participant operations", func(t *testing.T) {
 		created := make([]service.Participant, 0)

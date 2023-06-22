@@ -1,4 +1,4 @@
-package yarmarok
+package raffle
 
 import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"

@@ -12,13 +12,13 @@ import (
 )
 
 const (
-	YarmaroksPath    = "/yarmaroks"
+	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
 
-	yarmarokIDParam    = "yarmarok_id"
+	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
 
-	yarmarokIDPlaceholder = "/{" + yarmarokIDParam + "}"
+	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
 )
 
 var (
@@ -57,16 +57,16 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	router.Use(router.organizerMiddleware)
 
 	router.Route(
-		YarmaroksPath,
-		func(yarmaroksRouter chi.Router) { // "/yarmaroks"
-			yarmaroksRouter.Post("/", router.createYarmarok)
-			yarmaroksRouter.Get("/", router.listYarmaroks)
-			yarmaroksRouter.Route(
-				yarmarokIDPlaceholder,
-				func(yarmarokIDRouter chi.Router) { // "/yarmaroks/{yarmarok_id}"
-					yarmarokIDRouter.Route(
+		RafflesPath,
+		func(rafflesRouter chi.Router) { // "/raffles"
+			rafflesRouter.Post("/", router.createRaffle)
+			rafflesRouter.Get("/", router.listRaffles)
+			rafflesRouter.Route(
+				raffleIDPlaceholder,
+				func(raffleIDRouter chi.Router) { // "/raffles/{raffle_id}"
+					raffleIDRouter.Route(
 						ParticipantsPath,
-						func(participantsRouter chi.Router) { // "/yarmaroks/{yarmarok_id}/participants"
+						func(participantsRouter chi.Router) { // "/raffles/{raffle_id}/participants"
 							participantsRouter.Post("/", router.createParticipant)
 							participantsRouter.Put("/", router.updateParticipant)
 							participantsRouter.Get("/", router.listParticipants)
@@ -80,30 +80,30 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	return router, nil
 }
 
-func (r *Router) createYarmarok(w http.ResponseWriter, req *http.Request) {
+func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	yarmarokService := r.organizerService.YarmarokService(organizerID)
+	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newMethodHandler(yarmarokService.Init, r.logger.Logger)
+	m := newMethodHandler(raffleService.Init, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
 }
 
-func (r *Router) listYarmaroks(w http.ResponseWriter, req *http.Request) {
+func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 	organizerID, err := extractOrganizerID(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	yarmarokService := r.organizerService.YarmarokService(organizerID)
+	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newNoRequestMethodHandler(yarmarokService.List, r.logger.Logger)
+	m := newNoRequestMethodHandler(raffleService.List, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
 }
@@ -144,12 +144,12 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 		return nil, err
 	}
 
-	yarmarokID, err := extractParam(req, yarmarokIDParam)
-	if err != nil || yarmarokID == "" {
+	raffleID, err := extractParam(req, raffleIDParam)
+	if err != nil || raffleID == "" {
 		return nil, ErrMissingID
 	}
 
-	participantService := r.organizerService.YarmarokService(organizerID).ParticipantService(yarmarokID)
+	participantService := r.organizerService.RaffleService(organizerID).ParticipantService(raffleID)
 
 	return participantService, nil
 }
