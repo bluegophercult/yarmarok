@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestYarmarok(t *testing.T) {
+func TestRaffle(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
 
 	firestoreInstance, err := fsemulator.RunInstance(t)
@@ -22,12 +22,12 @@ func TestYarmarok(t *testing.T) {
 	err = orgStorage.Create(org)
 	require.NoError(t, err)
 
-	ys := orgStorage.YarmarokStorage(org.ID)
+	rs := orgStorage.RaffleStorage(org.ID)
 
-	y := &service.Yarmarok{
-		ID:          "yarmarok_id_1",
-		Name:        "yarmarok_name_1",
-		Note:        "yarmarok_note_1",
+	raf := &service.Raffle{
+		ID:          "raffle_id_1",
+		Name:        "raffle_name_1",
+		Note:        "raffle_note_1",
 		CreatedAt:   time.Now().UTC().Truncate(time.Millisecond),
 		OrganizerID: "to be replaced",
 	}
@@ -38,7 +38,7 @@ func TestYarmarok(t *testing.T) {
 	})
 
 	y.OrganizerID = org.ID
-	created := []service.Yarmarok{*y}
+	created := []service.Raffle{*y}
 
 	t.Run("get", func(t *testing.T) {
 		y2, err := ys.Get(y.ID)
@@ -54,23 +54,23 @@ func TestYarmarok(t *testing.T) {
 
 	t.Run("create again", func(t *testing.T) {
 		err = ys.Create(y)
-		require.ErrorIs(t, err, service.ErrYarmarokAlreadyExists)
+		require.ErrorIs(t, err, service.ErrRaffleAlreadyExists)
 	})
 
 	t.Run("create without id", func(t *testing.T) {
-		y2 := &service.Yarmarok{
-			Name: "yarmarok_name_2",
-			Note: "yarmarok_note_2",
+		y2 := &service.Raffle{
+			Name: "raffle_name_2",
+			Note: "raffle_note_2",
 		}
 		err = ys.Create(y2)
 		require.Error(t, err)
 	})
 
 	t.Run("create another", func(t *testing.T) {
-		y2 := &service.Yarmarok{
-			ID:          "yarmarok_id_2",
-			Name:        "yarmarok_name_2",
-			Note:        "yarmarok_note_2",
+		y2 := &service.Raffle{
+			ID:          "raffle_id_2",
+			Name:        "raffle_name_2",
+			Note:        "raffle_note_2",
 			CreatedAt:   time.Now().UTC().Truncate(time.Millisecond),
 			OrganizerID: "to be replaced",
 		}
