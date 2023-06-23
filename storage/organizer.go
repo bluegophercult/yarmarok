@@ -15,6 +15,7 @@ const (
 	organizerCollection   = "organizers"
 	yarmarokCollection    = "yarmaroks"
 	participantCollection = "participants"
+	prizeCollection       = "prizes"
 )
 
 // FirestoreOrganizerStorage is a storage for organizers based on Firestore.
