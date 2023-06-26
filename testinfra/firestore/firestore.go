@@ -64,11 +64,12 @@ func RunInstance(t *testing.T) (*Instance, error) {
 		Context: dockerDir,
 	}
 
+	t.Log("test")
 	ctx := context.Background()
 	//waitStrategy := (&wait.NopStrategy{}).WithStartupTimeout(5 * time.Second)
 	req := testcontainers.ContainerRequest{
 		FromDockerfile: fromDockerfile,
-		ExposedPorts:   []string{"8080/tcp"},
+		ExposedPorts:   []string{"8080:8080/tcp"},
 		WaitingFor:     wait.ForExposedPort(),
 	}
 
@@ -86,7 +87,7 @@ func RunInstance(t *testing.T) (*Instance, error) {
 		return nil, fmt.Errorf("get container host: %w", err)
 	}
 
-	t.Setenv("FIRESTORE_EMULATOR_HOST", fmt.Sprintf("%s:%s", ip, "8080"))
+	t.Setenv("FIRESTORE_EMULATOR_HOST", fmt.Sprintf("%s:%s", "localhost", "8080"))
 	client, err := firestore.NewClient(context.Background(), defaultProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("create firestore client: %w", err)
