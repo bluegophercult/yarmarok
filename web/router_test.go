@@ -25,7 +25,7 @@ import (
 )
 
 //go:generate mockgen -destination=mocks/mock_organizer.go -package=mocks github.com/kaznasho/yarmarok/service OrganizerService
-//go:generate mockgen -destination=mocks/mock_yarmarok.go -package=mocks github.com/kaznasho/yarmarok/service YarmarokService
+//go:generate mockgen -destination=mocks/mock_raffle.go -package=mocks github.com/kaznasho/yarmarok/service RaffleService
 //go:generate mockgen -destination=mocks/mock_participant.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantService
 
 func TestRouter(t *testing.T) {
@@ -39,25 +39,25 @@ func TestRouter(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("panic_in_handler", func(t *testing.T) {
-		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
 		osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-		ysMock := mocks.NewMockYarmarokService(ctrl)
-		osMock.EXPECT().YarmarokService(organizerID).Return(ysMock).Do(func(string) { panic("panic in handler") })
+		rsMock := mocks.NewMockRaffleService(ctrl)
+		osMock.EXPECT().RaffleService(organizerID).Return(rsMock).Do(func(string) { panic("panic in handler") })
 
 		writer := httptest.NewRecorder()
 		router.ServeHTTP(writer, req)
 		require.Equal(t, http.StatusInternalServerError, writer.Code)
 	})
 
-	t.Run("YARMAROK_ENDPOINT", func(t *testing.T) {
-		t.Run("create_yarmarok", func(t *testing.T) {
+	t.Run("RAFFLE_ENDPOINT", func(t *testing.T) {
+		t.Run("create_raffle", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
-				initRequest := &service.YarmarokInitRequest{
-					Name: "yarmarok_1",
+				initRequest := &service.RaffleInitRequest{
+					Name: "raffle_1",
 					Note: "note_1",
 				}
 
@@ -66,16 +66,16 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin("POST", YarmaroksPath, body)
+				req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
-				ysMock.EXPECT().Init(initRequest).Return(&service.InitResult{}, nil)
+				rsMock.EXPECT().Init(initRequest).Return(&service.InitResult{}, nil)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -83,8 +83,8 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				initRequest := &service.YarmarokInitRequest{
-					Name: "yarmarok_1",
+				initRequest := &service.RaffleInitRequest{
+					Name: "raffle_1",
 					Note: "note_1",
 				}
 
@@ -93,17 +93,17 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin("POST", YarmaroksPath, body)
+				req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				mockedErr := assert.AnError
-				ysMock.EXPECT().Init(initRequest).Return(nil, mockedErr)
+				rsMock.EXPECT().Init(initRequest).Return(nil, mockedErr)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -111,14 +111,14 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := newRequestWithOrigin("POST", YarmaroksPath, bytes.NewBuffer([]byte{}))
+				req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, bytes.NewBuffer([]byte{}))
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -126,42 +126,42 @@ func TestRouter(t *testing.T) {
 			})
 		})
 
-		t.Run("list_yarmaroks", func(t *testing.T) {
+		t.Run("list_raffles", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
 				dummyTime := time.Now().UTC()
-				expected := &service.YarmarokListResponse{
-					Yarmaroks: []service.Yarmarok{
+				expected := &service.RaffleListResponse{
+					Raffles: []service.Raffle{
 						{
-							ID:        "yarmarok_id_1",
-							Name:      "yarmarok_1",
+							ID:        "raffle_id_1",
+							Name:      "raffle_1",
 							Note:      "note_1",
 							CreatedAt: dummyTime,
 						},
 						{
-							ID:        "yarmarok_id_2",
-							Name:      "yarmarok_2",
+							ID:        "raffle_id_2",
+							Name:      "raffle_2",
 							Note:      "note_2",
 							CreatedAt: dummyTime,
 						},
 						{
-							ID:        "yarmarok_id_3",
-							Name:      "yarmarok_3",
+							ID:        "raffle_id_3",
+							Name:      "raffle_3",
 							Note:      "note_3",
 							CreatedAt: dummyTime,
 						},
 					},
 				}
 
-				req, err := newRequestWithOrigin("GET", YarmaroksPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodGet, RafflesPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
-				ysMock.EXPECT().List().Return(expected, nil)
+				rsMock.EXPECT().List().Return(expected, nil)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -172,17 +172,17 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := newRequestWithOrigin("GET", YarmaroksPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodGet, RafflesPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				mockedErr := assert.AnError
-				ysMock.EXPECT().List().Return(nil, mockedErr)
+				rsMock.EXPECT().List().Return(nil, mockedErr)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -193,8 +193,8 @@ func TestRouter(t *testing.T) {
 
 	t.Run("PARTICIPANT_ENDPOINT", func(t *testing.T) {
 		organizerID := "organizer_id_1"
-		yarmarokID := "yarmarok_id_1"
-		participantPath := joinPath(YarmaroksPath, yarmarokID, ParticipantsPath)
+		raffleID := "raffle_id_1"
+		participantPath := joinPath(RafflesPath, raffleID, ParticipantsPath)
 
 		t.Run("create_participant", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
@@ -208,17 +208,17 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin("POST", participantPath, body)
+				req, err := newRequestWithOrigin(http.MethodPost, participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				expect := &service.InitResult{ID: "participant_id_1"}
 				psMock.EXPECT().Add(participantInitRequest).Return(expect, nil)
@@ -239,17 +239,17 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin("POST", participantPath, body)
+				req, err := newRequestWithOrigin(http.MethodPost, participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				psMock.EXPECT().Add(participantInitRequest).Return(nil, errors.New("test error"))
 
@@ -259,17 +259,17 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := newRequestWithOrigin("POST", participantPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodPost, participantPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -290,17 +290,17 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin("PUT", participantPath, body)
+				req, err := newRequestWithOrigin(http.MethodPut, participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				psMock.EXPECT().Edit(participantEditRequest).Return(&service.Result{}, nil)
 
@@ -321,17 +321,17 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin("PUT", participantPath, body)
+				req, err := newRequestWithOrigin(http.MethodPut, participantPath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				psMock.EXPECT().Edit(participantEditRequest).Return(nil, errors.New("test error"))
 
@@ -341,17 +341,17 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := newRequestWithOrigin("PUT", participantPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodPut, participantPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -388,17 +388,17 @@ func TestRouter(t *testing.T) {
 					},
 				}
 
-				req, err := newRequestWithOrigin("GET", participantPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodGet, participantPath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				psMock.EXPECT().List().Return(expected, nil)
 
@@ -408,17 +408,17 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := newRequestWithOrigin("GET", participantPath, nil)
+				req, err := newRequestWithOrigin(http.MethodGet, participantPath, nil)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
 
-				ysMock := mocks.NewMockYarmarokService(ctrl)
-				osMock.EXPECT().YarmarokService(organizerID).Return(ysMock)
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				psMock := mocks.NewMockParticipantService(ctrl)
-				ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 				psMock.EXPECT().List().Return(nil, errors.New("test error"))
 
@@ -442,7 +442,7 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -458,7 +458,7 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 	})
 
 	t.Run("no_organizer_id", func(t *testing.T) {
-		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
@@ -471,7 +471,7 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
@@ -495,7 +495,7 @@ func TestCORSMiddleware(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := newRequestWithOrigin("POST", YarmaroksPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		writer := httptest.NewRecorder()
@@ -507,7 +507,7 @@ func TestCORSMiddleware(t *testing.T) {
 	})
 
 	t.Run("no_origin", func(t *testing.T) {
-		req, err := http.NewRequest("POST", YarmaroksPath, emptyBody())
+		req, err := http.NewRequest(http.MethodPost, RafflesPath, emptyBody())
 		require.NoError(t, err)
 
 		writer := httptest.NewRecorder()
@@ -519,7 +519,7 @@ func TestCORSMiddleware(t *testing.T) {
 	})
 
 	t.Run("wrong_origin", func(t *testing.T) {
-		req, err := http.NewRequest("POST", YarmaroksPath, emptyBody())
+		req, err := http.NewRequest(http.MethodPost, RafflesPath, emptyBody())
 		require.NoError(t, err)
 
 		req.Header.Set("Origin", "wrong_origin")
@@ -556,14 +556,14 @@ func TestGeParticipantService(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	organizerID := "organizer_id_1"
-	yarmarokID := "yarmarok_id_1"
+	raffleID := "raffle_id_1"
 
 	usMock := mocks.NewMockOrganizerService(ctrl)
-	ysMock := mocks.NewMockYarmarokService(ctrl)
+	rsMock := mocks.NewMockRaffleService(ctrl)
 	psMock := mocks.NewMockParticipantService(ctrl)
 
 	usMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil).AnyTimes()
-	usMock.EXPECT().YarmarokService(organizerID).Return(ysMock).AnyTimes()
+	usMock.EXPECT().RaffleService(organizerID).Return(rsMock).AnyTimes()
 
 	router, err := NewRouter(usMock, logger.NewLogger(logger.LevelDebug))
 
@@ -571,15 +571,15 @@ func TestGeParticipantService(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := newRequestWithOrigin("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
+		req, err := newRequestWithOrigin(http.MethodGet, "/raffles/raffle_id_1/participants", nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
 
 		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add(yarmarokIDParam, yarmarokID)
+		chiCtx.URLParams.Add(raffleIDParam, raffleID)
 
-		ysMock.EXPECT().ParticipantService(yarmarokID).Return(psMock)
+		rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
 		ctx := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
 		req = req.WithContext(ctx)
@@ -590,11 +590,11 @@ func TestGeParticipantService(t *testing.T) {
 	})
 
 	t.Run("missing_organizer_id", func(t *testing.T) {
-		req, err := newRequestWithOrigin("GET", "/yarmaroks/yarmarok_id_1/participants", nil)
+		req, err := newRequestWithOrigin(http.MethodGet, "/raffle/raffle_id_1/participants", nil)
 		require.NoError(t, err)
 
 		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add(yarmarokIDParam, yarmarokID)
+		chiCtx.URLParams.Add(raffleIDParam, raffleID)
 
 		ctx := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
 		req = req.WithContext(ctx)
@@ -605,14 +605,14 @@ func TestGeParticipantService(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 	})
 
-	t.Run("missing_yarmarok_id", func(t *testing.T) {
-		req, err := newRequestWithOrigin("GET", "/yarmaroks//participants", nil)
+	t.Run("missing_raffle_id", func(t *testing.T) {
+		req, err := newRequestWithOrigin(http.MethodGet, "/raffles//participants", nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
 
 		chiCtx := chi.NewRouteContext()
-		chiCtx.URLParams.Add(yarmarokIDParam, "")
+		chiCtx.URLParams.Add(raffleIDParam, "")
 
 		ctx := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
 		req = req.WithContext(ctx)

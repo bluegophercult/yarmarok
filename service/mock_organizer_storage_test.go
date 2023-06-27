@@ -62,16 +62,16 @@ func (mr *MockOrganizerStorageMockRecorder) Exists(arg0 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exists", reflect.TypeOf((*MockOrganizerStorage)(nil).Exists), arg0)
 }
 
-// YarmarokStorage mocks base method.
-func (m *MockOrganizerStorage) YarmarokStorage(arg0 string) YarmarokStorage {
+// RaffleStorage mocks base method.
+func (m *MockOrganizerStorage) RaffleStorage(arg0 string) RaffleStorage {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "YarmarokStorage", arg0)
-	ret0, _ := ret[0].(YarmarokStorage)
+	ret := m.ctrl.Call(m, "RaffleStorage", arg0)
+	ret0, _ := ret[0].(RaffleStorage)
 	return ret0
 }
 
-// YarmarokStorage indicates an expected call of YarmarokStorage.
-func (mr *MockOrganizerStorageMockRecorder) YarmarokStorage(arg0 interface{}) *gomock.Call {
+// RaffleStorage indicates an expected call of RaffleStorage.
+func (mr *MockOrganizerStorageMockRecorder) RaffleStorage(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "YarmarokStorage", reflect.TypeOf((*MockOrganizerStorage)(nil).YarmarokStorage), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RaffleStorage", reflect.TypeOf((*MockOrganizerStorage)(nil).RaffleStorage), arg0)
 }

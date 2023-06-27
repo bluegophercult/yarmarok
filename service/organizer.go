@@ -6,14 +6,14 @@ import (
 )
 
 var (
-	// ErrOrganizerAlreadyExists is returned when a organizer already exists.
+	// ErrOrganizerAlreadyExists is returned when an organizer already exists.
 	ErrOrganizerAlreadyExists = errors.New("organizer already exists")
 
-	// ErrYarmarokAlreadyExists is returned when a yarmarok already exists.
-	ErrYarmarokAlreadyExists = errors.New("yarmarok already exists")
+	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	ErrRaffleAlreadyExists = errors.New("raffle already exists")
 )
 
-// Organizer represents a organizer of the application.
+// Organizer represents an organizer of the application.
 type Organizer struct {
 	ID string
 }
@@ -22,13 +22,13 @@ type Organizer struct {
 type OrganizerStorage interface {
 	Create(Organizer) error
 	Exists(id string) (bool, error)
-	YarmarokStorage(organizerID string) YarmarokStorage
+	RaffleStorage(organizerID string) RaffleStorage
 }
 
 // OrganizerService is a service for organizers.
 type OrganizerService interface {
 	InitOrganizerIfNotExists(id string) error
-	YarmarokService(organizerID string) YarmarokService
+	RaffleService(organizerID string) RaffleService
 }
 
 // OrganizerManager is an implementation of OrganizerService.
@@ -37,13 +37,13 @@ type OrganizerManager struct {
 }
 
 // NewOrganizerManager creates a new OrganizerManager.
-func NewOrganizerManager(us OrganizerStorage) *OrganizerManager {
+func NewOrganizerManager(os OrganizerStorage) *OrganizerManager {
 	return &OrganizerManager{
-		organizerStorage: us,
+		organizerStorage: os,
 	}
 }
 
-// InitOrganizerIfNotExists initializes a organizer if it does not exist.
+// InitOrganizerIfNotExists initializes an organizer if it does not exist.
 func (om *OrganizerManager) InitOrganizerIfNotExists(id string) error {
 	exists, err := om.organizerStorage.Exists(id)
 	if err != nil {
@@ -57,7 +57,7 @@ func (om *OrganizerManager) InitOrganizerIfNotExists(id string) error {
 	return om.organizerStorage.Create(Organizer{ID: id})
 }
 
-// YarmarokService is a service for yarmaroks.
-func (om *OrganizerManager) YarmarokService(organizerID string) YarmarokService {
-	return NewYarmarokManager(om.organizerStorage.YarmarokStorage(organizerID))
+// RaffleService is a service for raffles.
+func (om *OrganizerManager) RaffleService(organizerID string) RaffleService {
+	return NewRaffleManager(om.organizerStorage.RaffleStorage(organizerID))
 }

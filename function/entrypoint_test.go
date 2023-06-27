@@ -83,15 +83,15 @@ func TestEntrypoint(t *testing.T) {
 
 func dummyRequest(t *testing.T) *http.Request {
 	t.Helper()
-	yarmarokInit := service.YarmarokInitRequest{
-		Name: "yarmarok_1",
+	raffleInit := service.RaffleInitRequest{
+		Name: "raffle_1",
 		Note: "note_1",
 	}
 
-	jsonBody, err := json.Marshal(yarmarokInit)
+	jsonBody, err := json.Marshal(raffleInit)
 	require.NoError(t, err)
 
-	req, err := http.NewRequest(http.MethodPost, web.YarmaroksPath, bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, web.RafflesPath, bytes.NewBuffer(jsonBody))
 	require.NoError(t, err)
 
 	req.Header.Set(web.GoogleUserIDHeader, "organizer_id_1")

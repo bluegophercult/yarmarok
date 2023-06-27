@@ -48,16 +48,16 @@ func (mr *MockOrganizerServiceMockRecorder) InitOrganizerIfNotExists(arg0 interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitOrganizerIfNotExists", reflect.TypeOf((*MockOrganizerService)(nil).InitOrganizerIfNotExists), arg0)
 }
 
-// YarmarokService mocks base method.
-func (m *MockOrganizerService) YarmarokService(arg0 string) service.YarmarokService {
+// RaffleService mocks base method.
+func (m *MockOrganizerService) RaffleService(arg0 string) service.RaffleService {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "YarmarokService", arg0)
-	ret0, _ := ret[0].(service.YarmarokService)
+	ret := m.ctrl.Call(m, "RaffleService", arg0)
+	ret0, _ := ret[0].(service.RaffleService)
 	return ret0
 }
 
-// YarmarokService indicates an expected call of YarmarokService.
-func (mr *MockOrganizerServiceMockRecorder) YarmarokService(arg0 interface{}) *gomock.Call {
+// RaffleService indicates an expected call of RaffleService.
+func (mr *MockOrganizerServiceMockRecorder) RaffleService(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "YarmarokService", reflect.TypeOf((*MockOrganizerService)(nil).YarmarokService), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RaffleService", reflect.TypeOf((*MockOrganizerService)(nil).RaffleService), arg0)
 }

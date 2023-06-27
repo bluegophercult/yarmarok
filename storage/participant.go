@@ -9,21 +9,21 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
-// FirestoreParticipantStorage is a storage for yarmaroks based on Firestore.
+// FirestoreParticipantStorage is a storage for raffles based on Firestore.
 type FirestoreParticipantStorage struct {
-	yarmarokID      string
+	raffleID        string
 	firestoreClient *firestore.CollectionRef
 }
 
 // ParticipantStorage returns a participant storage.
-func (ys *FirestoreYarmarokStorage) ParticipantStorage(yarmarokID string) service.ParticipantStorage {
-	return NewFirestoreParticipantStorage(ys.firestoreClient.Doc(yarmarokID).Collection(participantCollection), yarmarokID)
+func (rs *FirestoreRaffleStorage) ParticipantStorage(raffleID string) service.ParticipantStorage {
+	return NewFirestoreParticipantStorage(rs.firestoreClient.Doc(raffleID).Collection(participantCollection), raffleID)
 }
 
 // NewFirestoreParticipantStorage creates a new FirestoreParticipantStorage.
-func NewFirestoreParticipantStorage(client *firestore.CollectionRef, yarmarokID string) *FirestoreParticipantStorage {
+func NewFirestoreParticipantStorage(client *firestore.CollectionRef, raffleID string) *FirestoreParticipantStorage {
 	return &FirestoreParticipantStorage{
-		yarmarokID:      yarmarokID,
+		raffleID:        raffleID,
 		firestoreClient: client,
 	}
 }

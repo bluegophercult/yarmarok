@@ -13,7 +13,7 @@ import (
 
 const (
 	organizerCollection   = "organizers"
-	yarmarokCollection    = "yarmaroks"
+	raffleCollection      = "raffles"
 	participantCollection = "participants"
 	prizeCollection       = "prizes"
 )
