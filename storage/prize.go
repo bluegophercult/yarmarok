@@ -9,7 +9,7 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
-// FirestorePrizeStorage is a storage for yarmaroks based on Firestore.
+// FirestorePrizeStorage is a storage for prizes based on Firestore.
 type FirestorePrizeStorage struct {
 	yarmarokID      string
 	firestoreClient *firestore.CollectionRef
@@ -57,7 +57,7 @@ func (ps *FirestorePrizeStorage) Get(id string) (*service.Prize, error) {
 	}
 
 	var p service.Prize
-	if err = doc.DataTo(&p); err != nil {
+	if err := doc.DataTo(&p); err != nil {
 		return nil, fmt.Errorf("decode prize: %w", err)
 	}
 
@@ -120,6 +120,7 @@ func (ps *FirestorePrizeStorage) Delete(id string) error {
 	return nil
 }
 
+// Exists check if prize exists
 func (ps *FirestorePrizeStorage) Exists(id string) (bool, error) {
 	doc, err := ps.firestoreClient.Doc(id).Get(context.Background())
 	if isNotFound(err) {

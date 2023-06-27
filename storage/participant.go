@@ -1,9 +1,11 @@
 package storage
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/firestore"
+
 	"github.com/kaznasho/yarmarok/service"
 )
 
@@ -118,6 +120,7 @@ func (ps *FirestoreParticipantStorage) GetAll() ([]service.Participant, error) {
 	return participants, nil
 }
 
+// Exists check if Participant exists
 func (ps *FirestoreParticipantStorage) Exists(id string) (bool, error) {
 	doc, err := ps.firestoreClient.Doc(id).Get(context.Background())
 	if isNotFound(err) {
