@@ -24,8 +24,8 @@ func TestPrizeStorage(t *testing.T) {
 	err = os.Create(org)
 	require.NoError(t, err)
 
-	y := service.Yarmarok{ID: "yarmarok_id_1"}
-	ys := NewFirestoreYarmarokStorage(os.firestoreClient.Doc(org.ID).Collection(yarmarokCollection), y.ID)
+	y := service.Raffle{ID: "raffle_id_1"}
+	ys := NewFirestoreRaffleStorage(os.firestoreClient.Doc(org.ID).Collection(raffleCollection), y.ID)
 
 	err = ys.Create(&y)
 	require.NoError(t, err)
