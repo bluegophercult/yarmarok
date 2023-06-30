@@ -40,6 +40,7 @@ type RaffleService interface {
 	Init(*RaffleInitRequest) (*InitResult, error)
 	Get(id string) (*Raffle, error)
 	List() (*RaffleListResponse, error)
+	Export(id string) (*RaffleExportResponse, error)
 	ParticipantService(id string) ParticipantService
 	PrizeService(id string) PrizeService
 }
@@ -101,9 +102,37 @@ func (rm *RaffleManager) List() (*RaffleListResponse, error) {
 	}, nil
 }
 
+func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
+	raf, err := rm.Get(id)
+	if err != nil {
+		return nil, fmt.Errorf("get raffle: %w", err)
+	}
+
+	prtList, err := rm.ParticipantService(id).List()
+	if err != nil {
+		return nil, fmt.Errorf("get participants: %w", err)
+	}
+
+	przList, err := rm.PrizeService(id).List()
+	if err != nil {
+		return nil, fmt.Errorf("get prizes: %w", err)
+	}
+
+	return &RaffleExportResponse{
+		Raffle:       raf,
+		Participants: prtList.Participants,
+		Prizes:       przList.Prizes,
+	}, nil
+}
+
 // ParticipantService is a service for participants.
 func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
 	return NewParticipantManager(rm.raffleStorage.ParticipantStorage(id))
+}
+
+// PrizeService is a service for prizes.
+func (rm *RaffleManager) PrizeService(id string) PrizeService {
+	return NewPrizeManager(rm.raffleStorage.PrizeStorage(id))
 }
 
 // RaffleInitRequest is a request for initializing a raffle.
@@ -125,4 +154,11 @@ type Result struct {
 // RaffleListResponse is a response for listing raffles.
 type RaffleListResponse struct {
 	Raffles []Raffle
+}
+
+// RaffleExportResponse is a response for exporting a raffle sub-collections.
+type RaffleExportResponse struct {
+	Raffle       *Raffle
+	Participants []Participant
+	Prizes       []Prize
 }

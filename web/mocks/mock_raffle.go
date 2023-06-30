@@ -34,6 +34,21 @@ func (m *MockRaffleService) EXPECT() *MockRaffleServiceMockRecorder {
 	return m.recorder
 }
 
+// Export mocks base method.
+func (m *MockRaffleService) Export(arg0 string) (*service.RaffleExportResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Export", arg0)
+	ret0, _ := ret[0].(*service.RaffleExportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Export indicates an expected call of Export.
+func (mr *MockRaffleServiceMockRecorder) Export(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Export", reflect.TypeOf((*MockRaffleService)(nil).Export), arg0)
+}
+
 // Get mocks base method.
 func (m *MockRaffleService) Get(arg0 string) (*service.Raffle, error) {
 	m.ctrl.T.Helper()
@@ -91,4 +106,18 @@ func (m *MockRaffleService) ParticipantService(arg0 string) service.ParticipantS
 func (mr *MockRaffleServiceMockRecorder) ParticipantService(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParticipantService", reflect.TypeOf((*MockRaffleService)(nil).ParticipantService), arg0)
+}
+
+// PrizeService mocks base method.
+func (m *MockRaffleService) PrizeService(arg0 string) service.PrizeService {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrizeService", arg0)
+	ret0, _ := ret[0].(service.PrizeService)
+	return ret0
+}
+
+// PrizeService indicates an expected call of PrizeService.
+func (mr *MockRaffleServiceMockRecorder) PrizeService(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrizeService", reflect.TypeOf((*MockRaffleService)(nil).PrizeService), arg0)
 }

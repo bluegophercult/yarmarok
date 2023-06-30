@@ -6,6 +6,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 //go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
@@ -135,6 +136,24 @@ func TestRaffle(t *testing.T) {
 			assert.Equal(t, expected, res)
 		})
 	})
+
+	t.Run("export", func(t *testing.T) {
+		id := "raffle_id_1"
+
+		storageMock.EXPECT().Get(id).Return(&Raffle{}, nil).Times(1)
+
+		prtStorage := NewMockParticipantStorage(ctrl)
+		storageMock.EXPECT().ParticipantStorage(id).Return(prtStorage).Times(1)
+		prtStorage.EXPECT().GetAll().Return([]Participant{}, nil).Times(1)
+
+		przStorage := NewMockPrizeStorage(ctrl)
+		storageMock.EXPECT().PrizeStorage(id).Return(przStorage).Times(1)
+		przStorage.EXPECT().GetAll().Return([]Prize{}, nil).Times(1)
+
+		_, err := manager.Export(id)
+		require.NoError(t, err)
+	})
+
 }
 
 var _ RaffleService = &RaffleManager{}
