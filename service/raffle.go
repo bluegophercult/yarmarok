@@ -41,6 +41,7 @@ type RaffleService interface {
 	Get(id string) (*Raffle, error)
 	List() (*RaffleListResponse, error)
 	ParticipantService(id string) ParticipantService
+	PrizeService(id string) PrizeService
 }
 
 // RaffleStorage is a storage for raffles.
@@ -49,6 +50,7 @@ type RaffleStorage interface {
 	Get(id string) (*Raffle, error)
 	GetAll() ([]Raffle, error)
 	ParticipantStorage(id string) ParticipantStorage
+	PrizeStorage(id string) PrizeStorage
 }
 
 // RaffleManager is an implementation of RaffleService.
