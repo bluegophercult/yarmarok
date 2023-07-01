@@ -137,7 +137,7 @@ func TestRaffle(t *testing.T) {
 		})
 	})
 
-	t.Run("Export non-empty collection", func(t *testing.T) {
+	t.Run("Export non-empty collection s", func(t *testing.T) {
 		id := "raffle_id_1"
 		raf := &Raffle{ID: id, Name: "Raffle Test"} // Add more fields as needed
 		participants := []Participant{

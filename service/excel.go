@@ -90,14 +90,13 @@ func toSheet(collection interface{}) (*Sheet, error) {
 		return nil, errors.New("empty collection")
 	}
 
-	rows := make([]Row, 0, val.Len())
+	rows := make([]Row, val.Len()+1)
 	header := val.Index(0)
-
-	rows = append(rows, makeRow(header, fieldNameFunc(header)))
+	rows[0] = makeRow(header, fieldNameFunc(header))
 
 	for i := 0; i < val.Len(); i++ {
 		row := val.Index(i)
-		rows = append(rows, makeRow(row, fieldValueFunc(row)))
+		rows[i+1] = makeRow(row, fieldValueFunc(row))
 	}
 
 	name := val.Type().Elem().Name()

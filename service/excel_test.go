@@ -12,7 +12,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func TestExcelManager_WriteExcel(t *testing.T) {
+func TestExcelManagerWriteExcel(t *testing.T) {
 	type Person struct {
 		Name string
 		Age  int
