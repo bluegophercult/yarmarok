@@ -4,28 +4,33 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"reflect"
 	"strconv"
 
 	"github.com/xuri/excelize/v2"
 )
 
+// ExcelManager represents a manager for Excel files, using the excelize package.
 type ExcelManager struct {
 	File *excelize.File
 }
 
+// NewExcel is a function that creates a new ExcelManager instance with a new Excel file
 func NewExcel() *ExcelManager {
 	return &ExcelManager{File: excelize.NewFile()}
 }
 
+// Sheet is a type that represents an Excel sheet
+// that corresponds Go flat struct.
 type Sheet struct {
 	name string
 	rows []Row
 }
 
+// Row is a type that represents an Excel row.
 type Row = []interface{}
 
+// WriteExcel writes the provided collections into Excel sheets and writes the Excel file.
 func (em *ExcelManager) WriteExcel(w io.Writer, collections ...interface{}) error {
 	for i := range collections {
 		sheet, err := toSheet(collections[i])
@@ -33,13 +38,14 @@ func (em *ExcelManager) WriteExcel(w io.Writer, collections ...interface{}) erro
 			return err
 		}
 
-		log.Printf("+%v", sheet)
 		if err := em.addSheet(sheet); err != nil {
 			return err
 		}
 	}
 
-	em.File.SetActiveSheet(1)
+	if err := em.File.DeleteSheet("Sheet1"); err != nil {
+		return err
+	}
 
 	if err := em.File.Write(w); err != nil {
 		return fmt.Errorf("writing excel: %w", err)
@@ -52,6 +58,7 @@ func (em *ExcelManager) WriteExcel(w io.Writer, collections ...interface{}) erro
 	return nil
 }
 
+// addSheet adds a new sheet to the Excel file.
 func (em *ExcelManager) addSheet(sheet *Sheet) error {
 	if _, err := em.File.NewSheet(sheet.name); err != nil {
 		return fmt.Errorf("create sheet %q: %w", sheet.name, err)
@@ -67,6 +74,8 @@ func (em *ExcelManager) addSheet(sheet *Sheet) error {
 	return nil
 }
 
+// toSheet converts a collection of structs to a Sheet.
+// It verifies that the collection is a slice of structs.
 func toSheet(collection interface{}) (*Sheet, error) {
 	val := reflect.Indirect(reflect.ValueOf(collection))
 	if val.Kind() == reflect.Struct {
@@ -97,6 +106,8 @@ func toSheet(collection interface{}) (*Sheet, error) {
 	return &sheet, nil
 }
 
+// fieldFunc is used to create a row in a sheet from a struct,
+// either by getting the name of each field or by getting the value of each field.
 type fieldFunc func(int) interface{}
 
 func fieldNameFunc(val reflect.Value) fieldFunc {
@@ -111,6 +122,8 @@ func fieldValueFunc(val reflect.Value) fieldFunc {
 	}
 }
 
+// makeRow creates a new Row from a struct by applying
+// the provided field function to each field in the struct.
 func makeRow(val reflect.Value, fn fieldFunc) Row {
 	row := make(Row, val.Type().NumField())
 	for i := 0; i < val.Type().NumField(); i++ {
