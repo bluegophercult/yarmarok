@@ -20,7 +20,6 @@ func TestExcelManager_WriteExcel(t *testing.T) {
 	type NotAStruct int
 
 	tests := map[string]struct {
-		name        string
 		collections []interface{}
 		wantRowsNum int
 		wantErr     error
@@ -45,8 +44,8 @@ func TestExcelManager_WriteExcel(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
 			em := NewExcel()
 
 			buf := new(bytes.Buffer)
