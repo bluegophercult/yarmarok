@@ -8,13 +8,8 @@ import (
 
 // FirestorePrizeStorage is a storage for prizes based on Firestore.
 type FirestorePrizeStorage struct {
-	yarmarokID      string
-	firestoreClient *firestore.CollectionRef
-}
-
-// PrizeStorage returns a prize storage.
-func (ys *FirestoreRaffleStorage) PrizeStorage(yarmarokID string) service.PrizeStorage {
-	return NewFirestorePrizeStorage(ys.firestoreClient.Doc(yarmarokID).Collection(prizeCollection), yarmarokID)
+	raffleID string
+	*StorageBase[service.Prize]
 }
 
 // NewFirestorePrizeStorage creates a new FirestorePrizeStorage.

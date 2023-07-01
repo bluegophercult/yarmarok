@@ -15,7 +15,7 @@ type FirestoreDonationStorage struct {
 }
 
 func (rs *FirestoreRaffleStorage) DonationStorage(participantID string) service.DonationStorage {
-	return NewFirestoreDonationStorage(rs.firestoreClient.Doc(participantID).Collection(participantCollection), participantID)
+	return NewFirestoreDonationStorage(rs.collectionReference.Doc(participantID).Collection(participantCollection), participantID)
 }
 
 func NewFirestoreDonationStorage(client *firestore.CollectionRef, participantID string) *FirestoreDonationStorage {
