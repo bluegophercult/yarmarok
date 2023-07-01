@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
@@ -118,11 +119,19 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
 		return nil, fmt.Errorf("get prizes: %w", err)
 	}
 
-	return &RaffleExportResponse{
-		Raffle:       raf,
-		Participants: prtList.Participants,
-		Prizes:       przList.Prizes,
-	}, nil
+	excel := NewExcel()
+
+	buf := new(bytes.Buffer)
+	if err := excel.WriteExcel(buf, raf, prtList.Participants, przList.Prizes); err != nil {
+		return nil, fmt.Errorf("write excel: %w", err)
+	}
+
+	resp := RaffleExportResponse{
+		FileName: fmt.Sprintf("yarmarok_%s.xlsx", raf.ID),
+		Data:     buf.Bytes(),
+	}
+
+	return &resp, nil
 }
 
 // ParticipantService is a service for participants.
@@ -158,7 +167,6 @@ type RaffleListResponse struct {
 
 // RaffleExportResponse is a response for exporting a raffle sub-collections.
 type RaffleExportResponse struct {
-	Raffle       *Raffle
-	Participants []Participant
-	Prizes       []Prize
+	FileName string
+	Data     []byte
 }
