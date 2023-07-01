@@ -2,57 +2,68 @@ package service
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/xuri/excelize/v2"
 )
 
-type TestStruct struct {
-	Name string
-	Age  int
-}
-
 func TestExcelManager_WriteExcel(t *testing.T) {
-	testCases := []struct {
+	type Person struct {
+		Name string
+		Age  int
+	}
+
+	type NotAStruct int
+
+	tests := map[string]struct {
 		name        string
 		collections []interface{}
+		wantRowsNum int
 		wantErr     error
 	}{
-		{
-			name: "Valid single collection",
-			collections: []interface{}{
-				[]TestStruct{
-					{"Alice", 30},
-					{"Alice", 30},
-					{"Alice", 30}},
-			},
-			wantErr: nil,
+		"single struct": {
+			collections: []interface{}{Person{Name: "Alice", Age: 25}},
+			wantRowsNum: 2,
+			wantErr:     nil,
 		},
-		{
-			name: "Valid multiple collections",
-			collections: []interface{}{
-				TestStruct{"Alice", 30},
-				[]TestStruct{{"Alice", 30}},
-				[]TestStruct{{"Bob", 40}},
-			},
-			wantErr: nil,
+		"slice of structs": {
+			collections: []interface{}{[]Person{{"Bob", 30}, {"Charlie", 40}}},
+			wantRowsNum: 3,
+			wantErr:     nil,
+		},
+		"empty slice": {
+			collections: []interface{}{[]Person{}},
+			wantErr:     errors.New("empty collection"),
+		},
+		"non-struct nor slice value": {
+			collections: []interface{}{NotAStruct(1)},
+			wantErr:     fmt.Errorf("invalid type, expected struct or slice, got: %s", reflect.TypeOf(NotAStruct(1)).Kind()),
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			buf := new(bytes.Buffer)
 			em := NewExcel()
 
+			buf := new(bytes.Buffer)
 			err := em.WriteExcel(buf, tc.collections...)
+			require.Equal(t, tc.wantErr, err)
 
-			if tc.wantErr != nil {
-				assert.ErrorIs(t, err, tc.wantErr)
+			if err != nil {
 				return
 			}
 
-			assert.Nil(t, err)
-			assert.NotZero(t, buf.Len())
+			f, err := excelize.OpenReader(buf)
+			require.NoError(t, err)
+
+			rows, err := f.GetRows(f.GetSheetName(1))
+			require.NoError(t, err)
+
+			require.Len(t, rows, tc.wantRowsNum)
 		})
 	}
 }
