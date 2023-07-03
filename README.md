@@ -126,12 +126,45 @@ erDiagram
 - [Docker](https://docs.docker.com/get-docker/)
 - [Mockgen](https://github.com/golang/mock#installation)
 
-Quick install of go Task:
+Quick installation of go Task:
 
 ```bash
 go install github.com/go-task/task/v3/cmd/task@latest
 ```
 
+### Setup test firestore docker container
+
+On different platforms you can go with direct ip of container or with localhost
+
+In directory :
+```
+└── yarmarok
+    └── testifna
+        ├── firestore.go
+```
+#### For Linux users :
+Here you can go with non-exposed port
+```
+req := testcontainers.ContainerRequest{
+	FromDockerfile: fromDockerfile,
+	ExposedPorts:   []string{"8080/tcp"},
+	WaitingFor:     wait.ForExposedPort(),
+}
+```
+#### For Desktop Docker users on Mac or Windows :
+Port need to be exposed 
+```
+req := testcontainers.ContainerRequest{
+	FromDockerfile: fromDockerfile,
+	ExposedPorts:   []string{"8080:8080/tcp"},
+	WaitingFor:     wait.ForExposedPort(),
+}
+```
+localhost address of container needed, <strong>ip</strong> address of container <strong>not working</strong>
+```
+t.Setenv("FIRESTORE_EMULATOR_HOST", fmt.Sprintf("%s:%s", "localhost", "8080"))
+}
+```
 ### Run tasks
 
 ```bash
