@@ -10,28 +10,28 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-// ExcelManager represents a manager for Excel files, using the excelize package.
-type ExcelManager struct {
+// XLSXManager represents a manager for xlsx files, using the excelize package.
+type XLSXManager struct {
 	File *excelize.File
 }
 
-// NewExcel is a function that creates a new ExcelManager instance with a new Excel file
-func NewExcel() *ExcelManager {
-	return &ExcelManager{File: excelize.NewFile()}
+// NewXLSX is a function that creates a new XLSXManager instance with a new xlsx file.
+func NewXLSX() *XLSXManager {
+	return &XLSXManager{File: excelize.NewFile()}
 }
 
-// Sheet is a type that represents an Excel sheet
+// Sheet is a type that represents an XLSX sheet
 // that corresponds Go flat struct.
 type Sheet struct {
 	name string
 	rows []Row
 }
 
-// Row is a type that represents an Excel row.
+// Row is a type that represents an xlsx row.
 type Row = []interface{}
 
-// WriteExcel writes the provided collections into Excel sheets and writes the Excel file.
-func (em *ExcelManager) WriteExcel(w io.Writer, collections ...interface{}) error {
+// WriteXLSX writes the provided collections into xlsx file.
+func (em *XLSXManager) WriteXLSX(w io.Writer, collections ...interface{}) error {
 	for i := range collections {
 		sheet, err := toSheet(collections[i])
 		if err != nil {
@@ -48,18 +48,18 @@ func (em *ExcelManager) WriteExcel(w io.Writer, collections ...interface{}) erro
 	}
 
 	if err := em.File.Write(w); err != nil {
-		return fmt.Errorf("writing excel: %w", err)
+		return fmt.Errorf("writing xlsx: %w", err)
 	}
 
 	if err := em.File.Close(); err != nil {
-		return fmt.Errorf("closing excel: %w", err)
+		return fmt.Errorf("closing xlsx: %w", err)
 	}
 
 	return nil
 }
 
-// addSheet adds a new sheet to the Excel file.
-func (em *ExcelManager) addSheet(sheet *Sheet) error {
+// addSheet adds a new sheet to the xlsx file.
+func (em *XLSXManager) addSheet(sheet *Sheet) error {
 	if _, err := em.File.NewSheet(sheet.name); err != nil {
 		return fmt.Errorf("create sheet %q: %w", sheet.name, err)
 	}
@@ -77,17 +77,9 @@ func (em *ExcelManager) addSheet(sheet *Sheet) error {
 // toSheet converts a collection of structs to a Sheet.
 // It verifies that the collection is a slice of structs.
 func toSheet(collection interface{}) (*Sheet, error) {
-	val := reflect.Indirect(reflect.ValueOf(collection))
-	if val.Kind() == reflect.Struct {
-		val = reflect.Append(reflect.New(reflect.SliceOf(val.Type())).Elem(), val)
-	}
-
-	if val.Kind() != reflect.Slice || val.Type().Elem().Kind() != reflect.Struct {
-		return nil, fmt.Errorf("invalid type, expected struct or slice, got: %s", val.Kind())
-	}
-
-	if val.Len() == 0 {
-		return nil, errors.New("empty collection")
+	val, err := extractValue(collection)
+	if err != nil {
+		return nil, err
 	}
 
 	rows := make([]Row, val.Len()+1)
@@ -103,6 +95,26 @@ func toSheet(collection interface{}) (*Sheet, error) {
 	sheet := Sheet{name: name, rows: rows}
 
 	return &sheet, nil
+}
+
+// extractValue validates a collection if it is a slice of structs
+// or struct returning underlying reflected value or error.
+func extractValue(collection interface{}) (reflect.Value, error) {
+	val := reflect.Indirect(reflect.ValueOf(collection))
+	if val.Kind() == reflect.Struct {
+		slice := reflect.New(reflect.SliceOf(val.Type())).Elem()
+		val = reflect.Append(slice, val)
+	}
+
+	if val.Kind() != reflect.Slice || val.Type().Elem().Kind() != reflect.Struct {
+		return reflect.Value{}, fmt.Errorf("invalid type, expected struct or slice, got: %s", val.Kind())
+	}
+
+	if val.Len() == 0 {
+		return reflect.Value{}, errors.New("empty collection")
+	}
+
+	return val, nil
 }
 
 // fieldFunc is used to create a row in a sheet from a struct,

@@ -12,7 +12,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func TestExcelManagerWriteExcel(t *testing.T) {
+func TestExcelManagerWriteXLSX(t *testing.T) {
 	type Person struct {
 		Name string
 		Age  int
@@ -50,6 +50,14 @@ func TestExcelManagerWriteExcel(t *testing.T) {
 			collections: []interface{}{[]Person{}},
 			wantErr:     errors.New("empty collection"),
 		},
+		"invalid collections": {
+			collections: []interface{}{[]interface{}{nil, nil, []struct{}{}, &[]***struct{}{}, &[]struct{}{}}},
+			wantErr:     errors.New("invalid type, expected ..."),
+		},
+		"invalid ": {
+			collections: []interface{}{1234},
+			wantErr:     errors.New("invalid type, expected ..."),
+		},
 		"non-struct nor slice value": {
 			collections: []interface{}{NotAStruct(1)},
 			wantErr:     fmt.Errorf("invalid type, expected struct or slice, got: %s", reflect.TypeOf(NotAStruct(1)).Kind()),
@@ -58,13 +66,13 @@ func TestExcelManagerWriteExcel(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			em := NewExcel()
+			em := NewXLSX()
 
 			buf := new(bytes.Buffer)
-			err := em.WriteExcel(buf, tc.collections...)
-			require.Equal(t, tc.wantErr, err)
+			err := em.WriteXLSX(buf, tc.collections...)
 
 			if tc.wantErr != nil {
+				require.Error(t, err)
 				return
 			}
 
