@@ -20,14 +20,14 @@ func NewXLSX() *XLSXManager {
 	return &XLSXManager{File: excelize.NewFile()}
 }
 
-// Sheet is a type that represents an XLSX sheet
+// Sheet is a type that represents xlsx sheet
 // that corresponds Go flat struct.
 type Sheet struct {
 	name string
 	rows []Row
 }
 
-// Row is a type that represents an xlsx row.
+// Row is a type that represents xlsx row.
 type Row = []interface{}
 
 // WriteXLSX writes the provided collections into xlsx file.
@@ -76,8 +76,14 @@ func (em *XLSXManager) addSheet(sheet *Sheet) error {
 
 // toSheet converts a collection of structs to a Sheet.
 // It verifies that the collection is a slice of structs.
-func toSheet(collection interface{}) (*Sheet, error) {
-	val, err := extractValue(collection)
+func toSheet(collection interface{}) (sheet *Sheet, err error) {
+	defer func() { // this is considered as a last resort in case of panic.
+		if rec := recover(); rec != nil {
+			err = fmt.Errorf("invalid collection: %v", rec)
+		}
+	}()
+
+	val, err := isValidValue(collection)
 	if err != nil {
 		return nil, err
 	}
@@ -92,14 +98,14 @@ func toSheet(collection interface{}) (*Sheet, error) {
 	}
 
 	name := val.Type().Elem().Name()
-	sheet := Sheet{name: name, rows: rows}
+	sheet = &Sheet{name: name, rows: rows}
 
-	return &sheet, nil
+	return sheet, err
 }
 
-// extractValue validates a collection if it is a slice of structs
+// isValidValue validates a collection if it is a slice of structs
 // or struct returning underlying reflected value or error.
-func extractValue(collection interface{}) (reflect.Value, error) {
+func isValidValue(collection interface{}) (*reflect.Value, error) {
 	val := reflect.Indirect(reflect.ValueOf(collection))
 	if val.Kind() == reflect.Struct {
 		slice := reflect.New(reflect.SliceOf(val.Type())).Elem()
@@ -107,14 +113,14 @@ func extractValue(collection interface{}) (reflect.Value, error) {
 	}
 
 	if val.Kind() != reflect.Slice || val.Type().Elem().Kind() != reflect.Struct {
-		return reflect.Value{}, fmt.Errorf("invalid type, expected struct or slice, got: %s", val.Kind())
+		return nil, fmt.Errorf("invalid type, expected struct or slice, got: %s", val.Kind())
 	}
 
 	if val.Len() == 0 {
-		return reflect.Value{}, errors.New("empty collection")
+		return nil, errors.New("empty collection")
 	}
 
-	return val, nil
+	return &val, nil
 }
 
 // fieldFunc is used to create a row in a sheet from a struct,

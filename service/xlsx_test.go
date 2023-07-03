@@ -13,12 +13,12 @@ import (
 )
 
 func TestExcelManagerWriteXLSX(t *testing.T) {
-	type Person struct {
+	type person struct {
 		Name string
 		Age  int
 	}
 
-	type NotAStruct int
+	type notAStruct int
 
 	tests := map[string]struct {
 		collections []interface{}
@@ -27,7 +27,7 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 		wantErr     error
 	}{
 		"single struct": {
-			collections: []interface{}{Person{Name: "Alice", Age: 25}},
+			collections: []interface{}{person{Name: "Alice", Age: 25}},
 			sheetIdx:    0,
 			wantRowsNum: 2,
 			wantErr:     nil,
@@ -47,7 +47,7 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 			wantErr:     nil,
 		},
 		"empty slice": {
-			collections: []interface{}{[]Person{}},
+			collections: []interface{}{[]person{}},
 			wantErr:     errors.New("empty collection"),
 		},
 		"invalid collections": {
@@ -59,8 +59,12 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 			wantErr:     errors.New("invalid type, expected ..."),
 		},
 		"non-struct nor slice value": {
-			collections: []interface{}{NotAStruct(1)},
-			wantErr:     fmt.Errorf("invalid type, expected struct or slice, got: %s", reflect.TypeOf(NotAStruct(1)).Kind()),
+			collections: []interface{}{notAStruct(1)},
+			wantErr:     fmt.Errorf("invalid type, expected struct or slice, got: %s", reflect.TypeOf(notAStruct(1)).Kind()),
+		},
+		"non-exported field struct": {
+			collections: []interface{}{&struct{ name string }{"bob"}},
+			wantErr:     errors.New("invalid collection: ..."),
 		},
 	}
 
