@@ -64,6 +64,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 			rafflesRouter.Route(
 				raffleIDPlaceholder,
 				func(raffleIDRouter chi.Router) { // "/raffles/{raffle_id}"
+					raffleIDRouter.Get("/download-xlsx", router.downloadRaffleXLSX)
 					raffleIDRouter.Route(
 						ParticipantsPath,
 						func(participantsRouter chi.Router) { // "/raffles/{raffle_id}/participants"
@@ -106,6 +107,32 @@ func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 	m := newNoRequestMethodHandler(raffleService.List, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
+}
+
+func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
+	organizerID, err := extractOrganizerID(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	raffleService := r.organizerService.RaffleService(organizerID)
+
+	raffleID, err := extractParam(req, raffleIDParam)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp, err := raffleService.Export(raffleID)
+
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	w.Header().Set("Content-Disposition", "attachment; filename="+resp.FileName)
+
+	if _, err := w.Write(resp.Content); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		r.logger.WithError(err).Error("writing xlsx failed")
+	}
 }
 
 func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {

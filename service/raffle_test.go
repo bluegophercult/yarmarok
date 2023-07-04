@@ -163,7 +163,7 @@ func TestRaffle(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, resp)
 		require.Equal(t, "yarmarok_"+id+".xlsx", resp.FileName)
-		require.NotEmpty(t, resp.Data)
+		require.NotEmpty(t, resp.Content)
 	})
 }
 

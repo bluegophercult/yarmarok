@@ -128,7 +128,7 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
 
 	resp := RaffleExportResponse{
 		FileName: fmt.Sprintf("yarmarok_%s.xlsx", raf.ID),
-		Data:     buf.Bytes(),
+		Content:  buf.Bytes(),
 	}
 
 	return &resp, nil
@@ -168,5 +168,5 @@ type RaffleListResponse struct {
 // RaffleExportResponse is a response for exporting a raffle sub-collections.
 type RaffleExportResponse struct {
 	FileName string
-	Data     []byte
+	Content  []byte
 }
