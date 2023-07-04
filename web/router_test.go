@@ -189,6 +189,52 @@ func TestRouter(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, writer.Code)
 			})
 		})
+
+		t.Run("download_raffle_xlsx", func(t *testing.T) {
+			raffleID := "raffle_id_1"
+			downloadPath := joinPath(RafflesPath, raffleID, "/download-xlsx")
+
+			t.Run("success", func(t *testing.T) {
+				req, err := newRequestWithOrigin(http.MethodGet, downloadPath, nil)
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, organizerID)
+				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+				rsMock.EXPECT().Export(raffleID).Return(
+					&service.RaffleExportResponse{
+						FileName: "raffle.xlsx",
+						Content:  []byte("content")}, nil)
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusOK, writer.Code)
+				require.Equal(t, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", writer.Header().Get("Content-Type"))
+				require.Equal(t, "attachment; filename=raffle.xlsx", writer.Header().Get("Content-Disposition"))
+			})
+
+			t.Run("error", func(t *testing.T) {
+				req, err := newRequestWithOrigin(http.MethodGet, downloadPath, nil)
+				require.NoError(t, err)
+
+				req.Header.Set(GoogleUserIDHeader, organizerID)
+				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+
+				rsMock := mocks.NewMockRaffleService(ctrl)
+				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+				mockedErr := assert.AnError
+				rsMock.EXPECT().Export(raffleID).Return(nil, mockedErr)
+
+				writer := httptest.NewRecorder()
+				router.ServeHTTP(writer, req)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
+			})
+		})
+
 	})
 
 	t.Run("PARTICIPANT_ENDPOINT", func(t *testing.T) {
