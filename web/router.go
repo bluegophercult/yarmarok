@@ -125,6 +125,10 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 	}
 
 	resp, err := raffleService.Export(raffleID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	w.Header().Set("Content-Disposition", "attachment; filename="+resp.FileName)
