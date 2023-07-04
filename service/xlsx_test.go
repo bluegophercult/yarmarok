@@ -20,7 +20,9 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 
 	type notAStruct int
 
-	tests := map[string]struct {
+	type customString string
+
+	var tests = map[string]struct {
 		collections []interface{}
 		sheetIdx    int
 		wantRowsNum int
@@ -66,8 +68,47 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 			collections: []interface{}{&struct{ name string }{"bob"}},
 			wantErr:     errors.New("invalid collection: ..."),
 		},
+		"custom type field struct": {
+			collections: []interface{}{&struct{ Age notAStruct }{Age: notAStruct(25)}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"pointer type field struct": {
+			collections: []interface{}{&struct{ Age *int }{Age: new(int)}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"interface type field struct": {
+			collections: []interface{}{&struct{ Age interface{} }{Age: 25}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"slice type field struct": {
+			collections: []interface{}{&struct{ Ages []int }{Ages: []int{25, 26, 27}}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"map type field struct": {
+			collections: []interface{}{&struct{ Ages map[string]int }{Ages: map[string]int{"Alice": 25}}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"function type field struct": {
+			collections: []interface{}{&struct{ Age func() int }{Age: func() int { return 25 }}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"channel type field struct": {
+			collections: []interface{}{&struct{ Age chan int }{Age: make(chan int)}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"array type field struct": {
+			collections: []interface{}{&struct{ Ages [3]int }{Ages: [3]int{25, 26, 27}}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"struct type field struct": {
+			collections: []interface{}{&struct{ Age struct{ Value int } }{Age: struct{ Value int }{Value: 25}}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
+		"empty stringer interface field struct": {
+			collections: []interface{}{&struct{ Stringer fmt.Stringer }{*new(interface{ String() string })}},
+			wantErr:     errors.New("invalid collection: ..."),
+		},
 	}
-
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			em := NewXLSX()
