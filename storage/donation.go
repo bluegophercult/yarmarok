@@ -49,7 +49,9 @@ func (ds *FirestoreDonationStorage) Create(participantStorage service.Participan
 
 	d.TicketNumber = d.Amount / prize.TicketCost
 
-	_, err = ds.firestoreClient.Doc(d.ID).Set(context.Background(), d)
+	if _, err := ds.firestoreClient.Doc(d.ID).Set(context.Background(), d); err != nil {
+		return fmt.Errorf("donation saving failed: %w", err)
+	}
 
 	return err
 }
