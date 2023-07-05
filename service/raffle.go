@@ -119,16 +119,16 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
 		return nil, fmt.Errorf("get prizes: %w", err)
 	}
 
-	excel := NewExcel()
+	xslx := NewXLSX()
 
 	buf := new(bytes.Buffer)
-	if err := excel.WriteExcel(buf, raf, prtList.Participants, przList.Prizes); err != nil {
-		return nil, fmt.Errorf("write excel: %w", err)
+	if err := xslx.WriteXLSX(buf, raf, prtList.Participants, przList.Prizes); err != nil {
+		return nil, fmt.Errorf("write xlsx: %w", err)
 	}
 
 	resp := RaffleExportResponse{
 		FileName: fmt.Sprintf("yarmarok_%s.xlsx", raf.ID),
-		Data:     buf.Bytes(),
+		Content:  buf.Bytes(),
 	}
 
 	return &resp, nil
@@ -168,5 +168,5 @@ type RaffleListResponse struct {
 // RaffleExportResponse is a response for exporting a raffle sub-collections.
 type RaffleExportResponse struct {
 	FileName string
-	Data     []byte
+	Content  []byte
 }
