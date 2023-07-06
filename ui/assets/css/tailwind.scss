@@ -9,7 +9,7 @@
   }
 
   input, textarea, button {
-    @apply focus:outline-none;
+    @apply focus:outline-none focus:ring-0;
   }
 }
 

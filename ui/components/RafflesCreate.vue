@@ -6,19 +6,19 @@
         </button>
     </div>
 
-    <Modal :is-open="isOpen" :close-modal="closeModal">
+    <TheModal :is-open="isOpen" :close-modal="closeModal">
         <template #title>Додати новий розіграш</template>
 
         <div class="flex flex-col gap-2">
-            <Input v-model="newRaffle.name" label="Назва" required/>
-            <TextArea v-model="newRaffle.note" label="Опис"/>
+            <TheInput v-model="newRaffle.name" label="Назва" required/>
+            <TheTextArea v-model="newRaffle.note" label="Опис"/>
         </div>
 
         <div class="mt-4 flex gap-4">
-            <Button :click="addRaffle" full-width>Додати</Button>
-            <Button :click="closeModal" full-width secondary>Закрити</Button>
+            <TheButton :click="addRaffle" full-width>Додати</TheButton>
+            <TheButton :click="closeModal" full-width secondary>Закрити</TheButton>
         </div>
-    </Modal>
+    </TheModal>
 </template>
 
 <script setup lang="ts">

@@ -16,3 +16,9 @@ defineProps<{
     fullWidth: boolean,
 }>()
 </script>
+
+<style scoped lang="scss">
+button {
+  @apply focus:outline-none focus:ring-0;
+}
+</style>

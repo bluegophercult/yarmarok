@@ -2,6 +2,7 @@
     <label class="flex flex-col gap-1">
         <span>{{ label }} <span v-if="required" class="text-red-400 text-sm">*</span></span>
         <input type="text" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+               :required="required"
                class="rounded-md border border-gray-400 px-3 py-2 transition duration-100 focus:border-teal-400"/>
     </label>
 </template>
@@ -14,3 +15,9 @@ defineProps<{
 }>()
 defineEmits([ "update:modelValue" ])
 </script>
+
+<style scoped lang="scss">
+input {
+  @apply focus:outline-none focus:ring-0;
+}
+</style>
