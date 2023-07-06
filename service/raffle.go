@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
@@ -40,7 +41,9 @@ type RaffleService interface {
 	Init(*RaffleInitRequest) (*InitResult, error)
 	Get(id string) (*Raffle, error)
 	List() (*RaffleListResponse, error)
+	Export(id string) (*RaffleExportResponse, error)
 	ParticipantService(id string) ParticipantService
+	PrizeService(id string) PrizeService
 }
 
 // RaffleStorage is a storage for raffles.
@@ -49,6 +52,7 @@ type RaffleStorage interface {
 	Get(id string) (*Raffle, error)
 	GetAll() ([]Raffle, error)
 	ParticipantStorage(id string) ParticipantStorage
+	PrizeStorage(id string) PrizeStorage
 }
 
 // RaffleManager is an implementation of RaffleService.
@@ -99,9 +103,45 @@ func (rm *RaffleManager) List() (*RaffleListResponse, error) {
 	}, nil
 }
 
+func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
+	raf, err := rm.Get(id)
+	if err != nil {
+		return nil, fmt.Errorf("get raffle: %w", err)
+	}
+
+	prtList, err := rm.ParticipantService(id).List()
+	if err != nil {
+		return nil, fmt.Errorf("get participants: %w", err)
+	}
+
+	przList, err := rm.PrizeService(id).List()
+	if err != nil {
+		return nil, fmt.Errorf("get prizes: %w", err)
+	}
+
+	xslx := NewXLSX()
+
+	buf := new(bytes.Buffer)
+	if err := xslx.WriteXLSX(buf, raf, prtList.Participants, przList.Prizes); err != nil {
+		return nil, fmt.Errorf("write xlsx: %w", err)
+	}
+
+	resp := RaffleExportResponse{
+		FileName: fmt.Sprintf("yarmarok_%s.xlsx", raf.ID),
+		Content:  buf.Bytes(),
+	}
+
+	return &resp, nil
+}
+
 // ParticipantService is a service for participants.
 func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
 	return NewParticipantManager(rm.raffleStorage.ParticipantStorage(id))
+}
+
+// PrizeService is a service for prizes.
+func (rm *RaffleManager) PrizeService(id string) PrizeService {
+	return NewPrizeManager(rm.raffleStorage.PrizeStorage(id))
 }
 
 // RaffleInitRequest is a request for initializing a raffle.
@@ -123,4 +163,10 @@ type Result struct {
 // RaffleListResponse is a response for listing raffles.
 type RaffleListResponse struct {
 	Raffles []Raffle
+}
+
+// RaffleExportResponse is a response for exporting a raffle sub-collections.
+type RaffleExportResponse struct {
+	FileName string
+	Content  []byte
 }

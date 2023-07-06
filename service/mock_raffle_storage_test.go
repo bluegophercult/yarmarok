@@ -90,3 +90,17 @@ func (mr *MockRaffleStorageMockRecorder) ParticipantStorage(arg0 interface{}) *g
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParticipantStorage", reflect.TypeOf((*MockRaffleStorage)(nil).ParticipantStorage), arg0)
 }
+
+// PrizeStorage mocks base method.
+func (m *MockRaffleStorage) PrizeStorage(arg0 string) PrizeStorage {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PrizeStorage", arg0)
+	ret0, _ := ret[0].(PrizeStorage)
+	return ret0
+}
+
+// PrizeStorage indicates an expected call of PrizeStorage.
+func (mr *MockRaffleStorageMockRecorder) PrizeStorage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrizeStorage", reflect.TypeOf((*MockRaffleStorage)(nil).PrizeStorage), arg0)
+}

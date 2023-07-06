@@ -6,6 +6,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 //go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
@@ -134,6 +135,35 @@ func TestRaffle(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, expected, res)
 		})
+	})
+
+	t.Run("Export non-empty collection s", func(t *testing.T) {
+		id := "raffle_id_1"
+		raf := &Raffle{ID: id, Name: "Raffle Test"} // Add more fields as needed
+		participants := []Participant{
+			{ID: "p1", Name: "Participant 1"},
+			{ID: "p2", Name: "Participant 2"},
+		}
+		prizes := []Prize{
+			{ID: "pr1", Name: "Prize 1"},
+			{ID: "pr2", Name: "Prize 2"},
+		}
+
+		storageMock.EXPECT().Get(id).Return(raf, nil).Times(1)
+
+		prtStorage := NewMockParticipantStorage(ctrl)
+		storageMock.EXPECT().ParticipantStorage(id).Return(prtStorage).Times(1)
+		prtStorage.EXPECT().GetAll().Return(participants, nil).Times(1)
+
+		przStorage := NewMockPrizeStorage(ctrl)
+		storageMock.EXPECT().PrizeStorage(id).Return(przStorage).Times(1)
+		przStorage.EXPECT().GetAll().Return(prizes, nil).Times(1)
+
+		resp, err := manager.Export(id)
+		require.NoError(t, err)
+		require.NotNil(t, resp)
+		require.Equal(t, "yarmarok_"+id+".xlsx", resp.FileName)
+		require.NotEmpty(t, resp.Content)
 	})
 }
 
