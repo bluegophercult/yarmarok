@@ -1,10 +1,10 @@
 <template>
     <div class="w-full sm:w-72">
-        <HeadlessListbox v-model="selectedPerson">
+        <HeadlessListbox v-model="selectedRaffle">
             <div class="relative">
                 <HeadlessListboxButton
                         class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md group hover:cursor-pointer">
-                    <span class="block truncate">{{ selectedPerson.name }}</span>
+                    <span class="block truncate">{{ selectedRaffle.name }}</span>
                     <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <Icon name="heroicons:chevron-up-down"
                               class="h-5 w-5 text-gray-600 transition duration-200 group-hover:text-teal-400"/>
@@ -14,7 +14,13 @@
                 <transition name="m-fade">
                     <HeadlessListboxOptions
                             class="absolute mt-2 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5">
-                        <HeadlessListboxOption v-slot="{ active, selected, disabled }" v-for="raffle in raffles"
+                        <HeadlessListboxOption v-if="raffles.length === 0" disabled>
+                            <li class="py-2 px-4 text-gray-400 select-none">
+                                Пусто
+                            </li>
+                        </HeadlessListboxOption>
+                        <HeadlessListboxOption v-slot="{ active, selected, disabled }"
+                                               v-for="raffle in raffles.slice().reverse()"
                                                :key="raffle.id" :value="raffle" :disabled="raffle.id === ''"
                                                as="template">
                             <li :class="[
@@ -39,20 +45,22 @@
 </template>
 
 <script setup lang="ts">
-let raffles: Array<{
-    id: string,
-    name: string,
-}> = [
-    { id: "1", name: "Фестиваль їжі" },
-    { id: "2", name: "Atlas weekend" },
-]
+import { useRaffleStore } from "~/store/raffle"
+import { Raffle } from "~/types/raffle"
+import { Ref } from "@vue/reactivity"
 
-if (raffles.length === 0) {
-    raffles.push({ id: "", name: "Немає розіграшів" })
+const raffleStore = useRaffleStore()
+const { raffles } = storeToRefs(raffleStore)
+
+const noRaffles = <Raffle>{
+    id: "", name: "Немає розіграшів",
 }
-const selectedPerson = ref(raffles[0])
+const selectedRaffle: Ref<Raffle> = ref(noRaffles)
+watch(raffles.value, (newRaffles) => {
+    if (newRaffles.length === 0) {
+        selectedRaffle.value = noRaffles
+    } else {
+        selectedRaffle.value = newRaffles[newRaffles.length - 1]
+    }
+}, { immediate: true })
 </script>
-
-<style scoped>
-
-</style>

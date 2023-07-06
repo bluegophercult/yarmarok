@@ -40,18 +40,18 @@
                             <div class="mt-2 flex flex-col gap-2">
                                 <label class="flex flex-col gap-1">
                                     <span>Назва <span class="text-red-400 text-sm">*</span></span>
-                                    <input type="text"
+                                    <input type="text" v-model="newRaffle.name"
                                            class="rounded-md border border-gray-400 px-3 py-2 transition duration-100 focus:border-teal-400"/>
                                 </label>
                                 <label class="flex flex-col gap-1">
                                     <span>Опис</span>
-                                    <textarea rows="3"
+                                    <textarea rows="3" v-model="newRaffle.note"
                                               class="rounded-md border border-gray-400 px-3 py-2 transition duration-100 focus:border-teal-400"/>
                                 </label>
                             </div>
 
                             <div class="mt-4 flex gap-4">
-                                <button type="button" @click="closeModal"
+                                <button type="button" @click="addRaffle"
                                         class="rounded-md shadow w-full bg-teal-100 px-4 py-2 text-sm font-medium text-teal-950 hover:bg-teal-200 focus:bg-teal-200">
                                     Додати
                                 </button>
@@ -69,6 +69,10 @@
 </template>
 
 <script setup lang="ts">
+import { Ref } from "@vue/reactivity"
+import { NewRaffle } from "~/types/raffle"
+import { useRaffleStore } from "~/store/raffle"
+
 const isOpen = ref(false)
 
 function closeModal() {
@@ -77,5 +81,14 @@ function closeModal() {
 
 function openModal() {
     isOpen.value = true
+}
+
+const raffleStore = useRaffleStore()
+const newRaffle: Ref<NewRaffle> = ref(<NewRaffle>{})
+
+function addRaffle() {
+    raffleStore.addRaffle(newRaffle.value)
+    closeModal()
+    newRaffle.value = <NewRaffle>{}
 }
 </script>
