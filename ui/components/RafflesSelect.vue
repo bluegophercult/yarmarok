@@ -47,18 +47,15 @@
 <script setup lang="ts">
 import { useRaffleStore } from "~/store/raffle"
 import { Raffle } from "~/types/raffle"
-import { Ref } from "@vue/reactivity"
 
 const raffleStore = useRaffleStore()
-const { raffles } = storeToRefs(raffleStore)
+const { raffles, selectedRaffle } = storeToRefs(raffleStore)
 
-const noRaffles = <Raffle>{
-    id: "", name: "Немає розіграшів",
-}
-const selectedRaffle: Ref<Raffle> = ref(noRaffles)
 watch(raffles.value, (newRaffles) => {
     if (newRaffles.length === 0) {
-        selectedRaffle.value = noRaffles
+        selectedRaffle.value = <Raffle>{
+            id: "", name: "Немає розіграшів",
+        }
     } else {
         selectedRaffle.value = newRaffles[newRaffles.length - 1]
     }
