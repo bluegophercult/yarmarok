@@ -26,7 +26,7 @@ const props = defineProps<{
 const raffleStore = useRaffleStore()
 
 function deleteRaffle() {
-    raffleStore.deleteRaffle(props.raffle.id)
     props.closeModal()
+    setTimeout(() => raffleStore.deleteRaffle(props.raffle.id), 200)
 }
 </script>

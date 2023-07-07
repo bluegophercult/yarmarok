@@ -7,7 +7,7 @@ export const useRaffleStore = defineStore({
             { id: "1", name: "Фестиваль їжі" },
             { id: "2", name: "Atlas weekend" },
         ],
-        selectedRaffle: <Raffle>{},
+        selectedRaffle: <Raffle | null>null,
     }),
     actions: {
         addRaffle(newRaffle: NewRaffle) {

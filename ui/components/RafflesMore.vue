@@ -8,29 +8,24 @@
         <transition name="m-fade">
             <HeadlessMenuItems
                     class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-200">
-                <HeadlessMenuItem as="div" class="px-1 py-1" v-slot="{ active }">
-                    <button type="button" :class="[
-                            active ? 'bg-teal-100 text-teal-950' : 'text-gray-900',
+                <HeadlessMenuItem as="div" v-for="option in options" class="px-1 py-1" v-slot="{ active, disabled }"
+                                  :disabled="!selectedRaffle">
+                    <button type="button" @click="option.click" :class="[
+                            active && !disabled ? 'bg-teal-100 text-teal-950' : 'text-gray-900',
+                            disabled ? 'text-gray-300' : '',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',
                         ]">
-                        <Icon :active="active" name="heroicons:pencil" class="mr-2 h-5 w-5 text-teal-400"/>
-                        Змінити
-                    </button>
-                </HeadlessMenuItem>
-                <HeadlessMenuItem as="div" class="px-1 py-1" v-slot="{ active }">
-                    <button type="button" @click="openDeleteModal" :class="[
-                          active ? 'bg-teal-100 text-teal-950' : 'text-gray-900',
-                          'group flex w-full items-center rounded-md px-2 py-2 text-sm',
-                        ]">
-                        <Icon :active="active" name="heroicons:trash" class="mr-2 h-5 w-5 text-teal-400"/>
-                        Видалити
+                        <Icon :active="active" :name="option.icon"
+                              :class="disabled ? 'text-gray-400' : 'text-teal-400'" class="mr-2 h-5 w-5"/>
+                        {{ option.text }}
                     </button>
                 </HeadlessMenuItem>
             </HeadlessMenuItems>
         </transition>
     </HeadlessMenu>
 
-    <RafflesDelete :raffle="selectedRaffle" :is-open="isOpenDelete" :close-modal="closeDeleteModal"/>
+    <RafflesDelete v-if="selectedRaffle" :raffle="selectedRaffle" :is-open="isOpenDelete"
+                   :close-modal="() => isOpenDelete = false"/>
 </template>
 
 <script setup lang="ts">
@@ -39,13 +34,18 @@ import { useRaffleStore } from "~/store/raffle"
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
 
+const options = [
+    {
+        text: "Змінити",
+        icon: "heroicons:pencil",
+        click: null,
+    },
+    {
+        text: "Видалити",
+        icon: "heroicons:trash",
+        click: () => isOpenDelete.value = true,
+    },
+]
+
 const isOpenDelete = ref(false)
-
-function closeDeleteModal() {
-    isOpenDelete.value = false
-}
-
-function openDeleteModal() {
-    isOpenDelete.value = true
-}
 </script>

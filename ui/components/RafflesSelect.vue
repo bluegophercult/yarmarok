@@ -4,7 +4,7 @@
             <div class="relative">
                 <HeadlessListboxButton
                         class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md group hover:cursor-pointer ring-1 ring-black ring-opacity-5">
-                    <span class="block truncate">{{ selectedRaffle.name }}</span>
+                    <span class="block truncate">{{ selectedRaffle ? selectedRaffle.name : "Немає розіграшів" }}</span>
                     <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <Icon name="heroicons:chevron-up-down"
                               class="h-5 w-5 text-gray-600 transition duration-200 group-hover:text-teal-400"/>
@@ -14,7 +14,7 @@
                 <transition name="m-fade">
                     <HeadlessListboxOptions
                             class="absolute mt-2 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5">
-                        <HeadlessListboxOption v-if="raffles.length === 0" disabled>
+                        <HeadlessListboxOption v-if="!selectedRaffle" disabled>
                             <li class="py-2 px-4 text-gray-400 select-none">
                                 Пусто
                             </li>
@@ -46,16 +46,13 @@
 
 <script setup lang="ts">
 import { useRaffleStore } from "~/store/raffle"
-import { Raffle } from "~/types/raffle"
 
 const raffleStore = useRaffleStore()
 const { raffles, selectedRaffle } = storeToRefs(raffleStore)
 
 watch(raffles, (newRaffles) => {
     if (newRaffles.length === 0) {
-        selectedRaffle.value = <Raffle>{
-            id: "", name: "Немає розіграшів",
-        }
+        selectedRaffle.value = null
     } else {
         selectedRaffle.value = newRaffles[newRaffles.length - 1]
     }
