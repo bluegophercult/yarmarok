@@ -1,3 +1,5 @@
+import { object, string, InferType } from "yup"
+
 export type Raffle = {
     id: string,
     name: string,
@@ -6,7 +8,9 @@ export type Raffle = {
 
 export type Raffles = Raffle[]
 
-export type NewRaffle = {
-    name: string,
-    note: string,
-}
+export const newRaffleSchema = object({
+    name: string().required("Назва обов'язкова"),
+    note: string(),
+})
+
+export type NewRaffle = InferType<typeof newRaffleSchema>
