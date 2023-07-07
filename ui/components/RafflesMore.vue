@@ -1,13 +1,13 @@
 <template>
     <HeadlessMenu as="div" class="relative">
         <HeadlessMenuButton as="div"
-                            class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md transition duration-200 hover:text-teal-400 ring-1 ring-black ring-opacity-5">
+                            class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md ring-1 ring-black ring-opacity-5 transition duration-200 hover:text-teal-400">
             <Icon name="heroicons:ellipsis-vertical" class="h-6 w-6"/>
         </HeadlessMenuButton>
 
         <transition name="m-fade">
             <HeadlessMenuItems
-                    class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-200">
+                    class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 focus:outline-none">
                 <HeadlessMenuItem as="div" v-for="option in options" class="px-1 py-1" v-slot="{ active, disabled }"
                                   :disabled="!selectedRaffle">
                     <button type="button" @click="option.click" :class="[

@@ -3,7 +3,7 @@
         <HeadlessListbox v-model="selectedRaffle">
             <div class="relative">
                 <HeadlessListboxButton
-                        class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md group hover:cursor-pointer ring-1 ring-black ring-opacity-5">
+                        class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md ring-1 ring-black ring-opacity-5 group hover:cursor-pointer">
                     <span class="block truncate">{{ selectedRaffle ? selectedRaffle.name : "Немає розіграшів" }}</span>
                     <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <Icon name="heroicons:chevron-up-down"
@@ -13,9 +13,9 @@
 
                 <transition name="m-fade">
                     <HeadlessListboxOptions
-                            class="absolute mt-2 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5">
+                            class="absolute mt-2 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                         <HeadlessListboxOption v-if="!selectedRaffle" disabled>
-                            <li class="py-2 px-4 text-gray-400 select-none">
+                            <li class="select-none px-4 py-2 text-gray-400">
                                 Пусто
                             </li>
                         </HeadlessListboxOption>

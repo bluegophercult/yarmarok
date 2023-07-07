@@ -1,7 +1,7 @@
 <template>
     <div>
         <button type="button" @click="openModal"
-                class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md transition duration-200 hover:text-teal-400 ring-1 ring-black ring-opacity-5">
+                class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md ring-1 ring-black ring-opacity-5 transition duration-200 hover:text-teal-400">
             <Icon name="heroicons:plus" class="h-6 w-6"/>
         </button>
     </div>
