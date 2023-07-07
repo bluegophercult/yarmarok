@@ -9,18 +9,24 @@
     <TheModal :is-open="isOpen" :close-modal="closeModal">
         <template #title>Додати новий розіграш</template>
 
-        <div class="flex flex-col gap-2">
-            <TheInput v-model="newRaffle.name" label="Назва" required/>
-            <TheTextArea v-model="newRaffle.note" label="Опис"/>
-            <transition name="m-fade">
-                <p v-show="errorMsg" class="transition duration-200 mt-3 text-sm text-red-400">{{ errorMsg }}</p>
-            </transition>
-        </div>
+        <form @submit.prevent="addRaffle">
+            <div class="flex flex-col gap-2">
+                <TheInput v-model="newRaffle.name" label="Назва" required/>
+                <TheTextArea v-model="newRaffle.note" label="Опис"/>
+            </div>
 
-        <div class="mt-4 flex gap-4">
-            <TheButton :click="addRaffle" full-width>Додати</TheButton>
-            <TheButton :click="closeModal" full-width secondary>Закрити</TheButton>
-        </div>
+            <transition name="m-fade">
+                <p v-show="errorMsg" class="flex gap-2 items-center transition duration-200 mt-4 text-sm text-red-500">
+                    <Icon name="heroicons:exclamation-triangle" class="w-5 h-5"/>
+                    {{ errorMsg }}
+                </p>
+            </transition>
+
+            <div class="mt-4 flex gap-4">
+                <TheButton :click="addRaffle" full-width submit>Додати</TheButton>
+                <TheButton :click="closeModal" full-width secondary>Закрити</TheButton>
+            </div>
+        </form>
     </TheModal>
 </template>
 

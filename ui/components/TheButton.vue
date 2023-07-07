@@ -1,5 +1,5 @@
 <template>
-    <button type="button" @click="click"
+    <button :type="submit ? 'submit' : 'button'" @click="click"
             :class="[
                 secondary ?
                 'bg-gray-100 text-black hover:bg-gray-200 focus:bg-gray-200 ring-gray-600' :
@@ -14,6 +14,7 @@
 <script setup lang="ts">
 defineProps<{
     click: () => void,
+    submit?: boolean,
     secondary?: boolean,
     fullWidth?: boolean,
 }>()
