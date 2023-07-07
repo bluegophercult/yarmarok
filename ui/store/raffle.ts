@@ -11,10 +11,15 @@ export const useRaffleStore = defineStore({
     }),
     actions: {
         addRaffle(newRaffle: NewRaffle) {
+            // TODO: API call
             this.raffles.push(<Raffle>{
-                id: `${ this.raffles.length }`, // TODO: Replace
+                id: `${ this.raffles.length + 1 }`,
                 ...newRaffle,
             })
+        },
+        deleteRaffle(id: string) {
+            // TODO: API call
+            this.raffles = this.raffles.filter(raffle => raffle.id !== id)
         },
     },
 })

@@ -3,7 +3,7 @@
         <HeadlessListbox v-model="selectedRaffle">
             <div class="relative">
                 <HeadlessListboxButton
-                        class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md group hover:cursor-pointer">
+                        class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md group hover:cursor-pointer ring-1 ring-black ring-opacity-5">
                     <span class="block truncate">{{ selectedRaffle.name }}</span>
                     <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <Icon name="heroicons:chevron-up-down"
@@ -51,7 +51,7 @@ import { Raffle } from "~/types/raffle"
 const raffleStore = useRaffleStore()
 const { raffles, selectedRaffle } = storeToRefs(raffleStore)
 
-watch(raffles.value, (newRaffles) => {
+watch(raffles, (newRaffles) => {
     if (newRaffles.length === 0) {
         selectedRaffle.value = <Raffle>{
             id: "", name: "Немає розіграшів",
@@ -59,5 +59,5 @@ watch(raffles.value, (newRaffles) => {
     } else {
         selectedRaffle.value = newRaffles[newRaffles.length - 1]
     }
-}, { immediate: true })
+}, { deep: true, immediate: true })
 </script>

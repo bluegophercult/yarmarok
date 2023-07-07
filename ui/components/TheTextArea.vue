@@ -11,7 +11,7 @@
 defineProps<{
     modelValue: string,
     label: string,
-    required: boolean,
+    required?: boolean,
 }>()
 defineEmits([ "update:modelValue" ])
 </script>

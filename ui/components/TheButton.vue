@@ -12,8 +12,8 @@
 <script setup lang="ts">
 defineProps<{
     click: () => void,
-    secondary: boolean,
-    fullWidth: boolean,
+    secondary?: boolean,
+    fullWidth?: boolean,
 }>()
 </script>
 

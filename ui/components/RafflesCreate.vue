@@ -1,7 +1,7 @@
 <template>
     <div>
         <button type="button" @click="openModal"
-                class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md transition duration-200 hover:text-teal-400">
+                class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md transition duration-200 hover:text-teal-400 ring-1 ring-black ring-opacity-5">
             <Icon name="heroicons:plus" class="h-6 w-6"/>
         </button>
     </div>
@@ -37,11 +37,17 @@ function openModal() {
 }
 
 const raffleStore = useRaffleStore()
-const newRaffle: Ref<NewRaffle> = ref(<NewRaffle>{})
+const newRaffle: Ref<NewRaffle> = ref(<NewRaffle>{
+    name: "",
+    note: "",
+})
 
 function addRaffle() {
     raffleStore.addRaffle(newRaffle.value)
     closeModal()
-    newRaffle.value = <NewRaffle>{}
+    newRaffle.value = <NewRaffle>{
+        name: "",
+        note: "",
+    }
 }
 </script>

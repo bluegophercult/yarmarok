@@ -40,6 +40,6 @@
 <script setup lang="ts">
 defineProps<{
     isOpen: boolean,
-    closeModal: (_close: boolean) => void,
+    closeModal: () => void,
 }>()
 </script>
