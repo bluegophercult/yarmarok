@@ -23,6 +23,13 @@ jobs:
         working-directory: ./ui
         run: yarn generate
 
-      - name: Test
-        working-directory: ./ui
-        run: ls dist
+      - name: Setup GCP Service Account
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GCP_FUNCTION_DEPLOYMENT_SA }}"
+
+      - name: Upload folder to GCP bucket
+        uses: google-github-actions/upload-cloud-storage@v1
+        with:
+          path: "./ui/dist"
+          destination: "yarmarok-frontend"
