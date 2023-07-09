@@ -23,8 +23,8 @@
             </transition>
 
             <div class="mt-4 flex gap-4">
-                <TheButton :click="addRaffle" full-width submit>Додати</TheButton>
-                <TheButton :click="closeModal" full-width secondary>Закрити</TheButton>
+                <TheButton submit full-width>Додати</TheButton>
+                <TheButton :click="closeModal" secondary full-width>Закрити</TheButton>
             </div>
         </form>
     </TheModal>

@@ -49,12 +49,4 @@ import { useRaffleStore } from "~/store/raffle"
 
 const raffleStore = useRaffleStore()
 const { raffles, selectedRaffle } = storeToRefs(raffleStore)
-
-watch(raffles, (newRaffles) => {
-    if (newRaffles.length === 0) {
-        selectedRaffle.value = null
-    } else {
-        selectedRaffle.value = newRaffles[newRaffles.length - 1]
-    }
-}, { deep: true, immediate: true })
 </script>

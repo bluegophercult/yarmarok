@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 defineProps<{
-    click: () => void,
+    click?: () => void,
     submit?: boolean,
     secondary?: boolean,
     fullWidth?: boolean,

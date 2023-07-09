@@ -24,6 +24,8 @@
         </transition>
     </HeadlessMenu>
 
+    <RafflesUpdate v-if="selectedRaffle" :raffle="selectedRaffle" :is-open="isOpenUpdate"
+                   :close-modal="() => isOpenUpdate = false"/>
     <RafflesDelete v-if="selectedRaffle" :raffle="selectedRaffle" :is-open="isOpenDelete"
                    :close-modal="() => isOpenDelete = false"/>
 </template>
@@ -38,7 +40,7 @@ const options = [
     {
         text: "Змінити",
         icon: "heroicons:pencil",
-        click: null,
+        click: () => isOpenUpdate.value = true,
     },
     {
         text: "Видалити",
@@ -47,5 +49,6 @@ const options = [
     },
 ]
 
+const isOpenUpdate = ref(false)
 const isOpenDelete = ref(false)
 </script>
