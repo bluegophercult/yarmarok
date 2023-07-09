@@ -4,6 +4,7 @@ export const usePrizeStore = defineStore({
     id: "prize-store",
     state: () => ({
         prizes: <Prizes>{},
+        selectedPrize: <Prize | null>null,
     }),
     actions: {
         getPrizes() {
@@ -12,6 +13,7 @@ export const usePrizeStore = defineStore({
                 { id: "2", name: "Печенька" },
                 { id: "3", name: "Шкарпетки" },
             ]
+            this.selectFirstPrize()
         },
         addPrize(newPrize: NewPrize) {
             // TODO: API call
@@ -19,6 +21,7 @@ export const usePrizeStore = defineStore({
                 id: `${ this.prizes.length + 1 }`,
                 ...newPrize,
             })
+            this.selectLastPrize()
         },
         updatePrize(updatedPrize: Prize) {
             // TODO: API call
@@ -27,6 +30,13 @@ export const usePrizeStore = defineStore({
         deletePrize(id: string) {
             // TODO: API call
             this.prizes = this.prizes.filter(prize => prize.id !== id)
+            this.selectFirstPrize()
+        },
+        selectFirstPrize() {
+            this.selectedPrize = this.prizes.length === 0 ? null : this.prizes[0]
+        },
+        selectLastPrize() {
+            this.selectedPrize = this.prizes.length === 0 ? null : this.prizes[this.prizes.length - 1]
         },
     },
 })

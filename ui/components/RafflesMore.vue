@@ -1,7 +1,7 @@
 <template>
     <HeadlessMenu as="div" class="relative">
         <HeadlessMenuButton as="div"
-                            class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md ring-1 ring-black ring-opacity-5 transition duration-200 hover:text-teal-400">
+                            class="grid h-full w-10 place-content-center rounded-lg bg-white text-gray-600 shadow-md ring-1 ring-black ring-opacity-5 transition duration-200 hover:cursor-pointer hover:text-teal-400">
             <Icon name="heroicons:ellipsis-vertical" class="h-6 w-6"/>
         </HeadlessMenuButton>
 

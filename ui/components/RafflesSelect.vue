@@ -20,7 +20,7 @@
                             </li>
                         </HeadlessListboxOption>
                         <HeadlessListboxOption v-slot="{ active, selected, disabled }"
-                                               v-for="raffle in raffles.slice().reverse()"
+                                               v-for="raffle in raffles"
                                                :key="raffle.id" :value="raffle" :disabled="raffle.id === ''"
                                                as="template">
                             <li :class="[
@@ -32,8 +32,8 @@
                                     {{ raffle.name }}
                                 </span>
                                 <span v-if="selected"
-                                      class="absolute inset-y-0 left-0 flex items-center pl-3 text-teal-400">
-                                    <Icon name="heroicons:chevron-right-20-solid" class="h-5 w-5"/>
+                                      class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <Icon name="heroicons:chevron-right" class="h-5 w-5 text-teal-400"/>
                                 </span>
                             </li>
                         </HeadlessListboxOption>
