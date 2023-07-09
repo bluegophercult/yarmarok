@@ -33,3 +33,4 @@ jobs:
         with:
           path: "./ui/dist"
           destination: "yarmarok-frontend"
+          process_gcloudignore: false
