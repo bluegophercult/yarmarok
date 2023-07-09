@@ -57,7 +57,6 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 				"duration":     duration,
 				"size":         responseMetric.Size,
 				"organizer_id": organizerID,
-				"url":          req.URL,
 			},
 		).Info("request completed")
 	})
