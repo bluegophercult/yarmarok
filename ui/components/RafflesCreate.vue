@@ -16,8 +16,8 @@
             </div>
 
             <transition name="m-fade">
-                <p v-show="errorMsg" class="flex gap-2 items-center transition duration-200 mt-4 text-sm text-red-500">
-                    <Icon name="heroicons:exclamation-triangle" class="w-5 h-5"/>
+                <p v-show="errorMsg" class="mt-4 flex items-center gap-2 text-sm text-red-500 transition duration-200">
+                    <Icon name="heroicons:exclamation-triangle" class="h-5 w-5"/>
                     {{ errorMsg }}
                 </p>
             </transition>

@@ -1,6 +1,7 @@
 <template>
-    <div class="px-5 py-4">
+    <div class="grid gap-2 p-4">
         <Raffles/>
+        <Prizes/>
     </div>
 </template>
 

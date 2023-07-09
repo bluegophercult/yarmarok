@@ -9,7 +9,8 @@ export type Raffle = {
 export type Raffles = Raffle[]
 
 export const newRaffleSchema = object({
-    name: string().required("Назва обов'язкова"),
+    name: string()
+        .required("Назва обов'язкова"),
     note: string(),
 })
 
