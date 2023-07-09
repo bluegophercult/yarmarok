@@ -36,8 +36,20 @@ import { ValidationError } from "yup"
 import { NewRaffle, newRaffleSchema } from "~/types/raffle"
 import { useRaffleStore } from "~/store/raffle"
 
+const raffleStore = useRaffleStore()
+const newRaffle: Ref<NewRaffle> = ref(<NewRaffle>{
+    name: "",
+    note: "",
+})
+
 const isOpen = ref(false)
 const errorMsg = ref("")
+
+function openModal() {
+    errorMsg.value = ""
+    isOpen.value = true
+
+}
 
 function closeModal() {
     isOpen.value = false
@@ -48,17 +60,6 @@ function closeModal() {
         }
     }, 200)
 }
-
-function openModal() {
-    errorMsg.value = ""
-    isOpen.value = true
-}
-
-const raffleStore = useRaffleStore()
-const newRaffle: Ref<NewRaffle> = ref(<NewRaffle>{
-    name: "",
-    note: "",
-})
 
 function addRaffle() {
     newRaffleSchema.validate(newRaffle.value)

@@ -30,7 +30,6 @@ export const useRaffleStore = defineStore({
         deleteRaffle(id: string) {
             // TODO: API call
             this.raffles = this.raffles.filter(raffle => raffle.id !== id)
-            this.selectFirstRaffle()
         },
         selectFirstRaffle() {
             this.selectedRaffle = this.raffles.length === 0 ? null : this.raffles[0]

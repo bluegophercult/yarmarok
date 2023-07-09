@@ -30,7 +30,6 @@ export const usePrizeStore = defineStore({
         deletePrize(id: string) {
             // TODO: API call
             this.prizes = this.prizes.filter(prize => prize.id !== id)
-            this.selectFirstPrize()
         },
         selectFirstPrize() {
             this.selectedPrize = this.prizes.length === 0 ? null : this.prizes[0]
