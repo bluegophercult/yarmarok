@@ -1,38 +1,38 @@
 name: Deploy Cloud Function
 
 on:
-  workflow_dispatch
+  workflow_dispatch: { }
 
 jobs:
-  build:
-    runs-on: 'ubuntu-latest'
-
+  deploy:
+    runs-on: ubuntu-latest
     steps:
-    - uses: 'actions/checkout@v3'
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Setup GCP Service Account
-      id: 'auth'
-      uses: 'google-github-actions/auth@v1'
-      with:
-        credentials_json: '${{ secrets.GCP_FUNCTION_DEPLOYMENT_SA }}'
+      - name: Setup GCP Service Account
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GCP_FUNCTION_DEPLOYMENT_SA }}"
 
-    - name: Deploy Cloud Function
-      id: 'deploy'
-      uses: 'google-github-actions/deploy-cloud-functions@v1'
-      with:
-        name: 'yarmarok-api'
-        runtime: 'go120'
-        project_id: 'yarmarok-387414'
-        entry_point: 'Entrypoint'
-        service_account_email: 'yarmarok-cloug-functions-api@yarmarok-387414.iam.gserviceaccount.com'
-        memory_mb: '128'
-        region: 'europe-central2'
-        env_vars: 'GCP_PROJECT=yarmarok-387414'
-        timeout: 30
-        min_instances: 0
-        max_instances: 4
-        ingress_settings: ALLOW_INTERNAL_AND_GCLB
+      - name: Deploy Cloud Function
+        id: deploy
+        uses: google-github-actions/deploy-cloud-functions@v1
+        with:
+          name: yarmarok-api
+          runtime: go120
+          project_id: yarmarok-387414
+          entry_point: Entrypoint
+          service_account_email: "yarmarok-cloug-functions-api@yarmarok-387414.iam.gserviceaccount.com"
+          memory_mb: "128"
+          region: europe-central2
+          env_vars: GCP_PROJECT=yarmarok-387414
+          timeout: 30
+          min_instances: 0
+          max_instances: 4
+          ingress_settings: ALLOW_INTERNAL_AND_GCLB
 
-    - name: Test deployed function URL
-      id: 'test'
-      run: 'curl "${{ steps.deploy.outputs.url }}"'
+      - name: Test deployed function URL
+        id: test
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
