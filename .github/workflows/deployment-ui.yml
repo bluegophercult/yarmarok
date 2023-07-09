@@ -10,8 +10,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        working-directory: ./ui
+        run: yarn install
+
       - name: Build
-        uses: ./.github/workflows/js.yml
+        working-directory: ./ui
+        run: yarn generate
 
       - name: Test
-        run: ls ./ui -a
+        working-directory: ./ui
+        run: ls dist
