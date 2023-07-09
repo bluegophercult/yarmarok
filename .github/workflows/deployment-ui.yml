@@ -11,4 +11,4 @@ jobs:
         uses: ./.github/workflows/js.yml
 
       - name: Test
-        run: ls -a
+        run: ls ./ui -a
