@@ -28,6 +28,9 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_FUNCTION_DEPLOYMENT_SA }}"
 
+      - name: Setup GCP SDK
+        uses: google-github-actions/setup-gcloud@v1
+
       - name: Delete files from GCP bucket
         run: gsutil rm gs://yarmarok-frontend/**
 
