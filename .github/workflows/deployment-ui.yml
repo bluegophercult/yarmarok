@@ -31,6 +31,7 @@ jobs:
       - name: Upload folder to GCP bucket
         uses: google-github-actions/upload-cloud-storage@v1
         with:
-          path: "./ui/dist/*"
+          path: "./ui/dist"
+          parent: false
           destination: "yarmarok-frontend"
           process_gcloudignore: false
