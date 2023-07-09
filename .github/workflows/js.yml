@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [ "main" ]
     paths: [ "ui/**" ]
+  workflow_dispatch: { }
 
 jobs:
   build:
@@ -25,9 +26,3 @@ jobs:
 
       - name: Build
         run: yarn generate
-
-      - name: Archive build UI
-        uses: actions/upload-artifact@v3
-        with:
-          name: ui-dist
-          path: dist

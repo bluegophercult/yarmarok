@@ -1,0 +1,14 @@
+name: Deploy UI
+
+on:
+  workflow_dispatch: { }
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build
+        uses: ./.github/workflows/js.yml
+
+      - name: Test
+        run: ls -a
