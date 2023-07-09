@@ -32,5 +32,6 @@ jobs:
         uses: google-github-actions/upload-cloud-storage@v1
         with:
           path: "./ui/dist"
+          parent: false
           destination: "yarmarok-frontend"
           process_gcloudignore: false
