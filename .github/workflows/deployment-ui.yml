@@ -28,6 +28,9 @@ jobs:
         with:
           credentials_json: "${{ secrets.GCP_FUNCTION_DEPLOYMENT_SA }}"
 
+      - name: Delete files from GCP bucket
+        run: gsutil rm gs://yarmarok-frontend/**
+
       - name: Upload folder to GCP bucket
         uses: google-github-actions/upload-cloud-storage@v1
         with:
