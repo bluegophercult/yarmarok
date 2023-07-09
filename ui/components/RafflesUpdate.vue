@@ -4,8 +4,8 @@
 
         <form @submit.prevent="updateRaffle">
             <div class="flex flex-col gap-2">
-                <TheInput v-model="updatedRaffle.name" label="Назва" required/>
-                <TheTextArea v-model="updatedRaffle.note" label="Опис"/>
+                <TheInput v-model="updatedRaffle.name" label="Назва" :placeholder="raffle.name" required/>
+                <TheTextArea v-model="updatedRaffle.note" label="Опис" :placeholder="raffle.note"/>
             </div>
 
             <transition name="m-fade">

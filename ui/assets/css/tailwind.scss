@@ -7,10 +7,6 @@
     font-family: Roboto, sans-serif;
     @apply bg-gray-200;
   }
-
-  input, textarea, button {
-    @apply focus:outline-none focus:ring-0;
-  }
 }
 
 .m-fade {
