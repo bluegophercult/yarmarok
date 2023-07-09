@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./ui
-        run: yarn ci
+        run: yarn install
 
       - name: Build
         working-directory: ./ui
