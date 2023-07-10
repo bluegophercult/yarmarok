@@ -42,5 +42,5 @@ jobs:
           destination: "yarmarok-frontend"
           process_gcloudignore: false
 
-      - name: Remove cache from index.html
+      - name: Change cache time for index.html
         run: "gsutil setmeta -h 'Cache-Control: public, max-age=120' gs://yarmarok-frontend/index.html"
