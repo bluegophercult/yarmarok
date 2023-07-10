@@ -30,7 +30,7 @@ func TestLoadRouter(t *testing.T) {
 		firestoreInstance, err := fsemulator.RunInstance(t)
 		require.NoError(t, err)
 
-		t.Setenv(projectIDEnvVar, firestoreInstance.ProjectID())
+		t.Setenv(ProjectIDEnvVar, firestoreInstance.ProjectID())
 
 		router, err := LoadRouter(log)
 		require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestEntrypoint(t *testing.T) {
 		firestoreInstance, err := fsemulator.RunInstance(t)
 		require.NoError(t, err)
 
-		t.Setenv(projectIDEnvVar, firestoreInstance.ProjectID())
+		t.Setenv(ProjectIDEnvVar, firestoreInstance.ProjectID())
 
 		req := dummyRequest(t)
 
