@@ -11,15 +11,24 @@
 			"name": "Prizes",
 			"item": [
 				{
-					"name": "Contributions",
+					"name": "Donations",
 					"item": [
 						{
-							"name": "Add Contribution",
+							"name": "Add Donation",
 							"request": {
 								"method": "POST",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ContributorID\": \"{{$randomUUID}}\",\n    \"Amount\": {{$randomInt}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{contributions}}",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
 									"host": [
 										"{{base_url}}"
 									],
@@ -28,29 +37,87 @@
 										":raffle_id",
 										"{{prizes}}",
 										":prize_id",
-										"{{contributions}}"
+										"{{donations}}"
 									],
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": null
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
 										},
 										{
 											"key": "prize_id",
-											"value": null
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
 										}
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Add Donation",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n    \"Amount\": 300\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/donations",
+											"protocol": "https",
+											"host": [
+												"europe-central2-yarmarok-387414",
+												"cloudfunctions",
+												"net"
+											],
+											"path": [
+												"yarmarok-api",
+												"raffles",
+												":raffle_id",
+												"prizes",
+												":prize_id",
+												"donations"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\"\n}"
+								}
+							]
 						},
 						{
-							"name": "Delete Contribution",
+							"name": "Delete Donation",
 							"request": {
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{contributions}}/:contibution_id",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
 									"host": [
 										"{{base_url}}"
 									],
@@ -59,34 +126,80 @@
 										":raffle_id",
 										"{{prizes}}",
 										":prize_id",
-										"{{contributions}}",
-										":contibution_id"
+										"{{donations}}",
+										":donation_id"
 									],
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": null
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
 										},
 										{
 											"key": "prize_id",
-											"value": null
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
 										},
 										{
-											"key": "contibution_id",
-											"value": null
+											"key": "donation_id",
+											"value": "3856065c-74f9-44c4-b514-3e83bca1888d"
 										}
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "Delete Donation",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/donations/:donation_id",
+											"protocol": "https",
+											"host": [
+												"europe-central2-yarmarok-387414",
+												"cloudfunctions",
+												"net"
+											],
+											"path": [
+												"yarmarok-api",
+												"raffles",
+												":raffle_id",
+												"prizes",
+												":prize_id",
+												"donations",
+												":donation_id"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												},
+												{
+													"key": "donation_id",
+													"value": "3856065c-74f9-44c4-b514-3e83bca1888d"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": null,
+									"header": null,
+									"cookie": [],
+									"body": "{}"
+								}
+							]
 						},
 						{
-							"name": "List Contributions",
+							"name": "List Donations",
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{contributions}}",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
 									"host": [
 										"{{base_url}}"
 									],
@@ -95,23 +208,73 @@
 										":raffle_id",
 										"{{prizes}}",
 										":prize_id",
-										"{{contributions}}"
+										"{{donations}}"
 									],
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": null
+											"value": ""
 										},
 										{
 											"key": "prize_id",
-											"value": null
+											"value": ""
 										}
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "List Donations",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/donations",
+											"protocol": "https",
+											"host": [
+												"europe-central2-yarmarok-387414",
+												"cloudfunctions",
+												"net"
+											],
+											"path": [
+												"yarmarok-api",
+												"raffles",
+												":raffle_id",
+												"prizes",
+												":prize_id",
+												"donations"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"Donations\": [\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        }\n    ]\n}"
+								}
+							]
 						}
-					]
+					],
+					"description": "Donations are records of charity contribution from a raffle participant for some prize.\n\nThey describe the amount of money transferred and the participant who make the donation."
 				},
 				{
 					"name": "Play",
@@ -136,11 +299,11 @@
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+											"value": ""
 										},
 										{
 											"key": "prize_id",
-											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+											"value": ""
 										}
 									]
 								}
@@ -152,14 +315,18 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/play",
+											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/play",
+											"protocol": "https",
 											"host": [
-												"{{base_url}}"
+												"europe-central2-yarmarok-387414",
+												"cloudfunctions",
+												"net"
 											],
 											"path": [
-												"{{raffles}}",
+												"yarmarok-api",
+												"raffles",
 												":raffle_id",
-												"{{prizes}}",
+												"prizes",
 												":prize_id",
 												"play"
 											],
@@ -221,7 +388,7 @@
 							"variable": [
 								{
 									"key": "raffle_id",
-									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+									"value": ""
 								}
 							]
 						}
@@ -242,14 +409,18 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{prizes}}"
+										"prizes"
 									],
 									"variable": [
 										{
@@ -306,14 +477,18 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{prizes}}"
+										"prizes"
 									],
 									"variable": [
 										{
@@ -336,7 +511,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "[\n    {\n        \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n        \"Name\": \"Capacitor\",\n        \"TicketCost\": 100,\n        \"Description\": \"Lorem Ipsum\",\n        \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n        \"Played\": false\n    },\n    {\n        \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n        \"Name\": \"Capacitor\",\n        \"TicketCost\": 100,\n        \"Description\": \"Lorem Ipsum\",\n        \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n        \"Played\": false\n    },\n    {\n        \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n        \"Name\": \"Capacitor\",\n        \"TicketCost\": 100,\n        \"Description\": \"Lorem Ipsum\",\n        \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n        \"Played\": false\n    }\n]"
+							"body": "{\n    \"Prizes\": [\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Capacitor\",\n            \"TicketCost\": 100,\n            \"Description\": \"Lorem Ipsum\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n            \"Played\": false\n        },\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Capacitor\",\n            \"TicketCost\": 100,\n            \"Description\": \"Lorem Ipsum\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n            \"Played\": false\n        },\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Capacitor\",\n            \"TicketCost\": 100,\n            \"Description\": \"Lorem Ipsum\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n            \"Played\": false\n        }\n    ]\n}"
 						}
 					]
 				},
@@ -375,14 +550,18 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{prizes}}",
+										"prizes",
 										":prize_id"
 									],
 									"variable": [
@@ -459,14 +638,18 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{prizes}}",
+										"prizes",
 										":prize_id"
 									],
 									"variable": [
@@ -490,7 +673,8 @@
 						}
 					]
 				}
-			]
+			],
+			"description": "A charity raffle prize is an item or experience offered for bidding at a fundraising event. It will be passed to the winner.\n\nPrize exists in a scope of raffle, it has a name, a description and ticket price.\n\nTicket price is the price of a single chance to win. More tickets - more chances."
 		},
 		{
 			"name": "Participants",
@@ -543,14 +727,18 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{participants}}"
+										"participants"
 									],
 									"variable": [
 										{
@@ -623,7 +811,7 @@
 							"variable": [
 								{
 									"key": "raffle_id",
-									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+									"value": ""
 								}
 							]
 						}
@@ -635,14 +823,18 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{participants}}"
+										"participants"
 									],
 									"variable": [
 										{
@@ -725,11 +917,11 @@
 							"variable": [
 								{
 									"key": "raffle_id",
-									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+									"value": ""
 								},
 								{
 									"key": "participant_id",
-									"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+									"value": ""
 								}
 							]
 						}
@@ -742,7 +934,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"Name\": \"{{$randomFullName}}\",\n  \"Phone\": \"{{$randomPhoneNumber}}\",\n  \"Note\": \"{{$randomLoremText}}\"\n}",
+									"raw": "{\n  \"Name\": \"Linda Bashirian\",\n  \"Phone\": \"901-750-5012\",\n  \"Note\": \"Sequi est quae non.\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -750,14 +942,18 @@
 									}
 								},
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants/:participant_id",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{participants}}",
+										"participants",
 										":participant_id"
 									],
 									"variable": [
@@ -808,11 +1004,11 @@
 							"variable": [
 								{
 									"key": "raffle_id",
-									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+									"value": ""
 								},
 								{
 									"key": "participant_id",
-									"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+									"value": ""
 								}
 							]
 						}
@@ -824,14 +1020,18 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
+									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants/:participant_id",
+									"protocol": "https",
 									"host": [
-										"{{base_url}}"
+										"europe-central2-yarmarok-387414",
+										"cloudfunctions",
+										"net"
 									],
 									"path": [
-										"{{raffles}}",
+										"yarmarok-api",
+										"raffles",
 										":raffle_id",
-										"{{participants}}",
+										"participants",
 										":participant_id"
 									],
 									"variable": [
@@ -859,6 +1059,27 @@
 		},
 		{
 			"name": "Create raffle",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"raffle_created\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    pm.response.to.be.ok;",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"",
+							"pm.test(\"Your test name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.ID).to.not.empty;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -897,12 +1118,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/{{raffles}}",
+							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles",
+							"protocol": "https",
 							"host": [
-								"{{base_url}}"
+								"europe-central2-yarmarok-387414",
+								"cloudfunctions",
+								"net"
 							],
 							"path": [
-								"{{raffles}}"
+								"yarmarok-api",
+								"raffles"
 							]
 						}
 					},
@@ -973,12 +1198,16 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/{{raffles}}",
+							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles",
+							"protocol": "https",
 							"host": [
-								"{{base_url}}"
+								"europe-central2-yarmarok-387414",
+								"cloudfunctions",
+								"net"
 							],
 							"path": [
-								"{{raffles}}"
+								"yarmarok-api",
+								"raffles"
 							]
 						}
 					},
@@ -1066,7 +1295,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"Name\": \"{{$randomNoun}}\",\n    \"Note\": \"{{$randomLoremSentence}}\"\n}",
+							"raw": "{\n    \"Name\": \"circuit\",\n    \"Note\": \"Ea adipisci nulla velit nam asperiores ipsam quo et.\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1074,12 +1303,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id",
+							"protocol": "https",
 							"host": [
-								"{{base_url}}"
+								"europe-central2-yarmarok-387414",
+								"cloudfunctions",
+								"net"
 							],
 							"path": [
-								"{{raffles}}",
+								"yarmarok-api",
+								"raffles",
 								":raffle_id"
 							],
 							"variable": [
@@ -1124,7 +1357,7 @@
 					"variable": [
 						{
 							"key": "raffle_id",
-							"value": null
+							"value": ""
 						}
 					]
 				}
@@ -1136,12 +1369,16 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id",
+							"protocol": "https",
 							"host": [
-								"{{base_url}}"
+								"europe-central2-yarmarok-387414",
+								"cloudfunctions",
+								"net"
 							],
 							"path": [
-								"{{raffles}}",
+								"yarmarok-api",
+								"raffles",
 								":raffle_id"
 							],
 							"variable": [
@@ -1186,14 +1423,28 @@
 			"response": []
 		}
 	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{dummy_user_id}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Goog-Authenticated-User-Id",
+				"type": "string"
+			}
+		]
+	},
 	"event": [
 		{
 			"listen": "prerequest",
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"var user_id = pm.collectionVariables.get(\"dummy_user_id\");",
-					"pm.request.headers.upsert({key: 'X-Goog-Authenticated-User-Id', value: user_id });"
+					""
 				]
 			}
 		},
@@ -1234,8 +1485,8 @@
 			"type": "string"
 		},
 		{
-			"key": "contributions",
-			"value": "contributions",
+			"key": "donations",
+			"value": "donations",
 			"type": "string"
 		}
 	]
