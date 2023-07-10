@@ -67,7 +67,7 @@ func RunInstance(t *testing.T) (*Instance, error) {
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
 		FromDockerfile: fromDockerfile,
-		ExposedPorts:   []string{fmt.Sprintf("%s:8080/tcp", defaultPort)},
+		ExposedPorts:   []string{fmt.Sprintf("%s:%s", defaultPort, "8080/tcp")},
 		WaitingFor:     wait.ForExposedPort(),
 	}
 
