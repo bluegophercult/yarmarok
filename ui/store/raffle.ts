@@ -9,7 +9,8 @@ export const useRaffleStore = defineStore({
     actions: {
         getRaffles() {
             fetch("https://yarmarock.com.ua/raffles")
-                .then(data => console.log(data.json()))
+                .then(data => data.json())
+                .then(data => console.log(data))
                 .catch(e => console.error(e))
 
             this.raffles = <Raffles>[
