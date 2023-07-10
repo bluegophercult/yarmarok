@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 env:
   ZIP_NAME: yarmarok-api.zip
@@ -14,15 +14,19 @@ tasks:
 
   integration-test:
     cmds:
-      - RUN_INTEGRATION_TESTS=true go test -v ./...   
+      - RUN_INTEGRATION_TESTS=true go test -v ./...
   
   archive:
-    deps: [clean]
+    deps: [ clean ]
     cmds:
-      -  git archive --format=zip -o $ZIP_NAME HEAD
+      - git archive --format=zip -o $ZIP_NAME HEAD
 
   clean:
     cmds:
       - rm $ZIP_NAME
     status:
-      - "[ ! -f $ZIP_NAME ]" 
+      - "[ ! -f $ZIP_NAME ]"
+
+  local-run:
+    cmds:
+      - go test -tags local -timeout 0 -v ./testinfra/local/run_test.go
