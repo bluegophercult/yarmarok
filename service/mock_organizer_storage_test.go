@@ -34,7 +34,7 @@ func (m *MockOrganizerStorage) EXPECT() *MockOrganizerStorageMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockOrganizerStorage) Create(arg0 Organizer) error {
+func (m *MockOrganizerStorage) Create(arg0 *Organizer) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(error)

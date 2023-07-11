@@ -19,12 +19,12 @@ func TestParticipantStorage(t *testing.T) {
 
 	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
-	org := service.Organizer{ID: "organizer_id_1"}
+	org := &service.Organizer{ID: "organizer_id_1"}
 	err = os.Create(org)
 	require.NoError(t, err)
 
 	raf := service.Raffle{ID: "raffle_id_1"}
-	rs := NewFirestoreRaffleStorage(os.firestoreClient.Doc(org.ID).Collection(raffleCollection), raf.ID)
+	rs := NewFirestoreRaffleStorage(os.collectionReference.Doc(org.ID).Collection(raffleCollection), raf.ID)
 
 	err = rs.Create(&raf)
 	require.NoError(t, err)

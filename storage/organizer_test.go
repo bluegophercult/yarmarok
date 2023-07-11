@@ -14,7 +14,7 @@ import (
 
 func TestCreateOrganizer(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
-	org := service.Organizer{ID: "123"}
+	org := &service.Organizer{ID: "123"}
 
 	firestoreInstance, err := firestore.RunInstance(t)
 	require.NoError(t, err)
@@ -40,7 +40,7 @@ func TestCreateOrganizer(t *testing.T) {
 
 	t.Run("create again", func(t *testing.T) {
 		err = os.Create(org)
-		require.ErrorIs(t, err, service.ErrOrganizerAlreadyExists)
+		require.ErrorIs(t, err, service.ErrAlreadyExists)
 	})
 }
 

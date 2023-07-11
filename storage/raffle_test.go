@@ -19,7 +19,7 @@ func TestRaffle(t *testing.T) {
 
 	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
-	org := service.Organizer{ID: "organizer_id_1"}
+	org := &service.Organizer{ID: "organizer_id_1"}
 	err = os.Create(org)
 	require.NoError(t, err)
 

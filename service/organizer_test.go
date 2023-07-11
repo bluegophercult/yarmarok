@@ -26,7 +26,7 @@ func TestInitOrganizer(t *testing.T) {
 		t.Run("not exists", func(t *testing.T) {
 			organizerID := "123"
 			osMock.EXPECT().Exists(organizerID).Return(false, nil)
-			osMock.EXPECT().Create(Organizer{ID: organizerID}).Return(nil)
+			osMock.EXPECT().Create(&Organizer{ID: organizerID}).Return(nil)
 			om := NewOrganizerManager(osMock)
 
 			err := om.InitOrganizerIfNotExists(organizerID)
