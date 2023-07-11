@@ -55,7 +55,7 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("create again", func(t *testing.T) {
 		err = rs.Create(raf)
-		require.ErrorIs(t, err, service.ErrRaffleAlreadyExists)
+		require.ErrorIs(t, err, service.ErrAlreadyExists)
 	})
 
 	t.Run("create without id", func(t *testing.T) {

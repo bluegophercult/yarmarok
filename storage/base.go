@@ -42,7 +42,7 @@ func (sb *StorageBase[Item]) Create(item *Item) error {
 	}
 
 	if exists {
-		return service.ErrPrizeAlreadyExists
+		return service.ErrAlreadyExists
 	}
 
 	_, err = sb.collectionReference.Doc(id).Set(context.Background(), item)
@@ -58,7 +58,7 @@ func (sb *StorageBase[Item]) Get(id string) (*Item, error) {
 	doc, err := sb.collectionReference.Doc(id).Get(context.Background())
 	if err != nil {
 		if isNotFound(err) {
-			return nil, service.ErrPrizeNotFound
+			return nil, service.ErrNotFound
 		}
 		return nil, fmt.Errorf("get item: %w", err)
 	}
@@ -80,7 +80,7 @@ func (sb *StorageBase[Item]) Update(item *Item) error {
 	}
 
 	if !exists {
-		return service.ErrPrizeNotFound
+		return service.ErrNotFound
 	}
 
 	_, err = sb.collectionReference.Doc(id).Set(context.Background(), item)
@@ -95,14 +95,14 @@ func (sb *StorageBase[Item]) Update(item *Item) error {
 func (sb *StorageBase[Item]) GetAll() ([]Item, error) {
 	docs, err := sb.collectionReference.Documents(context.Background()).GetAll()
 	if err != nil {
-		return nil, fmt.Errorf("get all prizes: %w", err)
+		return nil, fmt.Errorf("get all items: %w", err)
 	}
 
 	items := make([]Item, 0, len(docs))
 	for _, doc := range docs {
 		var item Item
 		if err = doc.DataTo(&item); err != nil {
-			return nil, fmt.Errorf("decode prizes: %w", err)
+			return nil, fmt.Errorf("decode items: %w", err)
 		}
 
 		items = append(items, item)
@@ -119,12 +119,12 @@ func (sb *StorageBase[Item]) Delete(id string) error {
 	}
 
 	if !exists {
-		return service.ErrPrizeNotFound
+		return service.ErrAlreadyExists
 	}
 
 	_, err = sb.collectionReference.Doc(id).Delete(context.Background())
 	if err != nil {
-		return fmt.Errorf("delete prize: %w", err)
+		return fmt.Errorf("delete item: %w", err)
 	}
 
 	return nil

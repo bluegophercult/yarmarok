@@ -15,13 +15,20 @@ func NewFirestoreRaffleStorage(client *firestore.CollectionRef, organizerID stri
 	)
 
 	return &FirestoreRaffleStorage{
+		organizerID: organizerID,
 		StorageBase: NewStorageBase(client, raffleIDExtractor),
 	}
 }
 
 // FirestoreRaffleStorage is a storage for raffles based on Firestore.
 type FirestoreRaffleStorage struct {
+	organizerID string
 	*StorageBase[service.Raffle]
+}
+
+func (rs *FirestoreRaffleStorage) Create(r *service.Raffle) error {
+	r.OrganizerID = rs.organizerID
+	return rs.StorageBase.Create(r)
 }
 
 // PrizeStorage returns a prize storage.
