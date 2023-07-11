@@ -11,6 +11,11 @@ var (
 
 	// ErrRaffleAlreadyExists is returned when a raffle already exists.
 	ErrRaffleAlreadyExists = errors.New("raffle already exists")
+
+	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	ErrAlreadyExists = errors.New("item already exists")
+	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	ErrNotFound = errors.New("item not found")
 )
 
 // Organizer represents an organizer of the application.
