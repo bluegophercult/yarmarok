@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kaznasho/yarmarok/testinfra"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kaznasho/yarmarok/testinfra"
 )
 
 func TestFirestore(t *testing.T) {

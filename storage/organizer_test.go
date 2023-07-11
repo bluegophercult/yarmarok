@@ -4,24 +4,24 @@ import (
 	"testing"
 
 	"github.com/kaznasho/yarmarok/service"
-	fsemulator "github.com/kaznasho/yarmarok/testinfra/firestore"
+	"github.com/kaznasho/yarmarok/testinfra/firestore"
 
-	"github.com/kaznasho/yarmarok/testinfra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kaznasho/yarmarok/testinfra"
 )
 
 func TestCreateOrganizer(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
 	org := service.Organizer{ID: "123"}
 
-	firestoreInstance, err := fsemulator.RunInstance(t)
+	firestoreInstance, err := firestore.RunInstance(t)
 	require.NoError(t, err)
 
 	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
 	t.Run("create", func(t *testing.T) {
-
 		err = os.Create(org)
 		require.NoError(t, err)
 	})

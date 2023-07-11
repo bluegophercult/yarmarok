@@ -2,6 +2,7 @@ package raffle
 
 import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+
 	"github.com/kaznasho/yarmarok/function"
 )
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/firestore"
+
 	"github.com/kaznasho/yarmarok/service"
 )
 
@@ -34,16 +35,13 @@ func (rs *FirestoreRaffleStorage) Create(raf *service.Raffle) error {
 		if err != nil {
 			return fmt.Errorf("check existence: %w", err)
 		}
-
 		if doc != nil {
 			return service.ErrRaffleAlreadyExists
 		}
 	}
 
 	raf.OrganizerID = rs.organizerID
-
 	_, err = rs.firestoreClient.Doc(raf.ID).Set(context.Background(), raf)
-
 	return err
 }
 

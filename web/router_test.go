@@ -678,7 +678,7 @@ type HandlerStub struct {
 	once   sync.Once
 }
 
-func (h *HandlerStub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerStub) ServeHTTP(_ http.ResponseWriter, _ *http.Request) {
 	h.once.Do(func() {
 		h.called = true
 	})
