@@ -409,18 +409,14 @@
 									}
 								},
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes",
-									"protocol": "https",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"prizes"
+										"{{prizes}}"
 									],
 									"variable": [
 										{
@@ -588,7 +584,7 @@
 				{
 					"name": "Update Prize",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
