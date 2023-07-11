@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/kaznasho/yarmarok/service"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"cloud.google.com/go/firestore"
 )
@@ -140,4 +142,8 @@ func (sb *StorageBase[Item]) Exists(id string) (bool, error) {
 	}
 
 	return doc.Exists(), nil
+}
+
+func isNotFound(err error) bool {
+	return status.Code(err) == codes.NotFound
 }

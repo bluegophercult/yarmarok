@@ -7,8 +7,6 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 
 	"cloud.google.com/go/firestore"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -59,6 +57,7 @@ func (os *FirestoreOrganizerStorage) Exists(id string) (bool, error) {
 	return doc.Exists(), nil
 }
 
-func isNotFound(err error) bool {
-	return status.Code(err) == codes.NotFound
+// RaffleStorage returns a storage for raffles.
+func (os *FirestoreOrganizerStorage) RaffleStorage(organizerID string) service.RaffleStorage {
+	return NewFirestoreRaffleStorage(os.firestoreClient.Doc(organizerID).Collection(raffleCollection), organizerID)
 }
