@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9af0ba63-3ba9-4137-8af9-24176e31199d",
+		"_postman_id": "d4f7f55c-9243-494b-8b90-3ebd7f9a3d02",
 		"name": "Yarmarok",
 		"description": "Yarmarok collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -68,7 +68,6 @@
 										},
 										"url": {
 											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
-											"protocol": "https",
 											"host": [
 												"{{base_url}}"
 											],
@@ -150,7 +149,6 @@
 										"header": [],
 										"url": {
 											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
-											"protocol": "https",
 											"host": [
 												"{{base_url}}"
 											],
@@ -180,8 +178,8 @@
 									},
 									"status": "OK",
 									"code": 200,
-									"_postman_previewlanguage": null,
-									"header": null,
+									"_postman_previewlanguage": "Text",
+									"header": [],
 									"cookie": [],
 									"body": "{}"
 								}
@@ -224,7 +222,6 @@
 										"header": [],
 										"url": {
 											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
-											"protocol": "https",
 											"host": [
 												"{{base_url}}"
 											],
@@ -307,7 +304,6 @@
 										"header": [],
 										"url": {
 											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/play",
-											"protocol": "https",
 											"host": [
 												"{{base_url}}"
 											],
@@ -462,7 +458,6 @@
 								"header": [],
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -532,7 +527,6 @@
 								"header": [],
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -556,8 +550,8 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": null,
-							"header": null,
+							"_postman_previewlanguage": "Text",
+							"header": [],
 							"cookie": [],
 							"body": "{}"
 						}
@@ -617,7 +611,6 @@
 								},
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -641,8 +634,8 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": null,
-							"header": null,
+							"_postman_previewlanguage": "Text",
+							"header": [],
 							"cookie": [],
 							"body": "{}"
 						}
@@ -703,7 +696,6 @@
 								},
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -796,7 +788,6 @@
 								"header": [],
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -912,7 +903,6 @@
 								},
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -987,7 +977,6 @@
 								"header": [],
 								"url": {
 									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
-									"protocol": "https",
 									"host": [
 										"{{base_url}}"
 									],
@@ -1011,8 +1000,8 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": null,
-							"header": null,
+							"_postman_previewlanguage": "Text",
+							"header": [],
 							"cookie": [],
 							"body": "{}"
 						}
@@ -1027,17 +1016,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"raffle_created\", function () {",
-							"    pm.response.to.have.status(200);",
-							"    pm.response.to.be.ok;",
-							"    pm.response.to.be.withBody;",
-							"    pm.response.to.be.json;",
-							"});",
-							"",
-							"pm.test(\"Your test name\", function () {",
-							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.ID).to.not.empty;",
-							"});"
+							""
 						],
 						"type": "text/javascript"
 					}
@@ -1082,7 +1061,6 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/{{raffles}}",
-							"protocol": "https",
 							"host": [
 								"{{base_url}}"
 							],
@@ -1159,7 +1137,6 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/{{raffles}}",
-							"protocol": "https",
 							"host": [
 								"{{base_url}}"
 							],
@@ -1261,7 +1238,6 @@
 						},
 						"url": {
 							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
-							"protocol": "https",
 							"host": [
 								"{{base_url}}"
 							],
@@ -1324,7 +1300,6 @@
 						"header": [],
 						"url": {
 							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
-							"protocol": "https",
 							"host": [
 								"{{base_url}}"
 							],
@@ -1342,8 +1317,8 @@
 					},
 					"status": "OK",
 					"code": 200,
-					"_postman_previewlanguage": null,
-					"header": null,
+					"_postman_previewlanguage": "Text",
+					"header": [],
 					"cookie": [],
 					"body": "{}"
 				}
@@ -1355,13 +1330,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+					"raw": "{{base_url}}/{{raffles}}/:raffle_id/export",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"{{raffles}}",
-						":raffle_id"
+						":raffle_id",
+						"export"
 					],
 					"variable": [
 						{
