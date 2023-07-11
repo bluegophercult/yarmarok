@@ -7,7 +7,7 @@ It provides a platform for managing lots, participants, donations, and raffles.
 
 [![Build and test Go code](https://github.com/kaznasho/yarmarok/actions/workflows/go.yml/badge.svg)](https://github.com/kaznasho/yarmarok/actions/workflows/go.yml)
 [![Deploy Cloud Function](https://github.com/kaznasho/yarmarok/actions/workflows/deployment.yml/badge.svg)](https://github.com/kaznasho/yarmarok/actions/workflows/deployment.yml)
-
+<br>
 [![Build and test JS code](https://github.com/kaznasho/yarmarok/actions/workflows/js.yml/badge.svg)](https://github.com/kaznasho/yarmarok/actions/workflows/js.yml)
 [![Deploy UI](https://github.com/kaznasho/yarmarok/actions/workflows/deployment-ui.yml/badge.svg)](https://github.com/kaznasho/yarmarok/actions/workflows/deployment-ui.yml)
 
