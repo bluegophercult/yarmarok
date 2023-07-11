@@ -15,11 +15,6 @@ type FirestorePrizeStorage struct {
 	firestoreClient *firestore.CollectionRef
 }
 
-// PrizeStorage returns a prize storage.
-func (rs *FirestoreRaffleStorage) PrizeStorage(raffleID string) service.PrizeStorage {
-	return NewFirestorePrizeStorage(rs.firestoreClient.Doc(raffleID).Collection(prizeCollection), raffleID)
-}
-
 // NewFirestorePrizeStorage creates a new FirestorePrizeStorage.
 func NewFirestorePrizeStorage(client *firestore.CollectionRef, raffleID string) *FirestorePrizeStorage {
 	return &FirestorePrizeStorage{

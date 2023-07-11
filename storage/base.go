@@ -17,25 +17,25 @@ type Storable interface {
 }
 
 // IDExtractor is a typed function that extracts an ID from the item it serves.
-type IDExtractor[Item Storable] func(Item) string
+type IDExtractor[Item Storable] func(*Item) string
 
 // StorageBase is a base with common functionality for all storages.
 type StorageBase[Item Storable] struct {
 	collectionReference *firestore.CollectionRef
-	extractID           func(Item) string
+	extractID           IDExtractor[Item]
 }
 
 // NewStorageBase creates a new StorageBase.
-func NewStorageBase[Item Storable](collectionReference *firestore.CollectionRef, extractID IDExtractor[Item]) *StorageBase[Item] {
+func NewStorageBase[Item Storable](collectionReference *firestore.CollectionRef, idExtractor IDExtractor[Item]) *StorageBase[Item] {
 	return &StorageBase[Item]{
 		collectionReference: collectionReference,
-		extractID:           extractID,
+		extractID:           idExtractor,
 	}
 }
 
 // Create creates a new item.
 func (sb *StorageBase[Item]) Create(item *Item) error {
-	id := sb.extractID(*item)
+	id := sb.extractID(item)
 	exists, err := sb.Exists(id)
 	if err != nil {
 		return fmt.Errorf("check item exists: %w", err)
@@ -73,7 +73,7 @@ func (sb *StorageBase[Item]) Get(id string) (*Item, error) {
 
 // Update replaces an item with the given ID with the given item.
 func (sb *StorageBase[Item]) Update(item *Item) error {
-	id := sb.extractID(*item)
+	id := sb.extractID(item)
 	exists, err := sb.Exists(id)
 	if err != nil {
 		return fmt.Errorf("check item exists: %w", err)

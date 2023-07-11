@@ -15,11 +15,6 @@ type FirestoreParticipantStorage struct {
 	firestoreClient *firestore.CollectionRef
 }
 
-// ParticipantStorage returns a participant storage.
-func (rs *FirestoreRaffleStorage) ParticipantStorage(raffleID string) service.ParticipantStorage {
-	return NewFirestoreParticipantStorage(rs.firestoreClient.Doc(raffleID).Collection(participantCollection), raffleID)
-}
-
 // NewFirestoreParticipantStorage creates a new FirestoreParticipantStorage.
 func NewFirestoreParticipantStorage(client *firestore.CollectionRef, raffleID string) *FirestoreParticipantStorage {
 	return &FirestoreParticipantStorage{
