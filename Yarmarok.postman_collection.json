@@ -67,20 +67,17 @@
 											}
 										},
 										"url": {
-											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/donations",
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
 											"protocol": "https",
 											"host": [
-												"europe-central2-yarmarok-387414",
-												"cloudfunctions",
-												"net"
+												"{{base_url}}"
 											],
 											"path": [
-												"yarmarok-api",
-												"raffles",
+												"{{raffles}}",
 												":raffle_id",
-												"prizes",
+												"{{prizes}}",
 												":prize_id",
-												"donations"
+												"{{donations}}"
 											],
 											"variable": [
 												{
@@ -152,20 +149,17 @@
 										"method": "DELETE",
 										"header": [],
 										"url": {
-											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/donations/:donation_id",
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
 											"protocol": "https",
 											"host": [
-												"europe-central2-yarmarok-387414",
-												"cloudfunctions",
-												"net"
+												"{{base_url}}"
 											],
 											"path": [
-												"yarmarok-api",
-												"raffles",
+												"{{raffles}}",
 												":raffle_id",
-												"prizes",
+												"{{prizes}}",
 												":prize_id",
-												"donations",
+												"{{donations}}",
 												":donation_id"
 											],
 											"variable": [
@@ -229,20 +223,17 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/donations",
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
 											"protocol": "https",
 											"host": [
-												"europe-central2-yarmarok-387414",
-												"cloudfunctions",
-												"net"
+												"{{base_url}}"
 											],
 											"path": [
-												"yarmarok-api",
-												"raffles",
+												"{{raffles}}",
 												":raffle_id",
-												"prizes",
+												"{{prizes}}",
 												":prize_id",
-												"donations"
+												"{{donations}}"
 											],
 											"variable": [
 												{
@@ -315,18 +306,15 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id/play",
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/play",
 											"protocol": "https",
 											"host": [
-												"europe-central2-yarmarok-387414",
-												"cloudfunctions",
-												"net"
+												"{{base_url}}"
 											],
 											"path": [
-												"yarmarok-api",
-												"raffles",
+												"{{raffles}}",
 												":raffle_id",
-												"prizes",
+												"{{prizes}}",
 												":prize_id",
 												"play"
 											],
@@ -473,18 +461,15 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"prizes"
+										"{{prizes}}"
 									],
 									"variable": [
 										{
@@ -546,18 +531,15 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"prizes",
+										"{{prizes}}",
 										":prize_id"
 									],
 									"variable": [
@@ -634,18 +616,15 @@
 									}
 								},
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/prizes/:prize_id",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"prizes",
+										"{{prizes}}",
 										":prize_id"
 									],
 									"variable": [
@@ -723,18 +702,15 @@
 									}
 								},
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"participants"
+										"{{participants}}"
 									],
 									"variable": [
 										{
@@ -819,18 +795,15 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"participants"
+										"{{participants}}"
 									],
 									"variable": [
 										{
@@ -938,18 +911,15 @@
 									}
 								},
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants/:participant_id",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"participants",
+										"{{participants}}",
 										":participant_id"
 									],
 									"variable": [
@@ -1016,18 +986,15 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id/participants/:participant_id",
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
 									"protocol": "https",
 									"host": [
-										"europe-central2-yarmarok-387414",
-										"cloudfunctions",
-										"net"
+										"{{base_url}}"
 									],
 									"path": [
-										"yarmarok-api",
-										"raffles",
+										"{{raffles}}",
 										":raffle_id",
-										"participants",
+										"{{participants}}",
 										":participant_id"
 									],
 									"variable": [
@@ -1114,16 +1081,13 @@
 							}
 						},
 						"url": {
-							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles",
+							"raw": "{{base_url}}/{{raffles}}",
 							"protocol": "https",
 							"host": [
-								"europe-central2-yarmarok-387414",
-								"cloudfunctions",
-								"net"
+								"{{base_url}}"
 							],
 							"path": [
-								"yarmarok-api",
-								"raffles"
+								"{{raffles}}"
 							]
 						}
 					},
@@ -1194,16 +1158,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles",
+							"raw": "{{base_url}}/{{raffles}}",
 							"protocol": "https",
 							"host": [
-								"europe-central2-yarmarok-387414",
-								"cloudfunctions",
-								"net"
+								"{{base_url}}"
 							],
 							"path": [
-								"yarmarok-api",
-								"raffles"
+								"{{raffles}}"
 							]
 						}
 					},
@@ -1299,16 +1260,13 @@
 							}
 						},
 						"url": {
-							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id",
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
 							"protocol": "https",
 							"host": [
-								"europe-central2-yarmarok-387414",
-								"cloudfunctions",
-								"net"
+								"{{base_url}}"
 							],
 							"path": [
-								"yarmarok-api",
-								"raffles",
+								"{{raffles}}",
 								":raffle_id"
 							],
 							"variable": [
@@ -1365,16 +1323,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api/raffles/:raffle_id",
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
 							"protocol": "https",
 							"host": [
-								"europe-central2-yarmarok-387414",
-								"cloudfunctions",
-								"net"
+								"{{base_url}}"
 							],
 							"path": [
-								"yarmarok-api",
-								"raffles",
+								"{{raffles}}",
 								":raffle_id"
 							],
 							"variable": [
