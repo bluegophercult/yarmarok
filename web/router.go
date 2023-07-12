@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
+
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
 )
@@ -67,10 +68,10 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 					raffleIDRouter.Get("/download-xlsx", router.downloadRaffleXLSX)
 					raffleIDRouter.Route(
 						ParticipantsPath,
-						func(participantsRouter chi.Router) { // "/raffles/{raffle_id}/participants"
-							participantsRouter.Post("/", router.createParticipant)
-							participantsRouter.Put("/", router.updateParticipant)
-							participantsRouter.Get("/", router.listParticipants)
+						func(participantRouter chi.Router) { // "/raffles/{raffle_id}/participants"
+							participantRouter.Post("/", router.createParticipant)
+							participantRouter.Put("/", router.updateParticipant)
+							participantRouter.Get("/", router.listParticipants)
 						},
 					)
 				},

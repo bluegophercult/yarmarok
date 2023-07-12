@@ -3,30 +3,43 @@ version: "3"
 env:
   ZIP_NAME: yarmarok-api.zip
 
+silent: true
+
 tasks:
+  default:
+    desc: Task help
+    cmds:
+      - task --list-all
+
   generate:
+    desc: Generate all
     cmds:
       - go generate ./...
 
   test:
+    desc: Run tests
     cmds:
       - go test -v ./...
 
   integration-test:
+    desc: Run integration test
     cmds:
       - RUN_INTEGRATION_TESTS=true go test -v ./...
   
   archive:
+    desc: Zip project
     deps: [ clean ]
     cmds:
       - git archive --format=zip -o $ZIP_NAME HEAD
 
   clean:
+    desc: Remove project zip
     cmds:
       - rm $ZIP_NAME
     status:
       - "[ ! -f $ZIP_NAME ]"
 
   local-run:
+    desc: Run service locally
     cmds:
       - go test -tags local -timeout 0 -v ./testinfra/local/run_test.go

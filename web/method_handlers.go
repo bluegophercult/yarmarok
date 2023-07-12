@@ -24,7 +24,7 @@ func newNoRequestMethodHandler[Response any](
 	}
 }
 
-func (m noRequestMethodHandler[Response]) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (m noRequestMethodHandler[Response]) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	resp, err := m.method()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

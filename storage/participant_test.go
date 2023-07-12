@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/kaznasho/yarmarok/service"
 	"github.com/kaznasho/yarmarok/testinfra"
-	fsemulator "github.com/kaznasho/yarmarok/testinfra/firestore"
-	"github.com/stretchr/testify/require"
+	"github.com/kaznasho/yarmarok/testinfra/firestore"
 )
 
 func TestParticipantStorage(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
 
-	firestoreInstance, err := fsemulator.RunInstance(t)
+	firestoreInstance, err := firestore.RunInstance(t)
 	require.NoError(t, err)
 
 	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())

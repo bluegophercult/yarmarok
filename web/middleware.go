@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kaznasho/yarmarok/logger"
 	"github.com/rs/cors"
+
+	"github.com/kaznasho/yarmarok/logger"
 )
 
 const (

@@ -1,4 +1,4 @@
-// package firestore provides a firestore emulator instance for testing.
+// Package firestore provides a firestore emulator instance for testing.
 package firestore
 
 import (
