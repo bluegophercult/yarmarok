@@ -1,0 +1,1420 @@
+{
+	"info": {
+		"_postman_id": "d4f7f55c-9243-494b-8b90-3ebd7f9a3d02",
+		"name": "Yarmarok",
+		"description": "Yarmarok collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28016921"
+	},
+	"item": [
+		{
+			"name": "Prizes",
+			"item": [
+				{
+					"name": "Donations",
+					"item": [
+						{
+							"name": "Add Donation",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ContributorID\": \"{{$randomUUID}}\",\n    \"Amount\": {{$randomInt}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id",
+										"{{donations}}"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										},
+										{
+											"key": "prize_id",
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Add Donation",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n    \"Amount\": 300\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"{{raffles}}",
+												":raffle_id",
+												"{{prizes}}",
+												":prize_id",
+												"{{donations}}"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Delete Donation",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id",
+										"{{donations}}",
+										":donation_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										},
+										{
+											"key": "prize_id",
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+										},
+										{
+											"key": "donation_id",
+											"value": "3856065c-74f9-44c4-b514-3e83bca1888d"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Delete Donation",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"{{raffles}}",
+												":raffle_id",
+												"{{prizes}}",
+												":prize_id",
+												"{{donations}}",
+												":donation_id"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												},
+												{
+													"key": "donation_id",
+													"value": "3856065c-74f9-44c4-b514-3e83bca1888d"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "Text",
+									"header": [],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "List Donations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id",
+										"{{donations}}"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": ""
+										},
+										{
+											"key": "prize_id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "List Donations",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"{{raffles}}",
+												":raffle_id",
+												"{{prizes}}",
+												":prize_id",
+												"{{donations}}"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"Donations\": [\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        }\n    ]\n}"
+								}
+							]
+						}
+					],
+					"description": "Donations are records of charity contribution from a raffle participant for some prize.\n\nThey describe the amount of money transferred and the participant who make the donation."
+				},
+				{
+					"name": "Play",
+					"item": [
+						{
+							"name": "Play Prize",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/play",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id",
+										"play"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": ""
+										},
+										{
+											"key": "prize_id",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Play Prize",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/play",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"{{raffles}}",
+												":raffle_id",
+												"{{prizes}}",
+												":prize_id",
+												"play"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"Participants\": [\n        \"cb72f570-7c03-404a-9591-9e345da3164c\",\n        \"14f566ad-9f49-491f-a61f-aa30583f423b\",\n        \"7de56a47-a8e0-446e-af53-c72a6ad3d95a\",\n        \"14f566ad-9f49-491f-a61f-aa30583f423b\"\n    ]\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create Prize",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"{{$randomNoun}}\",\n    \"TicketCost\": {{$randomInt}},\n    \"Description\": \"{{$randomLoremSentences}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{prizes}}"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Prize",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Name\": \"capacitor\",\n    \"TicketCost\": 694,\n    \"Description\": \"Voluptatem voluptas perferendis excepturi. Atque non nulla quis doloremque sit natus voluptatibus doloremque.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List Prizes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{prizes}}"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "List Prizes",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Prizes\": [\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Capacitor\",\n            \"TicketCost\": 100,\n            \"Description\": \"Lorem Ipsum\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n            \"Played\": false\n        },\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Capacitor\",\n            \"TicketCost\": 100,\n            \"Description\": \"Lorem Ipsum\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n            \"Played\": false\n        },\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Capacitor\",\n            \"TicketCost\": 100,\n            \"Description\": \"Lorem Ipsum\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\",\n            \"Played\": false\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Prize",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{prizes}}",
+								":prize_id"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+								},
+								{
+									"key": "prize_id",
+									"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Delete Prize",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										},
+										{
+											"key": "prize_id",
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				},
+				{
+					"name": "Update Prize",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"capacitor\",\n    \"TicketCost\": 694,\n    \"Description\": \"Voluptatem voluptas perferendis excepturi. Atque non nulla quis doloremque sit natus voluptatibus doloremque.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{prizes}}",
+								":prize_id"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+								},
+								{
+									"key": "prize_id",
+									"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update Prize",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Name\": \"capacitor\",\n    \"TicketCost\": 694,\n    \"Description\": \"Voluptatem voluptas perferendis excepturi. Atque non nulla quis doloremque sit natus voluptatibus doloremque.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										},
+										{
+											"key": "prize_id",
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				}
+			],
+			"description": "A charity raffle prize is an item or experience offered for bidding at a fundraising event. It will be passed to the winner.\n\nPrize exists in a scope of raffle, it has a name, a description and ticket price.\n\nTicket price is the price of a single chance to win. More tickets - more chances."
+		},
+		{
+			"name": "Participants",
+			"item": [
+				{
+					"name": "Create Participant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Name\": \"{{$randomFullName}}\",\n  \"Phone\": \"{{$randomPhoneNumber}}\",\n  \"Note\": \"{{$randomLoremText}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{participants}}"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Participant",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"Name\": \"Lonnie Langworth\",\n    \"Phone\": \"297-275-0472\",\n    \"Note\": \"At ullam saepe voluptas sint repellat aut.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{participants}}"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "Function-Execution-Id",
+									"value": "3rafi7s3spmb"
+								},
+								{
+									"key": "X-Cloud-Trace-Context",
+									"value": "128034932f00d84ea6a6d2a37d58bd37;o=1"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 03 Jul 2023 20:16:25 GMT"
+								},
+								{
+									"key": "Server",
+									"value": "Google Frontend"
+								},
+								{
+									"key": "Content-Length",
+									"value": "46"
+								},
+								{
+									"key": "Alt-Svc",
+									"value": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List Participants",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{participants}}"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "List Participants",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{participants}}"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								},
+								{
+									"key": "Function-Execution-Id",
+									"value": "3raf0hn423cg"
+								},
+								{
+									"key": "X-Cloud-Trace-Context",
+									"value": "af3cda6f1e5a0eadbc977a7e73a0781e;o=1"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 03 Jul 2023 20:17:19 GMT"
+								},
+								{
+									"key": "Server",
+									"value": "Google Frontend"
+								},
+								{
+									"key": "Content-Length",
+									"value": "377"
+								},
+								{
+									"key": "Alt-Svc",
+									"value": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Participants\": [\n        {\n            \"ID\": \"bf54d620-39a7-4a84-9c65-2273b59a806b\",\n            \"Name\": \"Lonnie Langworth\",\n            \"Phone\": \"297-275-0472\",\n            \"Note\": \"At ullam saepe voluptas sint repellat aut.\",\n            \"CreatedAt\": \"2023-07-03T20:17:14.270496Z\"\n        },\n        {\n            \"ID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Name\": \"Sherry Nienow\",\n            \"Phone\": \"699-798-8243\",\n            \"Note\": \"Nam error quaerat quis et.\",\n            \"CreatedAt\": \"2023-07-03T20:16:25.18753Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Update participant",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Name\": \"{{$randomFullName}}\",\n  \"Phone\": \"{{$randomPhoneNumber}}\",\n  \"Note\": \"{{$randomLoremText}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{participants}}",
+								":participant_id"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": ""
+								},
+								{
+									"key": "participant_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update participant",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"Name\": \"Linda Bashirian\",\n  \"Phone\": \"901-750-5012\",\n  \"Note\": \"Sequi est quae non.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{participants}}",
+										":participant_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										},
+										{
+											"key": "participant_id",
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				},
+				{
+					"name": "Delete Participant",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id",
+								"{{participants}}",
+								":participant_id"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": ""
+								},
+								{
+									"key": "participant_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Delete Participant",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{participants}}/:participant_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{participants}}",
+										":participant_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+										},
+										{
+											"key": "participant_id",
+											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "Text",
+							"header": [],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Create raffle",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Name\": \"{{$randomNoun}}\",\n    \"Note\": \"{{$randomLoremSentence}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/{{raffles}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{raffles}}"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create raffle",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"Raffle Name\",\n    \"Note\": \"A note about the raffle\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Function-Execution-Id",
+							"value": "yvbbfoxbl6jv"
+						},
+						{
+							"key": "X-Cloud-Trace-Context",
+							"value": "b32f57ed251e17ea67dc51faa5065251;o=1"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 03 Jul 2023 17:49:11 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Google Frontend"
+						},
+						{
+							"key": "Content-Length",
+							"value": "46"
+						},
+						{
+							"key": "Alt-Svc",
+							"value": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"ID\": \"00001bf5-a64b-4f78-ba56-dfb4d398aae9\"\n}"
+				}
+			]
+		},
+		{
+			"name": "List raffles",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{raffles}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{raffles}}"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "List raffles",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Function-Execution-Id",
+							"value": "yvbbbw89sel9"
+						},
+						{
+							"key": "X-Cloud-Trace-Context",
+							"value": "1c770de2ba4e4af3c5a0a1f2eca09842;o=1"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 03 Jul 2023 17:48:34 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "Google Frontend"
+						},
+						{
+							"key": "Content-Length",
+							"value": "362"
+						},
+						{
+							"key": "Alt-Svc",
+							"value": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"Raffles\": [\n        {\n            \"ID\": \"14f566ad-9f49-491f-a61f-aa30583f423b\",\n            \"OrganizerID\": \"dummy_test_user\",\n            \"Name\": \"Raffle Name\",\n            \"Note\": \"A note about the raffle\",\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"cb72f570-7c03-404a-9591-9e345da3164c\",\n            \"OrganizerID\": \"dummy_test_user\",\n            \"Name\": \"Raffle Name\",\n            \"Note\": \"A note about the raffle\",\n            \"CreatedAt\": \"2023-07-03T17:01:01.082421Z\"\n        }\n    ]\n}"
+				}
+			]
+		},
+		{
+			"name": "Update Raffle",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Name\": \"{{$randomNoun}}\",\n    \"Note\": \"{{$randomLoremSentence}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{raffles}}",
+						":raffle_id"
+					],
+					"variable": [
+						{
+							"key": "raffle_id",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Update Raffle",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Name\": \"circuit\",\n    \"Note\": \"Ea adipisci nulla velit nam asperiores ipsam quo et.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{}"
+				}
+			]
+		},
+		{
+			"name": "Delete Raffle",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{raffles}}",
+						":raffle_id"
+					],
+					"variable": [
+						{
+							"key": "raffle_id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Delete Raffle",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/{{raffles}}/:raffle_id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"{{raffles}}",
+								":raffle_id"
+							],
+							"variable": [
+								{
+									"key": "raffle_id",
+									"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "Text",
+					"header": [],
+					"cookie": [],
+					"body": "{}"
+				}
+			]
+		},
+		{
+			"name": "Export Raffle",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/{{raffles}}/:raffle_id/export",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"{{raffles}}",
+						":raffle_id",
+						"export"
+					],
+					"variable": [
+						{
+							"key": "raffle_id",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{dummy_user_id}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Goog-Authenticated-User-Id",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://europe-central2-yarmarok-387414.cloudfunctions.net/yarmarok-api",
+			"type": "string"
+		},
+		{
+			"key": "dummy_user_id",
+			"value": "dummy_test_user",
+			"type": "string"
+		},
+		{
+			"key": "raffles",
+			"value": "raffles",
+			"type": "string"
+		},
+		{
+			"key": "prizes",
+			"value": "prizes",
+			"type": "string"
+		},
+		{
+			"key": "participants",
+			"value": "participants",
+			"type": "string"
+		},
+		{
+			"key": "donations",
+			"value": "donations",
+			"type": "string"
+		}
+	]
+}
