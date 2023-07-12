@@ -80,10 +80,12 @@ func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+var allowedOrigins = []string{defaultOrigin}
+
 func (r *Router) corsMiddleware(next http.Handler) http.Handler {
 	return cors.New(
 		cors.Options{
-			AllowedOrigins: []string{defaultOrigin},
+			AllowedOrigins: allowedOrigins,
 			AllowedMethods: []string{
 				http.MethodGet,
 				http.MethodPost,
@@ -106,4 +108,11 @@ func (r *Router) corsMiddleware(next http.Handler) http.Handler {
 			Debug:                false,
 		},
 	).Handler(next)
+}
+
+func (r *Router) headerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, req)
+	})
 }

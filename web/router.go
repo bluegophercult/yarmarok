@@ -55,6 +55,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	router.Use(router.corsMiddleware)
 	router.Use(router.loggingMiddleware)
 	router.Use(router.recoverMiddleware)
+	router.Use(router.headerMiddleware)
 	router.Use(router.organizerMiddleware)
 
 	router.Route(
