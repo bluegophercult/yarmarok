@@ -6,7 +6,7 @@ on:
     paths-ignore: [ "ui/**" ]
   pull_request:
     branches: [ "main" ]
-    paths-ignore: [ "ui/**" ]
+    paths: [ "**.go" ]
 
 jobs:
   build:
