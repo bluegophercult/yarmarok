@@ -2,6 +2,8 @@
     <div class="grid gap-2 p-4">
         <Raffles/>
         <Prizes/>
+
+        <TheNotification/>
     </div>
 </template>
 

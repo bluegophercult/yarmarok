@@ -8,9 +8,13 @@ export const useRaffleStore = defineStore({
     }),
     actions: {
         async getRaffles() {
-            const { data } = await useApiFetch<{
+            const { data, error } = await useApiFetch<{
                 raffles: Raffles
             }>("/raffles")
+            if (error.value) {
+                throw error.value
+            }
+
             this.raffles = data.value?.raffles || <Raffles>[]
             this.selectFirstRaffle()
         },
