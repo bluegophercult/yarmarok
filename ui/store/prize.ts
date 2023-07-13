@@ -3,17 +3,21 @@ import { NewPrize, Prize, Prizes } from "~/types/prize"
 export const usePrizeStore = defineStore({
     id: "prize-store",
     state: () => ({
-        prizes: <Prizes>{},
+        prizes: <Prizes>[],
         selectedPrize: <Prize | null>null,
     }),
     actions: {
-        getPrizes() {
+        getPrizes(raffleId: string) {
+            // TODO: API call
             this.prizes = <Prizes>[
                 { id: "1", name: "Прапор" },
                 { id: "2", name: "Печенька" },
                 { id: "3", name: "Шкарпетки" },
             ]
             this.selectFirstPrize()
+        },
+        clearPrizes() {
+            this.prizes = []
         },
         addPrize(newPrize: NewPrize) {
             // TODO: API call

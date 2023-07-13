@@ -3,26 +3,30 @@ import { NewRaffle, Raffle, Raffles } from "~/types/raffle"
 export const useRaffleStore = defineStore({
     id: "raffle-store",
     state: () => ({
-        raffles: <Raffles>{},
+        raffles: <Raffles>[],
         selectedRaffle: <Raffle | null>null,
     }),
     actions: {
-        getRaffles() {
-            fetch("https://yarmarock.com.ua/raffles")
-                .then(data => data.json())
-                .then(data => console.log(data))
-                .catch(e => console.error(e))
+        async getRaffles() {
+            const { data, error } = await useApiFetch<{
+                raffles: Raffles
+            }>("/raffles")
+            if (error.value) {
+                throw error.value
+            }
 
-            this.raffles = <Raffles>[
-                { id: "2", name: "Atlas weekend" },
-                { id: "1", name: "Фестиваль їжі" },
-            ]
+            this.raffles = data.value?.raffles || <Raffles>[]
             this.selectFirstRaffle()
         },
-        addRaffle(newRaffle: NewRaffle) {
-            // TODO: API call
+        async addRaffle(newRaffle: NewRaffle) {
+            const { data } = await useApiFetch<{
+                id: string,
+            }>("/raffles", {
+                method: "POST",
+                body: newRaffle,
+            })
             this.raffles.unshift(<Raffle>{
-                id: `${ this.raffles.length + 1 }`,
+                id: data.value!.id,
                 ...newRaffle,
             })
             this.selectFirstRaffle()

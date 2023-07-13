@@ -10,7 +10,17 @@
 
 <script setup lang="ts">
 import { usePrizeStore } from "~/store/prize"
+import { useRaffleStore } from "~/store/raffle"
+
+const raffleStore = useRaffleStore()
+const { selectedRaffle } = storeToRefs(raffleStore)
 
 const prizeStore = usePrizeStore()
-prizeStore.getPrizes()
+watch(selectedRaffle, () => {
+    if (selectedRaffle.value) {
+        prizeStore.getPrizes(selectedRaffle.value.id)
+    } else {
+        prizeStore.clearPrizes()
+    }
+})
 </script>
