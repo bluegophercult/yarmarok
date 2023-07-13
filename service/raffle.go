@@ -29,11 +29,11 @@ var timeNow = func() time.Time {
 
 // Raffle represents a raffle.
 type Raffle struct {
-	ID          string
-	OrganizerID string
-	Name        string
-	Note        string
-	CreatedAt   time.Time
+	ID          string    `json:"id"`
+	OrganizerID string    `json:"organizerId"`
+	Name        string    `json:"name"`
+	Note        string    `json:"note"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 // RaffleService is a service for raffles.
@@ -146,27 +146,27 @@ func (rm *RaffleManager) PrizeService(id string) PrizeService {
 
 // RaffleInitRequest is a request for initializing a raffle.
 type RaffleInitRequest struct {
-	Name string
-	Note string
+	Name string `json:"name"`
+	Note string `json:"note"`
 }
 
 // InitResult is a generic result of entity initialization.
 type InitResult struct {
-	ID string
+	ID string `json:"id"`
 }
 
 // Result is a generic result with status.
 type Result struct {
-	Status string
+	Status string `json:"status"`
 }
 
 // RaffleListResponse is a response for listing raffles.
 type RaffleListResponse struct {
-	Raffles []Raffle
+	Raffles []Raffle `json:"raffles"`
 }
 
 // RaffleExportResponse is a response for exporting a raffle sub-collections.
 type RaffleExportResponse struct {
-	FileName string
-	Content  []byte
+	FileName string `json:"fileName"`
+	Content  []byte `json:"content"`
 }
