@@ -10,7 +10,7 @@
                     class="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 focus:outline-none">
                 <HeadlessMenuItem as="div" v-for="option in options" class="px-1 py-1" v-slot="{ active, disabled }"
                                   :disabled="!selectedRaffle">
-                    <button type="button" @click="option.click" :class="[
+                    <button type="button" :disabled="disabled" @click="option.click" :class="[
                             active && !disabled ? 'bg-teal-100 text-teal-950' : 'text-gray-900',
                             disabled ? 'text-gray-300' : '',
                             'group flex w-full items-center rounded-md px-2 py-2 text-sm',

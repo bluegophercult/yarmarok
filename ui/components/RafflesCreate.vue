@@ -35,6 +35,7 @@ import { Ref } from "@vue/reactivity"
 import { ValidationError } from "yup"
 import { NewRaffle, newRaffleSchema } from "~/types/raffle"
 import { useRaffleStore } from "~/store/raffle"
+import { useNotificationStore } from "~/store/notification"
 
 const raffleStore = useRaffleStore()
 const newRaffle: Ref<NewRaffle> = ref(<NewRaffle>{
@@ -61,10 +62,15 @@ function closeModal() {
     }, 200)
 }
 
+const { showError } = useNotificationStore()
+
 function addRaffle() {
     newRaffleSchema.validate(newRaffle.value)
         .then(() => {
-            raffleStore.addRaffle(newRaffle.value)
+            raffleStore.addRaffle(newRaffle.value).catch(e => {
+                console.error(e)
+                showError("Не вдалося створити розіграш!")
+            })
             closeModal()
         })
         .catch((e: ValidationError) => {

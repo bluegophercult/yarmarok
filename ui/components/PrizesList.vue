@@ -9,6 +9,9 @@
             <Icon v-if="selectedPrize && prize.id === selectedPrize.id" name="heroicons:chevron-left"
                   class="h-5 w-5 text-teal-400"/>
         </li>
+        <li v-if="prizes.length === 0" class="text-gray-400">
+            Пусто
+        </li>
     </ul>
 </template>
 

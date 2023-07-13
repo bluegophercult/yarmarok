@@ -1,5 +1,5 @@
 <template>
-    <TheButton @click="openModal" full-width>Додати приз</TheButton>
+    <TheButton @click="openModal" :disabled="!selectedRaffle" full-width>Додати приз</TheButton>
 
     <TheModal :is-open="isOpen" :close-modal="closeModal">
         <template #title>Додати новий приз</template>
@@ -31,6 +31,10 @@ import { usePrizeStore } from "~/store/prize"
 import { Ref } from "@vue/reactivity"
 import { ValidationError } from "yup"
 import { NewPrize, newPrizeSchema } from "~/types/prize"
+import { useRaffleStore } from "~/store/raffle"
+
+const raffleStore = useRaffleStore()
+const { selectedRaffle } = storeToRefs(raffleStore)
 
 const prizeStore = usePrizeStore()
 const newPrize: Ref<NewPrize> = ref(<NewPrize>{
