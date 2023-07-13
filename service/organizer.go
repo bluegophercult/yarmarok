@@ -11,6 +11,11 @@ var (
 
 	// ErrRaffleAlreadyExists is returned when a raffle already exists.
 	ErrRaffleAlreadyExists = errors.New("raffle already exists")
+
+	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	ErrAlreadyExists = errors.New("item already exists")
+	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	ErrNotFound = errors.New("item not found")
 )
 
 // Organizer represents an organizer of the application.
@@ -20,7 +25,7 @@ type Organizer struct {
 
 // OrganizerStorage is a storage for organizers.
 type OrganizerStorage interface {
-	Create(Organizer) error
+	Create(*Organizer) error
 	Exists(id string) (bool, error)
 	RaffleStorage(organizerID string) RaffleStorage
 }
@@ -54,7 +59,7 @@ func (om *OrganizerManager) InitOrganizerIfNotExists(id string) error {
 		return nil
 	}
 
-	return om.organizerStorage.Create(Organizer{ID: id})
+	return om.organizerStorage.Create(&Organizer{ID: id})
 }
 
 // RaffleService is a service for raffles.

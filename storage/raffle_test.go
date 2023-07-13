@@ -19,7 +19,7 @@ func TestRaffle(t *testing.T) {
 
 	os := NewFirestoreOrganizerStorage(firestoreInstance.Client())
 
-	org := service.Organizer{ID: "organizer_id_1"}
+	org := &service.Organizer{ID: "organizer_id_1"}
 	err = os.Create(org)
 	require.NoError(t, err)
 
@@ -55,7 +55,7 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("create again", func(t *testing.T) {
 		err = rs.Create(raf)
-		require.ErrorIs(t, err, service.ErrRaffleAlreadyExists)
+		require.ErrorIs(t, err, service.ErrAlreadyExists)
 	})
 
 	t.Run("create without id", func(t *testing.T) {
