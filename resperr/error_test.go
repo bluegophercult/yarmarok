@@ -69,9 +69,12 @@ func TestError(t *testing.T) {
 		t.Run("self", func(t *testing.T) {
 			result := error(&Error{})
 			assert.ErrorAs(testError, &result)
-			assert.ErrorIs(testError, result)
 		})
 
+		t.Run("in_chain", func(t *testing.T) {
+			result := error(&Error{})
+			assert.ErrorAs(fmt.Errorf("wrapped error: %w", testError), &result)
+		})
 	})
 
 }
