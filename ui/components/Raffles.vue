@@ -13,9 +13,11 @@ import { useNotificationStore } from "~/store/notification"
 const { showError } = useNotificationStore()
 
 const raffleStore = useRaffleStore()
-raffleStore.getRaffles()
-    .catch(e => {
-        console.error(e)
-        showError("Не вдалося отримати сиписок розіграшів!")
-    })
+onMounted(() => {
+    raffleStore.getRaffles()
+        .catch(e => {
+            console.error(e)
+            showError("Не вдалося отримати сиписок розіграшів!")
+        })
+})
 </script>
