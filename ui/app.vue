@@ -1,10 +1,13 @@
 <template>
     <div class="grid gap-2 p-4">
-        <Raffles/>
+        <div class="flex justify-between">
+            <Raffles/>
+            <LogOut/>
+        </div>
         <Prizes/>
-
-        <TheNotification/>
     </div>
+
+    <TheNotification/>
 </template>
 
 <script setup lang="ts">

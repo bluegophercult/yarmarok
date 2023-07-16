@@ -8,7 +8,7 @@
                     'bg-teal-100 text-teal-950 hover:bg-teal-200 focus:bg-teal-200 ring-teal-600',
                 fullWidth ? 'w-full' : '',
             ]"
-            class="rounded-md shadow px-4 py-2 text-sm font-medium ring-1 ring-opacity-5 focus:outline-none">
+            class="rounded-md px-4 py-2 text-sm font-medium shadow ring-1 ring-opacity-5 focus:outline-none">
         <slot/>
     </button>
 </template>
