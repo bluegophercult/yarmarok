@@ -15,16 +15,20 @@ export const useRaffleStore = defineStore({
                 throw error.value
             }
 
-            this.raffles = data.value?.raffles || <Raffles>[]
+            this.raffles = data.value!.raffles || <Raffles>[]
             this.selectFirstRaffle()
         },
         async addRaffle(newRaffle: NewRaffle) {
-            const { data } = await useApiFetch<{
+            const { data, error } = await useApiFetch<{
                 id: string,
             }>("/raffles", {
                 method: "POST",
                 body: newRaffle,
             })
+            if (error.value) {
+                throw error.value
+            }
+
             this.raffles.unshift(<Raffle>{
                 id: data.value!.id,
                 ...newRaffle,
