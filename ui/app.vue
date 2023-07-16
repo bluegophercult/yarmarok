@@ -1,7 +1,7 @@
 <template>
     <div class="grid gap-2 p-4">
-        <div class="flex justify-between">
-            <Raffles/>
+        <div class="flex gap-2 justify-between">
+            <Raffles class="flex-grow"/>
             <LogOut/>
         </div>
         <Prizes/>
