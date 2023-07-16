@@ -44,8 +44,6 @@ func (m noRequestMethodHandler[Response]) ServeHTTP(w http.ResponseWriter, _ *ht
 			"response": resp,
 		},
 	).Debug("response")
-
-	w.WriteHeader(http.StatusOK)
 }
 
 // methodHandler is a wrapper around a service method
@@ -100,6 +98,4 @@ func (m methodHandler[Request, Response]) ServeHTTP(w http.ResponseWriter, req *
 		m.logger.WithError(err).Error("encoding response failed")
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
