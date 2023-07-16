@@ -22,6 +22,9 @@ const (
 	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
 )
 
+// localRun is true if app is build for local run
+var localRun = false
+
 var (
 	// ErrAmbiguousOrganizerIDHeader is returned when
 	// the organizer id header is not set or is ambiguous.
@@ -187,14 +190,21 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 	return participantService, nil
 }
 
-func extractOrganizerID(r *http.Request) (string, error) {
+func extractOrganizerID(r *http.Request) (id string, err error) {
+	defer func() {
+		if localRun && err != nil {
+			err = nil
+			id = "dummy_test_user"
+		}
+	}()
+
 	ids := r.Header.Values(GoogleUserIDHeader)
 
 	if len(ids) != 1 {
 		return "", ErrAmbiguousOrganizerIDHeader
 	}
 
-	id := ids[0]
+	id = ids[0]
 	if id == "" {
 		return "", ErrAmbiguousOrganizerIDHeader
 	}
