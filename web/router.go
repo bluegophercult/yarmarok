@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	ApiPath          = "/api"
 	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
 
@@ -61,27 +62,21 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	router.Use(router.headerMiddleware)
 	router.Use(router.organizerMiddleware)
 
-	router.Route(
-		RafflesPath,
-		func(rafflesRouter chi.Router) { // "/raffles"
-			rafflesRouter.Post("/", router.createRaffle)
-			rafflesRouter.Get("/", router.listRaffles)
-			rafflesRouter.Route(
-				raffleIDPlaceholder,
-				func(raffleIDRouter chi.Router) { // "/raffles/{raffle_id}"
-					raffleIDRouter.Get("/download-xlsx", router.downloadRaffleXLSX)
-					raffleIDRouter.Route(
-						ParticipantsPath,
-						func(participantRouter chi.Router) { // "/raffles/{raffle_id}/participants"
-							participantRouter.Post("/", router.createParticipant)
-							participantRouter.Put("/", router.updateParticipant)
-							participantRouter.Get("/", router.listParticipants)
-						},
-					)
-				},
-			)
-		},
-	)
+	router.Route(ApiPath, func(r chi.Router) { // "/api"
+		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
+		r.Route(RafflesPath, func(r chi.Router) { // "/api/raffles"
+			r.Post("/", router.createRaffle)
+			r.Get("/", router.listRaffles)
+			r.Route(raffleIDPlaceholder, func(r chi.Router) { // "/api/raffles/{raffle_id}"
+				r.Get("/download-xlsx", router.downloadRaffleXLSX)
+				r.Route(ParticipantsPath, func(r chi.Router) { // "/api/raffles/{raffle_id}/participants"
+					r.Post("/", router.createParticipant)
+					r.Put("/", router.updateParticipant)
+					r.Get("/", router.listParticipants)
+				})
+			})
+		})
+	})
 
 	return router, nil
 }

@@ -91,7 +91,7 @@ func dummyRequest(t *testing.T) *http.Request {
 	jsonBody, err := json.Marshal(raffleInit)
 	require.NoError(t, err)
 
-	req, err := http.NewRequest(http.MethodPost, web.RafflesPath, bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest(http.MethodPost, web.ApiPath+web.RafflesPath, bytes.NewBuffer(jsonBody))
 	require.NoError(t, err)
 
 	req.Header.Set(web.GoogleUserIDHeader, "organizer_id_1")

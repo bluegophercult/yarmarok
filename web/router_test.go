@@ -39,7 +39,9 @@ func TestRouter(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("panic_in_handler", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
+		rafflePath := joinPath(ApiPath, RafflesPath)
+
+		req, err := newRequestWithOrigin(http.MethodPost, rafflePath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -53,7 +55,24 @@ func TestRouter(t *testing.T) {
 		require.Equal(t, http.StatusInternalServerError, writer.Code)
 	})
 
-	t.Run("RAFFLE_ENDPOINT", func(t *testing.T) {
+	t.Run("login_endpoint", func(t *testing.T) {
+		loginPath := joinPath(ApiPath, "/login")
+
+		req, err := newRequestWithOrigin(http.MethodPost, loginPath, emptyBody())
+		require.NoError(t, err)
+
+		req.Header.Set(GoogleUserIDHeader, organizerID)
+		osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+
+		writer := httptest.NewRecorder()
+		router.ServeHTTP(writer, req)
+		require.Equal(t, http.StatusSeeOther, writer.Code)
+		require.Equal(t, "/", writer.Header().Get("Location"))
+	})
+
+	t.Run("raffle_endpoint", func(t *testing.T) {
+		rafflePath := joinPath(ApiPath, RafflesPath)
+
 		t.Run("create_raffle", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
 				initRequest := &service.RaffleInitRequest{
@@ -66,7 +85,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, body)
+				req, err := newRequestWithOrigin(http.MethodPost, rafflePath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -93,7 +112,7 @@ func TestRouter(t *testing.T) {
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, body)
+				req, err := newRequestWithOrigin(http.MethodPost, rafflePath, body)
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -111,7 +130,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("empty_body", func(t *testing.T) {
-				req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, bytes.NewBuffer([]byte{}))
+				req, err := newRequestWithOrigin(http.MethodPost, rafflePath, bytes.NewBuffer([]byte{}))
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -152,7 +171,7 @@ func TestRouter(t *testing.T) {
 					},
 				}
 
-				req, err := newRequestWithOrigin(http.MethodGet, RafflesPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodGet, rafflePath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -172,7 +191,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := newRequestWithOrigin(http.MethodGet, RafflesPath, emptyBody())
+				req, err := newRequestWithOrigin(http.MethodGet, rafflePath, emptyBody())
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -192,7 +211,7 @@ func TestRouter(t *testing.T) {
 
 		t.Run("download_raffle_xlsx", func(t *testing.T) {
 			raffleID := "raffle_id_1"
-			downloadPath := joinPath(RafflesPath, raffleID, "/download-xlsx")
+			downloadPath := joinPath(ApiPath, RafflesPath, raffleID, "/download-xlsx")
 
 			t.Run("success", func(t *testing.T) {
 				req, err := newRequestWithOrigin(http.MethodGet, downloadPath, nil)
@@ -237,10 +256,10 @@ func TestRouter(t *testing.T) {
 
 	})
 
-	t.Run("PARTICIPANT_ENDPOINT", func(t *testing.T) {
+	t.Run("participant_endpoint", func(t *testing.T) {
 		organizerID := "organizer_id_1"
 		raffleID := "raffle_id_1"
-		participantPath := joinPath(RafflesPath, raffleID, ParticipantsPath)
+		participantPath := joinPath(ApiPath, RafflesPath, raffleID, ParticipantsPath)
 
 		t.Run("create_participant", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
@@ -617,7 +636,7 @@ func TestGeParticipantService(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodGet, "/raffles/raffle_id_1/participants", nil)
+		req, err := newRequestWithOrigin(http.MethodGet, "/api/raffles/raffle_id_1/participants", nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -636,7 +655,7 @@ func TestGeParticipantService(t *testing.T) {
 	})
 
 	t.Run("missing_organizer_id", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodGet, "/raffle/raffle_id_1/participants", nil)
+		req, err := newRequestWithOrigin(http.MethodGet, "/api/raffle/raffle_id_1/participants", nil)
 		require.NoError(t, err)
 
 		chiCtx := chi.NewRouteContext()
@@ -652,7 +671,7 @@ func TestGeParticipantService(t *testing.T) {
 	})
 
 	t.Run("missing_raffle_id", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodGet, "/raffles//participants", nil)
+		req, err := newRequestWithOrigin(http.MethodGet, "/api/raffles//participants", nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
