@@ -10,7 +10,7 @@ export const useRaffleStore = defineStore({
         async getRaffles() {
             const { data, error } = await useApiFetch<{
                 raffles: Raffles
-            }>("/raffles")
+            }>("/api/raffles")
             if (error.value) {
                 throw error.value
             }
@@ -21,7 +21,7 @@ export const useRaffleStore = defineStore({
         async addRaffle(newRaffle: NewRaffle) {
             const { data, error } = await useApiFetch<{
                 id: string,
-            }>("/raffles", {
+            }>("/api/raffles", {
                 method: "POST",
                 body: newRaffle,
             })
