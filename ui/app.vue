@@ -21,4 +21,9 @@ useHead({
         { rel: "manifest", href: "/site.webmanifest" },
     ],
 })
+
+const auth = useCookie("GCP_IAP_UID")
+if (appConfig.isProduction && auth.value == undefined) {
+    navigateTo("/api/login")
+}
 </script>
