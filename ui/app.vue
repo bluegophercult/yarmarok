@@ -22,10 +22,8 @@ useHead({
     ],
 })
 
-onMounted(() => {
-    const auth = useCookie("GCP_IAP_UID")
-    if (appConfig.isProduction && (!auth.value || auth.value.length === 0)) {
-        window.location.replace("/api/login")
-    }
-})
+const auth = useCookie("GCP_IAP_UID")
+if (appConfig.isProduction && (!auth.value || auth.value.length === 0)) {
+    navigateTo("/api/login", { replace: true, redirectCode: 303 })
+}
 </script>
