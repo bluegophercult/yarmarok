@@ -23,7 +23,7 @@ useHead({
 })
 
 const auth = useCookie("GCP_IAP_UID")
-if (appConfig.isProduction && auth.value == undefined) {
+if (appConfig.isProduction && (!auth.value || auth.value.length === 0)) {
     await navigateTo("/api/login", {
         external: true,
     })
