@@ -22,12 +22,10 @@ useHead({
     ],
 })
 
-const auth = useCookie("GCP_IAP_UID")
-if (appConfig.isProduction && (!auth.value || auth.value.length === 0)) {
-    // await navigateTo("/api/login", {
-    //     external: true,
-    // })
-    console.log(auth.value)
-    console.error("not authorized")
-}
+onMounted(() => {
+    const auth = useCookie("GCP_IAP_UID")
+    if (appConfig.isProduction && (!auth.value || auth.value.length === 0)) {
+        window.location.replace("/api/login")
+    }
+})
 </script>
