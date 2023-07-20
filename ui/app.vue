@@ -24,6 +24,8 @@ useHead({
 
 const auth = useCookie("GCP_IAP_UID")
 if (appConfig.isProduction && auth.value == undefined) {
-    navigateTo("/api/login")
+    await navigateTo("/api/login", {
+        external: true,
+    })
 }
 </script>
