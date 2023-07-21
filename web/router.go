@@ -89,7 +89,7 @@ func (r *Router) login(w http.ResponseWriter, req *http.Request) {
 		MaxAge:   3600,
 		Secure:   false,
 		HttpOnly: false,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 	})
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
