@@ -63,7 +63,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	router.Use(router.organizerMiddleware)
 
 	router.Route(ApiPath, func(r chi.Router) { // "/api"
-		r.HandleFunc("/login", router.login)
+		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
 		r.Route(RafflesPath, func(r chi.Router) { // "/api/raffles"
 			r.Post("/", router.createRaffle)
 			r.Get("/", router.listRaffles)
@@ -79,19 +79,6 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	})
 
 	return router, nil
-}
-
-func (r *Router) login(w http.ResponseWriter, req *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "AUTHORIZED",
-		Value:    "true",
-		Path:     "/",
-		MaxAge:   3600,
-		Secure:   false,
-		HttpOnly: false,
-		SameSite: http.SameSiteNoneMode,
-	})
-	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
 func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
