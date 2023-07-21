@@ -3,8 +3,10 @@
 </template>
 
 <script setup lang="ts">
+const appConfig = useAppConfig()
+
 function logOut() {
-    const auth = useCookie("GCP_IAP_UID")
+    const auth = useCookie(appConfig.authCookieName)
     auth.value = null
     location.reload()
 }

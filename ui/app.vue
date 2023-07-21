@@ -23,8 +23,8 @@ useHead({
 })
 
 if (appConfig.isProduction) {
-    const auth = useCookie("GCP_IAP_UID", { domain: ".yarmarock.com.ua" })
-    if (!auth.value || auth.value.length === 0) {
+    const auth = useCookie(appConfig.authCookieName)
+    if (auth.value !== "true") {
         navigateTo("/api/login", { external: true, replace: true, redirectCode: 303 })
     }
 }
