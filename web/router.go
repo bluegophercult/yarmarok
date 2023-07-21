@@ -87,9 +87,9 @@ func (r *Router) login(w http.ResponseWriter, req *http.Request) {
 		Value:    "true",
 		Path:     "/",
 		MaxAge:   3600,
-		Secure:   true,
+		Secure:   false,
 		HttpOnly: false,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteLaxMode,
 	})
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
