@@ -32,7 +32,7 @@ type OrganizerStorage interface {
 
 // OrganizerService is a service for organizers.
 type OrganizerService interface {
-	InitOrganizerIfNotExists(id string) error
+	CreateOrganizerIfNotExists(id string) error
 	RaffleService(organizerID string) RaffleService
 }
 
@@ -48,8 +48,8 @@ func NewOrganizerManager(os OrganizerStorage) *OrganizerManager {
 	}
 }
 
-// InitOrganizerIfNotExists initializes an organizer if it does not exist.
-func (om *OrganizerManager) InitOrganizerIfNotExists(id string) error {
+// CreateOrganizerIfNotExists creates an organizer if it does not exist.
+func (om *OrganizerManager) CreateOrganizerIfNotExists(id string) error {
 	exists, err := om.organizerStorage.Exists(id)
 	if err != nil {
 		return err

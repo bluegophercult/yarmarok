@@ -21,7 +21,7 @@ func TestPrizeManager(t *testing.T) {
 		t.Run("prize_success", func(t *testing.T) {
 			storageMock.EXPECT().Create(gomock.Any()).Return(nil)
 
-			res, err := manager.Add(&PrizeAddRequest{
+			res, err := manager.Create(&PrizeCreateRequest{
 				Name:        "prize_name_1",
 				TicketCost:  1234,
 				Description: "prize_description_1",
@@ -36,7 +36,7 @@ func TestPrizeManager(t *testing.T) {
 
 			prizeManager := NewPrizeManager(storageMock)
 
-			res, err := prizeManager.Add(&PrizeAddRequest{
+			res, err := prizeManager.Create(&PrizeCreateRequest{
 				Name:        "prize_name_1",
 				TicketCost:  1234,
 				Description: "prize_description_1",

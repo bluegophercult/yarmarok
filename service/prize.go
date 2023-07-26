@@ -19,8 +19,8 @@ type Prize struct {
 	CreatedAt   time.Time
 }
 
-// PrizeAddRequest is a request for creating a new prize.
-type PrizeAddRequest struct {
+// PrizeCreateRequest is a request for creating a new prize.
+type PrizeCreateRequest struct {
 	Name        string
 	TicketCost  int
 	Description string
@@ -36,7 +36,7 @@ type PrizeListResult struct {
 
 // PrizeService is a service for prizes.
 type PrizeService interface {
-	Add(p *PrizeAddRequest) (*InitResult, error)
+	Create(p *PrizeCreateRequest) (*CreateResult, error)
 	Edit(p *PrizeEditRequest) (*Result, error)
 	List() (*PrizeListResult, error)
 }
@@ -60,14 +60,14 @@ func NewPrizeManager(ps PrizeStorage) *PrizeManager {
 	return &PrizeManager{prizeStorage: ps}
 }
 
-// Add creates a new prize
-func (pm *PrizeManager) Add(p *PrizeAddRequest) (*InitResult, error) {
+// Create creates a new prize
+func (pm *PrizeManager) Create(p *PrizeCreateRequest) (*CreateResult, error) {
 	prize := toPrize(p)
 	if err := pm.prizeStorage.Create(prize); err != nil {
 		return nil, err
 	}
 
-	return &InitResult{ID: prize.ID}, nil
+	return &CreateResult{ID: prize.ID}, nil
 }
 
 // Edit updates a Prize TODO: edit after donate representation
@@ -94,7 +94,7 @@ func (pm *PrizeManager) List() (*PrizeListResult, error) {
 	return &PrizeListResult{Prizes: prizes}, nil
 }
 
-func toPrize(p *PrizeAddRequest) *Prize {
+func toPrize(p *PrizeCreateRequest) *Prize {
 	return &Prize{
 		ID:          stringUUID(),
 		Name:        p.Name,

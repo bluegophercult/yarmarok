@@ -26,7 +26,7 @@ func (r *Router) organizerMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		err = r.organizerService.InitOrganizerIfNotExists(organizerID)
+		err = r.organizerService.CreateOrganizerIfNotExists(organizerID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			r.logger.WithError(err).Error("failed to init organizer")

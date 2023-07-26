@@ -45,7 +45,7 @@ func TestRouter(t *testing.T) {
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
-		osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+		osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 		rsMock := mocks.NewMockRaffleService(ctrl)
 		osMock.EXPECT().RaffleService(organizerID).Return(rsMock).Do(func(string) { panic("panic in handler") })
@@ -62,7 +62,7 @@ func TestRouter(t *testing.T) {
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
-		osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+		osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 		writer := httptest.NewRecorder()
 		router.ServeHTTP(writer, req)
@@ -89,12 +89,12 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
-				rsMock.EXPECT().Init(initRequest).Return(&service.InitResult{}, nil)
+				rsMock.EXPECT().Create(initRequest).Return(&service.CreateResult{}, nil)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -116,13 +116,13 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
 
 				mockedErr := assert.AnError
-				rsMock.EXPECT().Init(initRequest).Return(nil, mockedErr)
+				rsMock.EXPECT().Create(initRequest).Return(nil, mockedErr)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -134,7 +134,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -175,7 +175,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -195,7 +195,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -218,7 +218,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -240,7 +240,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -277,7 +277,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -285,8 +285,8 @@ func TestRouter(t *testing.T) {
 				psMock := mocks.NewMockParticipantService(ctrl)
 				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
-				expect := &service.InitResult{ID: "participant_id_1"}
-				psMock.EXPECT().Add(participantInitRequest).Return(expect, nil)
+				expect := &service.CreateResult{ID: "participant_id_1"}
+				psMock.EXPECT().Create(participantInitRequest).Return(expect, nil)
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -308,7 +308,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -316,7 +316,7 @@ func TestRouter(t *testing.T) {
 				psMock := mocks.NewMockParticipantService(ctrl)
 				rsMock.EXPECT().ParticipantService(raffleID).Return(psMock)
 
-				psMock.EXPECT().Add(participantInitRequest).Return(nil, errors.New("test error"))
+				psMock.EXPECT().Create(participantInitRequest).Return(nil, errors.New("test error"))
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
@@ -328,7 +328,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -359,7 +359,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -390,7 +390,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -410,7 +410,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -457,7 +457,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -477,7 +477,7 @@ func TestRouter(t *testing.T) {
 				require.NoError(t, err)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
-				osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 				rsMock := mocks.NewMockRaffleService(ctrl)
 				osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
@@ -511,7 +511,7 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
-		osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil)
+		osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
 
 		stub := newHandlerStub()
 		handler := http.HandlerFunc(stub.ServeHTTP)
@@ -545,7 +545,7 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 		mockedErr := errors.New("mocked error")
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
-		osMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(mockedErr)
+		osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(mockedErr)
 
 		writer := httptest.NewRecorder()
 		router.organizerMiddleware(handler).ServeHTTP(writer, req)
@@ -627,7 +627,7 @@ func TestGeParticipantService(t *testing.T) {
 	rsMock := mocks.NewMockRaffleService(ctrl)
 	psMock := mocks.NewMockParticipantService(ctrl)
 
-	usMock.EXPECT().InitOrganizerIfNotExists(organizerID).Return(nil).AnyTimes()
+	usMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil).AnyTimes()
 	usMock.EXPECT().RaffleService(organizerID).Return(rsMock).AnyTimes()
 
 	router, err := NewRouter(usMock, logger.NewLogger(logger.LevelDebug))

@@ -29,7 +29,7 @@ func TestRaffle(t *testing.T) {
 
 			storageMock.EXPECT().Create(gomock.Any()).Return(mockedErr).Times(1)
 
-			res, err := manager.Init(&req)
+			res, err := manager.Create(&req)
 			assert.Error(t, err)
 			assert.Equal(t, mockedErr, err)
 			assert.Nil(t, res)
@@ -56,7 +56,7 @@ func TestRaffle(t *testing.T) {
 
 			storageMock.EXPECT().Create(mockedRaffle).Return(nil).Times(1)
 
-			res, err := manager.Init(&req)
+			res, err := manager.Create(&req)
 			assert.NoError(t, err)
 			assert.Equal(t, mockedID, res.ID)
 		})

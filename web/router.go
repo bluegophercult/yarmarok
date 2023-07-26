@@ -90,7 +90,7 @@ func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 
 	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newMethodHandler(raffleService.Init, r.logger.Logger)
+	m := newMethodHandler(raffleService.Create, r.logger.Logger)
 
 	m.ServeHTTP(w, req)
 }
@@ -146,7 +146,7 @@ func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newMethodHandler(participantService.Add, r.logger.Logger).ServeHTTP(w, req)
+	newMethodHandler(participantService.Create, r.logger.Logger).ServeHTTP(w, req)
 }
 
 func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
