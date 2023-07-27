@@ -77,6 +77,10 @@ func (pm *ParticipantManager) Edit(p *ParticipantEditRequest) (*Result, error) {
 		return &Result{StatusError}, err
 	}
 
+	participant.Name = p.Name
+	participant.Phone = p.Phone
+	participant.Note = p.Note
+
 	if err := pm.participantStorage.Update(participant); err != nil {
 		return &Result{StatusError}, err
 	}
