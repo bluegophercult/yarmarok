@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	"errors"
 )
 
@@ -18,10 +17,6 @@ type Details map[string]any
 func (e *Error) With(key string, val any) *Error {
 	e.Message[key] = val
 	return e
-}
-
-func (e *Error) MarshalJSON() ([]byte, error) {
-	return json.Marshal(e.Message)
 }
 
 func NewError(err error, code int) *Error {
