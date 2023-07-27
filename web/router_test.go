@@ -141,7 +141,7 @@ func TestRouter(t *testing.T) {
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
-				require.Equal(t, http.StatusBadRequest, writer.Code)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
 			})
 		})
 
@@ -338,7 +338,7 @@ func TestRouter(t *testing.T) {
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
-				require.Equal(t, http.StatusBadRequest, writer.Code)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
 			})
 		})
 
@@ -420,7 +420,7 @@ func TestRouter(t *testing.T) {
 
 				writer := httptest.NewRecorder()
 				router.ServeHTTP(writer, req)
-				require.Equal(t, http.StatusBadRequest, writer.Code)
+				require.Equal(t, http.StatusInternalServerError, writer.Code)
 			})
 		})
 

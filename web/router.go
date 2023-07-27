@@ -90,9 +90,7 @@ func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 
 	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newMethodHandler(raffleService.Create, r.logger.Logger)
-
-	m.ServeHTTP(w, req)
+	NewMethodCreate(raffleService.Create).ServeHTTP(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
@@ -104,9 +102,7 @@ func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 
 	raffleService := r.organizerService.RaffleService(organizerID)
 
-	m := newNoRequestMethodHandler(raffleService.List, r.logger.Logger)
-
-	m.ServeHTTP(w, req)
+	NewMethodList(raffleService.List).ServeHTTP(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
@@ -146,7 +142,7 @@ func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newMethodHandler(participantService.Create, r.logger.Logger).ServeHTTP(w, req)
+	NewMethodCreate(participantService.Create).ServeHTTP(w, req)
 }
 
 func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
@@ -156,7 +152,8 @@ func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newMethodHandler(participantService.Edit, r.logger.Logger).ServeHTTP(w, req)
+	// TODO: replace with NewMethodUpdate when signature is fixed.
+	NewMethodCreate(participantService.Edit).ServeHTTP(w, req)
 }
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
@@ -166,7 +163,7 @@ func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
+	NewMethodList(participantService.List).ServeHTTP(w, req)
 }
 
 func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
