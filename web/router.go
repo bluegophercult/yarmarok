@@ -12,17 +12,6 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
-const (
-	ApiPath          = "/api"
-	RafflesPath      = "/raffles"
-	ParticipantsPath = "/participants"
-
-	raffleIDParam      = "raffle_id"
-	participantIDParam = "participant_id"
-
-	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
-)
-
 // localRun is true if app is build for local run
 var localRun = false
 
