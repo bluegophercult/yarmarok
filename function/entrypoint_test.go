@@ -51,6 +51,8 @@ func TestLoadRouter(t *testing.T) {
 }
 
 func TestEntrypoint(t *testing.T) {
+	testinfra.SkipIfNotIntegrationRun(t)
+
 	t.Run("no_project_id", func(t *testing.T) {
 		req := dummyRequest(t)
 
