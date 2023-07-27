@@ -58,7 +58,6 @@ func (w *Web) Handle(method string, group, pattern string, h Handler, mws ...Mid
 }
 
 func (w *Web) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	w.log.Println(req)
 	w.mux.ServeHTTP(rw, req)
 }
 
