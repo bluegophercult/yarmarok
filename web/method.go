@@ -2,8 +2,7 @@ package web
 
 import (
 	"net/http"
-
-	"github.com/go-chi/chi"
+	"path"
 )
 
 type (
@@ -40,7 +39,7 @@ func (m M1[Req, Resp]) Handle(rw http.ResponseWriter, req *http.Request) error {
 }
 
 func (m M2[Req, Resp]) Handle(rw http.ResponseWriter, req *http.Request) error {
-	id := chi.URLParam(req, "id")
+	id := path.Base(req.URL.String())
 
 	var request Req
 	if err := DecodeBody(req.Body, &request); err != nil {
