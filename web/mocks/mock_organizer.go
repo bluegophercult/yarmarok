@@ -34,18 +34,18 @@ func (m *MockOrganizerService) EXPECT() *MockOrganizerServiceMockRecorder {
 	return m.recorder
 }
 
-// InitOrganizerIfNotExists mocks base method.
-func (m *MockOrganizerService) InitOrganizerIfNotExists(arg0 string) error {
+// CreateOrganizerIfNotExists mocks base method.
+func (m *MockOrganizerService) CreateOrganizerIfNotExists(arg0 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InitOrganizerIfNotExists", arg0)
+	ret := m.ctrl.Call(m, "CreateOrganizerIfNotExists", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// InitOrganizerIfNotExists indicates an expected call of InitOrganizerIfNotExists.
-func (mr *MockOrganizerServiceMockRecorder) InitOrganizerIfNotExists(arg0 interface{}) *gomock.Call {
+// CreateOrganizerIfNotExists indicates an expected call of CreateOrganizerIfNotExists.
+func (mr *MockOrganizerServiceMockRecorder) CreateOrganizerIfNotExists(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitOrganizerIfNotExists", reflect.TypeOf((*MockOrganizerService)(nil).InitOrganizerIfNotExists), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrganizerIfNotExists", reflect.TypeOf((*MockOrganizerService)(nil).CreateOrganizerIfNotExists), arg0)
 }
 
 // RaffleService mocks base method.

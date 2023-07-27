@@ -19,7 +19,7 @@ func TestInitOrganizer(t *testing.T) {
 			osMock.EXPECT().Exists(organizerID).Return(true, nil)
 			om := NewOrganizerManager(osMock)
 
-			err := om.InitOrganizerIfNotExists(organizerID)
+			err := om.CreateOrganizerIfNotExists(organizerID)
 			assert.NoError(t, err)
 		})
 
@@ -29,7 +29,7 @@ func TestInitOrganizer(t *testing.T) {
 			osMock.EXPECT().Create(&Organizer{ID: organizerID}).Return(nil)
 			om := NewOrganizerManager(osMock)
 
-			err := om.InitOrganizerIfNotExists(organizerID)
+			err := om.CreateOrganizerIfNotExists(organizerID)
 			assert.NoError(t, err)
 		})
 
@@ -38,7 +38,7 @@ func TestInitOrganizer(t *testing.T) {
 			osMock.EXPECT().Exists(organizerID).Return(false, assert.AnError)
 			om := NewOrganizerManager(osMock)
 
-			err := om.InitOrganizerIfNotExists(organizerID)
+			err := om.CreateOrganizerIfNotExists(organizerID)
 			assert.Error(t, err)
 		})
 	})

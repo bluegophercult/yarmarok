@@ -40,7 +40,7 @@ func TestLoadRouter(t *testing.T) {
 
 		router.ServeHTTP(recorder, req)
 
-		resp := service.InitResult{}
+		resp := service.CreateResult{}
 
 		assert.Equal(t, http.StatusOK, recorder.Code)
 		assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp), recorder.Body.String())
@@ -74,7 +74,7 @@ func TestEntrypoint(t *testing.T) {
 
 		Entrypoint(recorder, req)
 
-		resp := service.InitResult{}
+		resp := service.CreateResult{}
 
 		assert.Equal(t, http.StatusOK, recorder.Code)
 		assert.NoError(t, json.Unmarshal(recorder.Body.Bytes(), &resp), recorder.Body.String())

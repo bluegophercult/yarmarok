@@ -38,7 +38,7 @@ type Raffle struct {
 
 // RaffleService is a service for raffles.
 type RaffleService interface {
-	Init(*RaffleInitRequest) (*InitResult, error)
+	Create(*RaffleInitRequest) (*CreateResult, error)
 	Get(id string) (*Raffle, error)
 	List() (*RaffleListResponse, error)
 	Export(id string) (*RaffleExportResponse, error)
@@ -67,8 +67,8 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 	}
 }
 
-// Init initializes a raffle.
-func (rm *RaffleManager) Init(raf *RaffleInitRequest) (*InitResult, error) {
+// Create initializes a raffle.
+func (rm *RaffleManager) Create(raf *RaffleInitRequest) (*CreateResult, error) {
 	raffle := Raffle{
 		ID:        stringUUID(),
 		Name:      raf.Name,
@@ -81,7 +81,7 @@ func (rm *RaffleManager) Init(raf *RaffleInitRequest) (*InitResult, error) {
 		return nil, err
 	}
 
-	return &InitResult{
+	return &CreateResult{
 		ID: raffle.ID,
 	}, nil
 }
@@ -150,8 +150,8 @@ type RaffleInitRequest struct {
 	Note string `json:"note"`
 }
 
-// InitResult is a generic result of entity initialization.
-type InitResult struct {
+// CreateResult is a generic result of entity creation.
+type CreateResult struct {
 	ID string `json:"id"`
 }
 

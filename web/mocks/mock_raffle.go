@@ -34,6 +34,21 @@ func (m *MockRaffleService) EXPECT() *MockRaffleServiceMockRecorder {
 	return m.recorder
 }
 
+// Create mocks base method.
+func (m *MockRaffleService) Create(arg0 *service.RaffleInitRequest) (*service.CreateResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", arg0)
+	ret0, _ := ret[0].(*service.CreateResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockRaffleServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRaffleService)(nil).Create), arg0)
+}
+
 // Export mocks base method.
 func (m *MockRaffleService) Export(arg0 string) (*service.RaffleExportResponse, error) {
 	m.ctrl.T.Helper()
@@ -62,21 +77,6 @@ func (m *MockRaffleService) Get(arg0 string) (*service.Raffle, error) {
 func (mr *MockRaffleServiceMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockRaffleService)(nil).Get), arg0)
-}
-
-// Init mocks base method.
-func (m *MockRaffleService) Init(arg0 *service.RaffleInitRequest) (*service.InitResult, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Init", arg0)
-	ret0, _ := ret[0].(*service.InitResult)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Init indicates an expected call of Init.
-func (mr *MockRaffleServiceMockRecorder) Init(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Init", reflect.TypeOf((*MockRaffleService)(nil).Init), arg0)
 }
 
 // List mocks base method.

@@ -34,19 +34,19 @@ func (m *MockParticipantService) EXPECT() *MockParticipantServiceMockRecorder {
 	return m.recorder
 }
 
-// Add mocks base method.
-func (m *MockParticipantService) Add(arg0 *service.ParticipantAddRequest) (*service.InitResult, error) {
+// Create mocks base method.
+func (m *MockParticipantService) Create(arg0 *service.ParticipantAddRequest) (*service.CreateResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Add", arg0)
-	ret0, _ := ret[0].(*service.InitResult)
+	ret := m.ctrl.Call(m, "Create", arg0)
+	ret0, _ := ret[0].(*service.CreateResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Add indicates an expected call of Add.
-func (mr *MockParticipantServiceMockRecorder) Add(arg0 interface{}) *gomock.Call {
+// Create indicates an expected call of Create.
+func (mr *MockParticipantServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockParticipantService)(nil).Add), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockParticipantService)(nil).Create), arg0)
 }
 
 // Edit mocks base method.
