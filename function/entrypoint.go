@@ -35,7 +35,7 @@ func Entrypoint(w http.ResponseWriter, r *http.Request) {
 }
 
 // LoadRouter loads the router.
-func LoadRouter(log *logger.Logger) (*web.Router, error) {
+func LoadRouter(log *logger.Logger) (*web.Web, error) {
 	projectID := os.Getenv(ProjectIDEnvVar)
 	if projectID == "" {
 		return nil, fmt.Errorf("%w: %s is not set", ErrEmptyProjectID, ProjectIDEnvVar)
@@ -50,5 +50,5 @@ func LoadRouter(log *logger.Logger) (*web.Router, error) {
 
 	organizerService := service.NewOrganizerManager(organizerStorage)
 
-	return web.NewRouter(organizerService, log)
+	return web.NewWeb(log, organizerService), nil
 }
