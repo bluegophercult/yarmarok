@@ -2,7 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"runtime/debug"
 	"time"
@@ -43,11 +42,7 @@ func WithErrors(log *logger.Logger) Middleware {
 		return func(rw http.ResponseWriter, req *http.Request) error {
 			if err := h(rw, req); err != nil {
 				log.WithFields(logger.Fields{"error": err})
-				fmt.Print(err)
-				fmt.Print(err)
-				fmt.Print(err)
-				fmt.Print(err)
-				fmt.Print(err)
+
 				if !ErrorIs(err) {
 					err = NewError(err, http.StatusInternalServerError, Fields{"error": ErrUnknownError})
 				}
