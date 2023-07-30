@@ -19,26 +19,31 @@ type Participant struct {
 	CreatedAt time.Time
 }
 
-// ParticipantAddRequest is a request for creating a new participant.
-type ParticipantAddRequest struct {
+// IDResponse is a response by creating a new entity.
+type IDResponse struct {
+	ID string
+}
+
+// ParticipantRequest is a request for creating/updating a participant.
+type ParticipantRequest struct {
 	Name  string
 	Phone string
 	Note  string
 }
 
-// ParticipantEditRequest is a request for updating a participant.
-type ParticipantEditRequest Participant
-
-// ParticipantListResult is a response for listing participants.
-type ParticipantListResult struct {
+// ParticipantListResponse is a response for listing participants.
+type ParticipantListResponse struct {
 	Participants []Participant
 }
 
 // ParticipantService is a service for participants.
+//
+//go:generate mockgen -destination=mocks/participant_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantService
 type ParticipantService interface {
-	Create(p *ParticipantAddRequest) (*CreateResult, error)
-	Edit(p *ParticipantEditRequest) (*Result, error)
-	List() (*ParticipantListResult, error)
+	Create(p *ParticipantRequest) (*CreateResult, error)
+	Edit(id string, p *ParticipantRequest) error
+	Delete(id string) error
+	List() (*ParticipantListResponse, error)
 }
 
 // ParticipantStorage is a storage for participants.
@@ -61,44 +66,45 @@ func NewParticipantManager(ps ParticipantStorage) *ParticipantManager {
 }
 
 // Create creates a new participant.
-func (pm *ParticipantManager) Create(p *ParticipantAddRequest) (*CreateResult, error) {
+func (pm *ParticipantManager) Create(p *ParticipantRequest) (*CreateResult, error) {
 	participant := toParticipant(p)
 	if err := pm.participantStorage.Create(participant); err != nil {
 		return nil, err
 	}
 
-	return &CreateResult{ID: participant.ID}, nil
+	return &CreateResult{participant.ID}, nil
 }
 
 // Edit updates a participant.
-func (pm *ParticipantManager) Edit(p *ParticipantEditRequest) (*Result, error) {
-	participant, err := pm.participantStorage.Get(p.ID)
+func (pm *ParticipantManager) Edit(id string, p *ParticipantRequest) error {
+	participant, err := pm.participantStorage.Get(id)
 	if err != nil {
-		return &Result{StatusError}, err
+		return err
 	}
 
 	participant.Name = p.Name
 	participant.Phone = p.Phone
 	participant.Note = p.Note
 
-	if err := pm.participantStorage.Update(participant); err != nil {
-		return &Result{StatusError}, err
-	}
+	return pm.participantStorage.Update(participant)
+}
 
-	return &Result{StatusSuccess}, nil
+// Delete deletes a participant.
+func (pm *ParticipantManager) Delete(id string) error {
+	return pm.participantStorage.Delete(id)
 }
 
 // List returns all participants.
-func (pm *ParticipantManager) List() (*ParticipantListResult, error) {
+func (pm *ParticipantManager) List() (*ParticipantListResponse, error) {
 	participants, err := pm.participantStorage.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	return &ParticipantListResult{Participants: participants}, nil
+	return &ParticipantListResponse{Participants: participants}, nil
 }
 
-func toParticipant(p *ParticipantAddRequest) *Participant {
+func toParticipant(p *ParticipantRequest) *Participant {
 	return &Participant{
 		ID:        stringUUID(),
 		Name:      p.Name,

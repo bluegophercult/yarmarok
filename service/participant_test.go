@@ -18,7 +18,7 @@ func TestParticipantManagerAdd(t *testing.T) {
 	t.Run("add participant", func(t *testing.T) {
 		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
 
-		_, err := manager.Create(&ParticipantAddRequest{
+		_, err := manager.Create(&ParticipantRequest{
 			Name:  "John Doe",
 			Phone: "1234567890",
 			Note:  "Test participant",
@@ -35,7 +35,7 @@ func TestParticipantManagerAdd(t *testing.T) {
 
 		participantManager := NewParticipantManager(storageMock)
 
-		_, err := participantManager.Create(&ParticipantAddRequest{
+		_, err := participantManager.Create(&ParticipantRequest{
 			Name:  "John Doe",
 			Phone: "1234567890",
 			Note:  "Test participant",

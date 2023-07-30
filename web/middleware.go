@@ -1,9 +1,13 @@
 package web
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
+	"runtime/debug"
 	"time"
 
+	"github.com/kaznasho/yarmarok/service"
 	"github.com/rs/cors"
 
 	"github.com/kaznasho/yarmarok/logger"
@@ -17,102 +21,131 @@ const (
 	defaultOrigin = "https://yarmarock.com.ua"
 )
 
-func (r *Router) organizerMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		organizerID, err := extractOrganizerID(req)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			r.logger.WithError(err).Error("failed to extract organizer id")
-			return
-		}
+var (
+	ErrCreatingOrganizer  = errors.New("creating organizer")
+	ErrRecoveredFromPanic = errors.New("recovered from panic")
+)
 
-		err = r.organizerService.CreateOrganizerIfNotExists(organizerID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			r.logger.WithError(err).Error("failed to init organizer")
-			return
-		}
+type Middleware = func(Handler) Handler
 
-		next.ServeHTTP(w, req)
-	})
+func WrapMiddlewares(h Handler, mws ...Middleware) Handler {
+	for i := len(mws) - 1; i >= 0; i-- {
+		h = mws[i](h)
+	}
+
+	return h
 }
 
-func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		organizerID, _ := extractOrganizerID(req)
+// WithErrors is a middleware that handles errors if they occur during the execution.
+// If the error is not of the type Error, as determined by the ErrorIs function, then a default error is created.
+func WithErrors(log *logger.Logger) Middleware {
+	return func(h Handler) Handler {
+		return func(rw http.ResponseWriter, req *http.Request) error {
+			if err := h(rw, req); err != nil {
+				log.WithFields(logger.Fields{"error": err})
+				fmt.Print(err)
+				fmt.Print(err)
+				fmt.Print(err)
+				fmt.Print(err)
+				fmt.Print(err)
+				if !ErrorIs(err) {
+					err = NewError(err, http.StatusInternalServerError, Fields{"error": ErrUnknownError})
+				}
 
-		start := time.Now()
-		duration := time.Since(start)
-
-		lrw := logger.NewLoggingResponseWriter(w)
-
-		next.ServeHTTP(lrw, req)
-
-		responseMetric := lrw.ResponseMetric()
-
-		r.logger.WithFields(
-			logger.Fields{
-				"uri":          req.RequestURI,
-				"method":       req.Method,
-				"status":       responseMetric.Status,
-				"duration":     duration,
-				"size":         responseMetric.Size,
-				"organizer_id": organizerID,
-			},
-		).Info("request completed")
-	})
-}
-
-func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				r.logger.WithFields(logger.Fields{
-					"uri":    req.RequestURI,
-					"method": req.Method,
-					"error":  err,
-				}).Error("panic recovered")
+				return Respond(rw, err)
 			}
-			w.WriteHeader(http.StatusInternalServerError)
-		}()
 
-		next.ServeHTTP(w, req)
-	})
+			return nil
+		}
+	}
 }
 
-var allowedOrigins = []string{defaultOrigin}
+func WithJSON(h Handler) Handler {
+	return func(rw http.ResponseWriter, req *http.Request) error {
+		rw.Header().Set("Content-Type", "application/json")
 
-func (r *Router) corsMiddleware(next http.Handler) http.Handler {
-	return cors.New(
-		cors.Options{
-			AllowedOrigins: allowedOrigins,
-			AllowedMethods: []string{
-				http.MethodGet,
-				http.MethodPost,
-				http.MethodPut,
-				http.MethodDelete,
-			},
-
-			AllowedHeaders: []string{
-				"Accept",
-				"Authorization",
-				"Content-Type",
-				"X-CSRF-Token",
-				"X-Goog-Authenticated-User-Id",
-			},
-			ExposedHeaders:       []string{},
-			MaxAge:               0,
-			AllowPrivateNetwork:  false,
-			OptionsPassthrough:   false,
-			OptionsSuccessStatus: 0,
-			Debug:                false,
-		},
-	).Handler(next)
+		return h(rw, req)
+	}
 }
 
-func (r *Router) headerMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, req)
-	})
+func WithXLSX(h Handler) Handler {
+	return func(rw http.ResponseWriter, req *http.Request) error {
+		rw.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		return h(rw, req)
+	}
+}
+
+func WithOrganizer(svc service.OrganizerService, log *logger.Logger) Middleware {
+	return func(h Handler) Handler {
+		return func(rw http.ResponseWriter, req *http.Request) error {
+			organizerID, err := extractOrganizerID(req)
+			if err != nil {
+				return NewError(errors.Join(ErrMissingID, err), http.StatusBadRequest)
+			}
+
+			if err = svc.CreateOrganizerIfNotExists(organizerID); err != nil {
+				return NewError(errors.Join(ErrCreatingOrganizer, err), http.StatusInternalServerError)
+			}
+
+			return h(rw, req)
+		}
+	}
+}
+
+func WithLogging(log *logger.Logger) Middleware {
+	return func(h Handler) Handler {
+		return func(rw http.ResponseWriter, req *http.Request) error {
+			start := time.Now()
+
+			defer func() {
+				log.WithFields(logger.Fields{
+					"uri":          req.RequestURI,
+					"method":       req.Method,
+					"status":       rw.Header().Get("Status"),
+					"duration":     time.Since(start),
+					"size":         rw.Header().Get("Content-Length"),
+					"organizer_id": req.Header.Get(GoogleUserIDHeader),
+				}).Info("request completed")
+			}()
+
+			return h(rw, req)
+		}
+	}
+}
+
+func WithRecover(log *logger.Logger) Middleware {
+	return func(h Handler) Handler {
+		return func(rw http.ResponseWriter, req *http.Request) (err error) {
+			defer func() {
+				if rec := recover(); rec != nil {
+					log.WithFields(logger.Fields{
+						"uri":    req.RequestURI,
+						"method": req.Method,
+						"rec":    rec,
+						"trace":  string(debug.Stack()),
+					}).Error(ErrRecoveredFromPanic)
+
+					err = NewError(ErrRecoveredFromPanic, http.StatusInternalServerError, Fields{"error": ErrUnknownError})
+				}
+			}()
+
+			return h(rw, req)
+		}
+	}
+}
+
+func WithCORS(h Handler) Handler {
+	return func(rw http.ResponseWriter, req *http.Request) error {
+		c := cors.New(cors.Options{
+			AllowedOrigins:   []string{defaultOrigin},
+			AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-Goog-Authenticated-User-Id"},
+			ExposedHeaders:   []string{},
+			AllowCredentials: true,
+			MaxAge:           0,
+		})
+		c.HandlerFunc(rw, req)
+
+		return h(rw, req)
+	}
 }

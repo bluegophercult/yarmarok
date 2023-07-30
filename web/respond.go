@@ -3,11 +3,15 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 )
 
+var ErrEmptyBody = errors.New("empty body")
+
+// Response is possibly YAGNI.
 type Response struct {
 	Data    any    `json:"data,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -28,7 +32,7 @@ func (r *Response) StatusCode() int {
 
 // Respond responds with converted data to the client.
 func Respond(rw http.ResponseWriter, data any) error {
-	val, ok := data.(interface{ StatusCode() int })
+	val, ok := data.(interface{ StatusCode() int }) // Error and Response will implement this interface.
 	if !ok || data == nil {
 		rw.WriteHeader(http.StatusNoContent)
 		return nil
@@ -48,8 +52,13 @@ func Respond(rw http.ResponseWriter, data any) error {
 	return nil
 }
 
+// DecodeBody reads data from a body and converts it to any.
 func DecodeBody(body io.Reader, data any) error {
 	if err := json.NewDecoder(body).Decode(data); err != nil {
+		if errors.Is(err, io.EOF) {
+			return NewError(ErrEmptyBody, http.StatusBadRequest, Fields{"error": ErrEmptyBody})
+		}
+
 		return fmt.Errorf("decoding body: %w", err)
 	}
 

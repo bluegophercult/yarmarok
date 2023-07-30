@@ -37,6 +37,8 @@ type Raffle struct {
 }
 
 // RaffleService is a service for raffles.
+//
+//go:generate mockgen -destination=mocks/raffle_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service RaffleService
 type RaffleService interface {
 	Create(*RaffleInitRequest) (*CreateResult, error)
 	Get(id string) (*Raffle, error)
