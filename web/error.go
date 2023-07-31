@@ -4,8 +4,12 @@ import (
 	"errors"
 )
 
-// ErrUnknownError is returned when something is not ok.
-var ErrUnknownError = errors.New("unknown error")
+var (
+	// ErrUnknownError is returned when something is not ok.
+	ErrUnknownError = errors.New("unknown error")
+	// ErrUnsupportedField is returned when a field is not supported.
+	ErrUnsupportedField = errors.New("unsupported field")
+)
 
 var _ error = (*Error)(nil)
 
@@ -33,7 +37,7 @@ func (e *Error) StatusCode() int {
 	return e.Code
 }
 
-func NewError(err error, code int, fields ...any) error {
+func NewError(err error, code int, fields ...any) *Error {
 	msg := make(Message)
 	log := make(Log)
 
@@ -43,6 +47,8 @@ func NewError(err error, code int, fields ...any) error {
 			msg = v
 		case Log:
 			log = v
+		default:
+			err = errors.Join(err, ErrUnsupportedField)
 		}
 	}
 
