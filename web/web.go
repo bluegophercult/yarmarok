@@ -22,16 +22,10 @@ type Web struct {
 }
 
 // NewWeb creates a new Web instance.
-func NewWeb(log *logger.Logger, svc service.OrganizerService) *Web {
+func NewWeb(log *logger.Logger, svc service.OrganizerService, mws ...Middleware) *Web {
 	return &Web{
 		mux: chi.NewRouter(),
-		mws: []Middleware{
-			WithLogging(log),
-			WithCORS,
-			WithErrors(log),
-			WithJSON,
-			WithRecover,
-		},
+		mws: []Middleware{WithRecover, WithLogging(log), WithErrors(log), WithCORS, WithJSON},
 		log: log.WithFields(logger.Fields{"component": "web", "trace_id": uuid.New().String()}),
 		svc: svc,
 	}

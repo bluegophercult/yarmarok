@@ -1,9 +1,12 @@
 package web
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"sync"
 	"testing"
 
@@ -12,6 +15,50 @@ import (
 	"github.com/kaznasho/yarmarok/web/mocks"
 	"github.com/stretchr/testify/require"
 )
+
+func TestChainMiddlewares(t *testing.T) {
+	const mwNum = 10
+
+	var (
+		key  = new(any)
+		want string
+	)
+
+	mw := func(str string) Middleware {
+		return func(next Handler) Handler {
+			return func(rw http.ResponseWriter, req *http.Request) error {
+				val, ok := req.Context().Value(key).(string)
+				require.True(t, ok)
+				val += str
+				ctx := context.WithValue(req.Context(), key, val)
+				return next(rw, req.WithContext(ctx))
+			}
+		}
+	}
+
+	mws := make([]Middleware, mwNum)
+
+	for i := 0; i < mwNum; i++ {
+		str := strconv.Itoa(i)
+		mws[i] = mw(str)
+		want += str
+	}
+
+	h := func(rw http.ResponseWriter, req *http.Request) error {
+		_, err := rw.Write([]byte(fmt.Sprint(req.Context().Value(key))))
+		require.NoError(t, err)
+		return nil
+	}
+
+	h = WrapMiddlewares(h, mws...)
+
+	rw := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	ctx := context.WithValue(req.Context(), key, "")
+	err := h(rw, req.WithContext(ctx))
+	require.NoError(t, err)
+	require.Equal(t, want, rw.Body.String())
+}
 
 func TestWithErrors(t *testing.T) {
 	ctrl := gomock.NewController(t)
