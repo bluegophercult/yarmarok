@@ -27,9 +27,10 @@ func WrapMiddlewares(h Handler, mws ...Middleware) Handler {
 	return h
 }
 
-// WithErrors is a middleware that handles errors if they occur during the execution.
-// If the error is not of the type Error, as determined by the ErrorAs function, then a default error is created.
-// Log and Message data will be logged or sent to a client respectively.
+// WithErrors middleware in the web package handles errors during HTTP handler execution.
+// It checks if an error is of type Error, and if not, creates a default error.
+// The error and its associated Log fields are then logged.
+// Finally, the error is passed to the Respond function to render the error to the client with Message if there is any.
 func WithErrors(log *logger.Logger) Middleware {
 	return func(h Handler) Handler {
 		return func(rw http.ResponseWriter, req *http.Request) error {
