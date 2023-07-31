@@ -103,24 +103,21 @@ func WithLogging(log *logger.Logger) Middleware {
 	}
 }
 
-func WithRecover(log *logger.Logger) Middleware {
-	return func(h Handler) Handler {
-		return func(rw http.ResponseWriter, req *http.Request) (err error) {
-			defer func() {
-				if rec := recover(); rec != nil {
-					log.WithFields(logger.Fields{
+func WithRecover(h Handler) Handler {
+	return func(rw http.ResponseWriter, req *http.Request) (err error) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				err = NewError(ErrRecoveredFromPanic, http.StatusInternalServerError,
+					Log{
 						"uri":    req.RequestURI,
 						"method": req.Method,
 						"rec":    rec,
 						"trace":  string(debug.Stack()),
-					}).Error(ErrRecoveredFromPanic)
+					})
+			}
+		}()
 
-					err = NewError(ErrRecoveredFromPanic, http.StatusInternalServerError, Fields{"error": ErrUnknownError})
-				}
-			}()
-
-			return h(rw, req)
-		}
+		return h(rw, req)
 	}
 }
 

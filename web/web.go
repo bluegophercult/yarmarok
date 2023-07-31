@@ -25,7 +25,13 @@ type Web struct {
 func NewWeb(log *logger.Logger, svc service.OrganizerService) *Web {
 	return &Web{
 		mux: chi.NewRouter(),
-		mws: []Middleware{ /*Middlewares list*/ },
+		mws: []Middleware{
+			WithLogging(log),
+			WithCORS,
+			WithErrors(log),
+			WithJSON,
+			WithRecover,
+		},
 		log: log.WithFields(logger.Fields{"component": "web", "trace_id": uuid.New().String()}),
 		svc: svc,
 	}

@@ -182,8 +182,6 @@ func TestWithRecover(t *testing.T) {
 	osMock := mocks.NewMockOrganizerService(ctrl)
 	organizerID := "organizer_id_1"
 
-	log := logger.NewNoOpLogger()
-
 	web := NewWeb(logger.NewNoOpLogger(), osMock)
 	require.NotNil(t, web)
 
@@ -195,7 +193,7 @@ func TestWithRecover(t *testing.T) {
 		h := func(rw http.ResponseWriter, r *http.Request) error { panic("test panic") }
 		rw := httptest.NewRecorder()
 
-		err = WithRecover(log)(h)(rw, req)
+		err = WithRecover(h)(rw, req)
 		errweb, ok := ErrorAs(err)
 		require.True(t, ok)
 		require.ErrorIs(t, errweb.Value, ErrRecoveredFromPanic)
@@ -210,7 +208,7 @@ func TestWithRecover(t *testing.T) {
 		h := func(rw http.ResponseWriter, r *http.Request) error { return nil }
 		rw := httptest.NewRecorder()
 
-		err = WithRecover(log)(h)(rw, req)
+		err = WithRecover(h)(rw, req)
 		require.Nil(t, err)
 		require.Equal(t, http.StatusOK, rw.Code)
 	})
