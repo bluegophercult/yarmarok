@@ -15,15 +15,15 @@ const (
 	StatusError = "error"
 )
 
-// stringUUID is a plumbing function for generating UUIDs.
+// StringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
-var stringUUID = func() string {
+var StringUUID = func() string {
 	return uuid.New().String()
 }
 
-// timeNow is a plumbing function for getting the current time.
+// TimeNow is a plumbing function for getting the current time.
 // It is overridden in tests.
-var timeNow = func() time.Time {
+var TimeNow = func() time.Time {
 	return time.Now()
 }
 
@@ -37,6 +37,8 @@ type Raffle struct {
 }
 
 // RaffleService is a service for raffles.
+//
+//go:generate mockgen -destination=../mocks/raffle_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service RaffleService
 type RaffleService interface {
 	Create(*RaffleInitRequest) (*CreateResult, error)
 	Get(id string) (*Raffle, error)
@@ -47,6 +49,8 @@ type RaffleService interface {
 }
 
 // RaffleStorage is a storage for raffles.
+//
+//go:generate mockgen -destination=../mocks/raffle_storage_mock.go -package=mocks github.com/kaznasho/yarmarok/service RaffleStorage
 type RaffleStorage interface {
 	Create(*Raffle) error
 	Get(id string) (*Raffle, error)
@@ -70,10 +74,10 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 // Create initializes a raffle.
 func (rm *RaffleManager) Create(raf *RaffleInitRequest) (*CreateResult, error) {
 	raffle := Raffle{
-		ID:        stringUUID(),
+		ID:        StringUUID(),
 		Name:      raf.Name,
 		Note:      raf.Note,
-		CreatedAt: timeNow(),
+		CreatedAt: TimeNow(),
 	}
 
 	err := rm.raffleStorage.Create(&raffle)
@@ -169,4 +173,12 @@ type RaffleListResponse struct {
 type RaffleExportResponse struct {
 	FileName string `json:"fileName"`
 	Content  []byte `json:"content"`
+}
+
+// OK validates UUID.
+func (cr *CreateResult) OK() error {
+	if _, err := uuid.Parse(cr.ID); err != nil {
+		return fmt.Errorf("invalid id: %w", err)
+	}
+	return nil
 }

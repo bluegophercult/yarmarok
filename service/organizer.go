@@ -6,17 +6,13 @@ import (
 )
 
 var (
-	// ErrOrganizerAlreadyExists is returned when an organizer already exists.
-	ErrOrganizerAlreadyExists = errors.New("organizer already exists")
-
-	// ErrRaffleAlreadyExists is returned when a raffle already exists.
-	ErrRaffleAlreadyExists = errors.New("raffle already exists")
-
-	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	// ErrAlreadyExists is returned when an item already exists.
 	ErrAlreadyExists = errors.New("item already exists")
-	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	// ErrNotFound is returned when an item already exists.
 	ErrNotFound = errors.New("item not found")
 )
+
+var _ OrganizerService = (*OrganizerManager)(nil)
 
 // Organizer represents an organizer of the application.
 type Organizer struct {
@@ -24,6 +20,8 @@ type Organizer struct {
 }
 
 // OrganizerStorage is a storage for organizers.
+//
+//go:generate mockgen -destination=../mocks/organizer_storage_mock.go -package=mocks github.com/kaznasho/yarmarok/service OrganizerStorage
 type OrganizerStorage interface {
 	Create(*Organizer) error
 	Exists(id string) (bool, error)
@@ -31,6 +29,8 @@ type OrganizerStorage interface {
 }
 
 // OrganizerService is a service for organizers.
+//
+//go:generate mockgen -destination=../mocks/organizer_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service OrganizerService
 type OrganizerService interface {
 	CreateOrganizerIfNotExists(id string) error
 	RaffleService(organizerID string) RaffleService
