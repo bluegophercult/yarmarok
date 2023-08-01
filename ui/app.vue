@@ -2,7 +2,8 @@
     <div class="grid gap-2 p-4">
         <div class="flex gap-2 justify-between">
             <Raffles class="flex-grow"/>
-            <LogOut/>
+            <!-- TODO: Add if there will be a way to log out -->
+            <!-- <LogOut/> -->
         </div>
         <Prizes/>
     </div>
@@ -21,11 +22,4 @@ useHead({
         { rel: "manifest", href: "/site.webmanifest" },
     ],
 })
-
-if (appConfig.isProduction) {
-    const auth = useCookie(appConfig.authCookieName)
-    if (auth.value !== "true") {
-        navigateTo("/api/login", { external: true, replace: true, redirectCode: 303 })
-    }
-}
 </script>
