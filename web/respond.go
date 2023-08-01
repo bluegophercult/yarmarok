@@ -10,10 +10,14 @@ import (
 
 // Respond responds with converted data to the client with the given status code.
 func Respond(rw http.ResponseWriter, data any) error {
-	val, ok := data.(interface{ StatusCode() int })
-	if !ok || data == nil {
+	if data == nil {
 		rw.WriteHeader(http.StatusNoContent)
 		return nil
+	}
+
+	code := http.StatusOK
+	if val, ok := data.(interface{ StatusCode() int }); ok && val.StatusCode() != 0 {
+		code = val.StatusCode()
 	}
 
 	var buf bytes.Buffer
@@ -21,7 +25,7 @@ func Respond(rw http.ResponseWriter, data any) error {
 		return fmt.Errorf("encoding to buffer: %w", err)
 	}
 
-	rw.WriteHeader(val.StatusCode())
+	rw.WriteHeader(code)
 
 	if _, err := buf.WriteTo(rw); err != nil {
 		return fmt.Errorf("writing response: %w", err)

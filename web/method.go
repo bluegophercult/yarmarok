@@ -40,7 +40,7 @@ func (m List[O]) Handle(rw http.ResponseWriter, _ *http.Request) error {
 		return err
 	}
 
-	return EncodeBody(rw, resp)
+	return Respond(rw, resp)
 }
 
 // Handle handles the HTTP request for the Create operation.
@@ -55,7 +55,7 @@ func (m Create[I, O]) Handle(rw http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
-	return EncodeBody(rw, out)
+	return Respond(rw, out)
 }
 
 // Handle handles the HTTP request for the Update operation.
