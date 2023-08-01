@@ -119,7 +119,7 @@ func (sb *StorageBase[Item]) Delete(id string) error {
 	}
 
 	if !exists {
-		return service.ErrAlreadyExists
+		return service.ErrNotFound
 	}
 
 	_, err = sb.collectionReference.Doc(id).Delete(context.Background())
