@@ -12,6 +12,13 @@ import (
 	"github.com/kaznasho/yarmarok/logger"
 )
 
+const (
+	// GoogleUserIDHeader is the header that contains the organizer id set by google identity aware proxy.
+	GoogleUserIDHeader = "X-Goog-Authenticated-User-Id"
+
+	defaultOrigin = "https://yarmarock.com.ua"
+)
+
 var (
 	ErrCreatingOrganizer  = errors.New("creating organizer")
 	ErrRecoveredFromPanic = errors.New("recovered from panic")
@@ -37,10 +44,10 @@ func WithErrors(log *logger.Logger) Middleware {
 			if err := h(rw, req); err != nil {
 				errweb, ok := ErrorAs(err)
 				if !ok {
-					errweb = NewError(err, http.StatusInternalServerError, Message(logger.Fields{"error": ErrUnknownError}))
+					errweb = NewError(err, http.StatusInternalServerError, Message{"error": ErrUnknownError})
 				}
 
-				log.WithError(err).WithFields(logger.Fields(errweb.Log))
+				log.WithError(err).WithFields(logger.Fields(errweb.log))
 
 				return Respond(rw, errweb)
 			}

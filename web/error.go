@@ -2,6 +2,8 @@ package web
 
 import (
 	"errors"
+	"net/http"
+	"strings"
 )
 
 var (
@@ -17,10 +19,10 @@ var _ error = (*Error)(nil)
 // that will be logged by WithErrors middleware
 // and could return to as Message with Fields.
 type Error struct {
-	Value   error   `json:"-"`
-	Code    int     `json:"-"`
-	Log     Log     `json:"-"`
-	Message Message `json:"message,omitempty"`
+	value   error
+	code    int
+	log     Log
+	Message Message
 }
 
 type (
@@ -30,11 +32,11 @@ type (
 )
 
 func (e *Error) Error() string {
-	return e.Value.Error()
+	return e.value.Error()
 }
 
 func (e *Error) StatusCode() int {
-	return e.Code
+	return e.code
 }
 
 func NewError(err error, code int, fields ...any) *Error {
@@ -53,16 +55,11 @@ func NewError(err error, code int, fields ...any) *Error {
 	}
 
 	return &Error{
-		Value:   err,
-		Code:    code,
-		Log:     log,
+		value:   err,
+		code:    code,
+		log:     log,
 		Message: msg,
 	}
-}
-
-func ErrorIs(err error) bool {
-	_, ok := errorAs[*Error](err)
-	return ok
 }
 
 func ErrorAs(err error) (*Error, bool) {
@@ -71,4 +68,8 @@ func ErrorAs(err error) (*Error, bool) {
 
 func errorAs[E error](err error) (errv E, ok bool) {
 	return errv, errors.As(err, &errv)
+}
+
+func statusText(code int) string {
+	return strings.ToLower(http.StatusText(code))
 }

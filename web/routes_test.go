@@ -8,15 +8,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/golang/mock/gomock"
 	"github.com/kaznasho/yarmarok/logger"
+	"github.com/kaznasho/yarmarok/mocks"
 	"github.com/kaznasho/yarmarok/service"
-	"github.com/kaznasho/yarmarok/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,6 +24,7 @@ func TestRoutes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	osMock := mocks.NewMockOrganizerService(ctrl)
+
 	organizerID := "organizer_id_1"
 
 	log := logger.NewLogger(logger.LevelDebug)
@@ -311,13 +311,13 @@ func TestRoutes(t *testing.T) {
 					Phone: "1234567890",
 				}
 
-				encoded, err := json.Marshal(participantEditRequest)
-				require.NoError(t, err)
+				encoded, value := json.Marshal(participantEditRequest)
+				require.NoError(t, value)
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin(http.MethodPut, joinPath(participantPath, participantID), body)
-				require.NoError(t, err)
+				req, value := newRequestWithOrigin(http.MethodPut, joinPath(participantPath, participantID), body)
+				require.NoError(t, value)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
@@ -342,13 +342,13 @@ func TestRoutes(t *testing.T) {
 					Phone: "1234567890",
 				}
 
-				encoded, err := json.Marshal(participantEditRequest)
-				require.NoError(t, err)
+				encoded, value := json.Marshal(participantEditRequest)
+				require.NoError(t, value)
 
 				body := bytes.NewReader(encoded)
 
-				req, err := newRequestWithOrigin(http.MethodPut, joinPath(participantPath, participantID), body)
-				require.NoError(t, err)
+				req, value := newRequestWithOrigin(http.MethodPut, joinPath(participantPath, participantID), body)
+				require.NoError(t, value)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
@@ -388,7 +388,7 @@ func TestRoutes(t *testing.T) {
 		t.Run("list_participants", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
 				dummyTime := time.Now().UTC()
-				expected := &service.ParticipantListResponse{
+				expected := &service.ParticipantListResult{
 					Participants: []service.Participant{
 						{
 							ID:        "participant_id_1",
@@ -414,8 +414,8 @@ func TestRoutes(t *testing.T) {
 					},
 				}
 
-				req, err := newRequestWithOrigin(http.MethodGet, participantPath, emptyBody())
-				require.NoError(t, err)
+				req, value := newRequestWithOrigin(http.MethodGet, participantPath, emptyBody())
+				require.NoError(t, value)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
@@ -434,8 +434,8 @@ func TestRoutes(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := newRequestWithOrigin(http.MethodGet, participantPath, nil)
-				require.NoError(t, err)
+				req, value := newRequestWithOrigin(http.MethodGet, participantPath, nil)
+				require.NoError(t, value)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
@@ -456,8 +456,8 @@ func TestRoutes(t *testing.T) {
 
 		t.Run("delete_participant", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
-				req, err := newRequestWithOrigin(http.MethodDelete, joinPath(participantPath, participantID), nil)
-				require.NoError(t, err)
+				req, value := newRequestWithOrigin(http.MethodDelete, joinPath(participantPath, participantID), nil)
+				require.NoError(t, value)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
@@ -476,8 +476,8 @@ func TestRoutes(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				req, err := newRequestWithOrigin(http.MethodDelete, joinPath(participantPath, participantID), nil)
-				require.NoError(t, err)
+				req, value := newRequestWithOrigin(http.MethodDelete, joinPath(participantPath, participantID), nil)
+				require.NoError(t, value)
 
 				req.Header.Set(GoogleUserIDHeader, organizerID)
 				osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
@@ -495,7 +495,6 @@ func TestRoutes(t *testing.T) {
 				require.Equal(t, http.StatusInternalServerError, rw.Code)
 			})
 		})
-
 	})
 }
 
@@ -551,7 +550,7 @@ func TestGeParticipantService(t *testing.T) {
 
 		e, ok := ErrorAs(err)
 		require.True(t, ok)
-		require.ErrorIs(t, e.Value, ErrMissingID)
+		require.ErrorIs(t, e.value, ErrMissingID)
 	})
 }
 
@@ -576,35 +575,6 @@ func TestJoinPath(t *testing.T) {
 
 func joinPath(args ...string) string {
 	return path.Clean("/" + path.Join(args...))
-}
-
-type HandlerStub struct {
-	err    error
-	called bool
-	once   sync.Once
-}
-
-func (h *HandlerStub) ServeHTTP(_ http.ResponseWriter, _ *http.Request) error {
-	h.once.Do(func() {
-		h.called = true
-	})
-
-	return h.err
-}
-
-func (h *HandlerStub) Called() bool {
-	return h.called
-}
-
-func (h *HandlerStub) WithError(err error) {
-	h.err = err
-}
-
-func newHandlerStub() *HandlerStub {
-	return &HandlerStub{
-		once:   sync.Once{},
-		called: false,
-	}
 }
 
 func emptyBody() io.Reader {

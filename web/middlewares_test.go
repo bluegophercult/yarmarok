@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/kaznasho/yarmarok/logger"
-	"github.com/kaznasho/yarmarok/web/mocks"
+	"github.com/kaznasho/yarmarok/mocks"
 	"github.com/stretchr/testify/require"
 )
 
@@ -243,7 +243,7 @@ func TestWithRecover(t *testing.T) {
 		err = WithRecover(h)(rw, req)
 		errweb, ok := ErrorAs(err)
 		require.True(t, ok)
-		require.ErrorIs(t, errweb.Value, ErrRecoveredFromPanic)
+		require.ErrorIs(t, errweb.value, ErrRecoveredFromPanic)
 		require.Equal(t, http.StatusInternalServerError, errweb.StatusCode())
 	})
 

@@ -51,11 +51,11 @@ func TestNewError(t *testing.T) {
 			require.Equal(t, tc.code, err.StatusCode(), "Status codes do not match")
 
 			require.EqualValues(t, tc.msg, err.Message, "Client messages do not match")
-			require.EqualValues(t, tc.log, err.Log, "Log messages do not match")
+			require.EqualValues(t, tc.log, err.log, "Log messages do not match")
 
 			if tc.extra != nil {
 				err := NewError(tc.err, tc.code, tc.extra)
-				require.ErrorIs(t, err.Value, ErrUnsupportedField, "Expected Unsupported field error")
+				require.ErrorIs(t, err.value, ErrUnsupportedField, "Expected Unsupported field error")
 			}
 		})
 	}
