@@ -82,7 +82,7 @@ func (pm *ParticipantManager) Edit(id string, p *ParticipantRequest) error {
 
 // Delete deletes a participant.
 func (pm *ParticipantManager) Delete(id string) error {
-	return pm.Delete(id)
+	return pm.participantStorage.Delete(id)
 }
 
 // List returns all participants.

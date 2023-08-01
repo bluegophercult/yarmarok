@@ -71,6 +71,29 @@ func TestParticipantManagerEdit(t *testing.T) {
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 }
+func TestParticipantManagerDelete(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	storageMock := NewMockParticipantStorage(ctrl)
+	manager := NewParticipantManager(storageMock)
+
+	id := "participant_id"
+
+	t.Run("delete participant", func(t *testing.T) {
+		storageMock.EXPECT().Get(gomock.Any()).Return(&Participant{}, nil)
+		storageMock.EXPECT().Delete(gomock.Any()).Return(nil)
+
+		err := manager.Delete(id)
+		assert.NoError(t, err)
+	})
+
+	t.Run("participant not found", func(t *testing.T) {
+		storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrNotFound)
+
+		err := manager.Delete(id)
+		assert.ErrorIs(t, err, ErrNotFound)
+	})
+}
 
 func TestParticipantManagerList(t *testing.T) {
 	ctrl := gomock.NewController(t)
