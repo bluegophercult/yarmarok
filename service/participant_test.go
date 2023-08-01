@@ -18,7 +18,7 @@ func TestParticipantManagerAdd(t *testing.T) {
 	t.Run("add participant", func(t *testing.T) {
 		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
 
-		_, err := manager.Create(&ParticipantAddRequest{
+		_, err := manager.Create(&ParticipantRequest{
 			Name:  "John Doe",
 			Phone: "1234567890",
 			Note:  "Test participant",
@@ -31,17 +31,17 @@ func TestParticipantManagerAdd(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		storageMock.EXPECT().Create(gomock.Any()).Return(ErrParticipantAlreadyExists)
+		storageMock.EXPECT().Create(gomock.Any()).Return(ErrAlreadyExists)
 
 		participantManager := NewParticipantManager(storageMock)
 
-		_, err := participantManager.Create(&ParticipantAddRequest{
+		_, err := participantManager.Create(&ParticipantRequest{
 			Name:  "John Doe",
 			Phone: "1234567890",
 			Note:  "Test participant",
 		})
 
-		assert.ErrorIs(t, err, ErrParticipantAlreadyExists)
+		assert.ErrorIs(t, err, ErrAlreadyExists)
 	})
 }
 
@@ -51,23 +51,24 @@ func TestParticipantManagerEdit(t *testing.T) {
 	storageMock := NewMockParticipantStorage(ctrl)
 	manager := NewParticipantManager(storageMock)
 
+	id := "participant_id"
+	p := &ParticipantRequest{"test-name", "1234567890", "test-note"}
+
 	t.Run("edit participant", func(t *testing.T) {
 		storageMock.EXPECT().Get(gomock.Any()).Return(&Participant{}, nil)
 		storageMock.EXPECT().Update(gomock.Any()).Return(nil)
 
-		_, err := manager.Edit(&ParticipantEditRequest{ID: "test-id"})
+		err := manager.Edit(id, p)
 
 		assert.NoError(t, err)
 	})
 
 	t.Run("participant not found", func(t *testing.T) {
-		storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrParticipantNotFound)
+		storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrNotFound)
 
-		_, err := manager.Edit(&ParticipantEditRequest{
-			ID: "test-id",
-		})
+		err := manager.Edit(id, p)
 
-		assert.ErrorIs(t, err, ErrParticipantNotFound)
+		assert.ErrorIs(t, err, ErrNotFound)
 	})
 }
 
