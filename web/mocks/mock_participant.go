@@ -35,7 +35,7 @@ func (m *MockParticipantService) EXPECT() *MockParticipantServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockParticipantService) Create(arg0 *service.ParticipantAddRequest) (*service.CreateResult, error) {
+func (m *MockParticipantService) Create(arg0 *service.ParticipantRequest) (*service.CreateResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(*service.CreateResult)

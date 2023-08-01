@@ -5,31 +5,19 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-chi/chi"
 	"github.com/kaznasho/yarmarok/service"
 )
 
 const (
-	ApiPath                  = "/api"
-	RafflesPath              = "/raffles"
-	ParticipantsPath         = "/participants"
-	raffleIDParam            = "raffle_id"
-	participantIDParam       = "participant_id"
-	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
+	/*	ApiPath                  = "/api"
+		RafflesPath              = "/raffles"
+		ParticipantsPath         = "/participants"
+		raffleIDParam            = "raffle_id"
+		participantIDParam       = "participant_id"
+		raffleIDPlaceholder      = "/{" + raffleIDParam + "}" */
 	participantIDPlaceholder = "/{" + participantIDParam + "}"
 	rafflesGroup             = ApiPath + RafflesPath
 	participantsGroup        = rafflesGroup + raffleIDPlaceholder + ParticipantsPath
-)
-
-// localRun is true if app is build for local run
-var localRun = false
-
-var (
-	// ErrAmbiguousOrganizerIDHeader is returned when the organizer id header is not set or is ambiguous.
-	ErrAmbiguousOrganizerIDHeader = errors.New("ambiguous organizer id format")
-
-	// ErrMissingID is returned when id is missing.
-	ErrMissingID = errors.New("missing id")
 )
 
 func (w *Web) Routes() {
@@ -151,35 +139,4 @@ func (w *Web) getRaffleService(req *http.Request) (service.RaffleService, error)
 	}
 
 	return w.svc.RaffleService(organizerID), nil
-}
-
-func extractOrganizerID(r *http.Request) (id string, err error) {
-	defer func() {
-		if localRun && err != nil {
-			err = nil
-			id = "dummy_test_user"
-		}
-	}()
-
-	ids := r.Header.Values(GoogleUserIDHeader)
-
-	if len(ids) != 1 {
-		return "", NewError(ErrAmbiguousOrganizerIDHeader, http.StatusBadRequest)
-	}
-
-	id = ids[0]
-	if id == "" {
-		return "", NewError(ErrAmbiguousOrganizerIDHeader, http.StatusBadRequest)
-	}
-
-	return id, nil
-}
-
-func extractParam(req *http.Request, param string) (string, error) {
-	val := chi.URLParam(req, param)
-	if param == "" {
-		return "", NewError(fmt.Errorf("missing param: %s", param), http.StatusBadRequest)
-	}
-
-	return val, nil
 }

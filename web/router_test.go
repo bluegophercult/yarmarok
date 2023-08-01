@@ -263,7 +263,7 @@ func TestRouter(t *testing.T) {
 
 		t.Run("create_participant", func(t *testing.T) {
 			t.Run("success", func(t *testing.T) {
-				participantInitRequest := &service.ParticipantAddRequest{
+				participantInitRequest := &service.ParticipantRequest{
 					Name: "participant_1",
 					Note: "note_1",
 				}
@@ -294,7 +294,7 @@ func TestRouter(t *testing.T) {
 			})
 
 			t.Run("error", func(t *testing.T) {
-				participantInitRequest := &service.ParticipantAddRequest{
+				participantInitRequest := &service.ParticipantRequest{
 					Name: "participant_1",
 					Note: "note_1",
 				}
