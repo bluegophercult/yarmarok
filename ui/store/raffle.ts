@@ -12,6 +12,13 @@ export const useRaffleStore = defineStore({
                 raffles: Raffles
             }>("/api/raffles")
             if (error.value) {
+                if (error.value.statusCode && error.value.response && error.value.statusCode === 302) {
+                    let header = error.value?.response.headers.get("x-goog-iap-generated-response")
+                    if (header && header === "true") {
+                        navigateTo("/api/login", { external: true, replace: true, redirectCode: 302 })
+                        return
+                    }
+                }
                 throw error.value
             }
 
