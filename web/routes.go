@@ -10,18 +10,25 @@ import (
 )
 
 const (
-	ApiPath                  = "/api"
-	RafflesPath              = "/raffles"
-	ParticipantsPath         = "/participants"
-	PrizePath                = "/prizes"
-	raffleIDParam            = "raffle_id"
-	participantIDParam       = "participant_id"
+	ApiPath          = "/api"
+	RafflesPath      = "/raffles"
+	ParticipantsPath = "/participants"
+	PrizePath        = "/prizes"
+)
+const (
+	raffleIDParam      = "raffle_id"
+	participantIDParam = "participant_id"
+	prizeIDParam       = "prize_id"
+)
+const (
 	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
 	participantIDPlaceholder = "/{" + participantIDParam + "}"
-	prizeIDPlaceholder       = "/{" + raffleIDParam + "}"
-	rafflesGroup             = ApiPath + RafflesPath
-	participantsGroup        = rafflesGroup + raffleIDPlaceholder + ParticipantsPath
-	prizeGroup               = rafflesGroup + raffleIDPlaceholder + PrizePath
+	prizeIDPlaceholder       = "/{" + prizeIDParam + "}"
+)
+const (
+	rafflesGroup      = ApiPath + RafflesPath
+	participantsGroup = rafflesGroup + raffleIDPlaceholder + ParticipantsPath
+	prizeGroup        = rafflesGroup + raffleIDPlaceholder + PrizePath
 )
 
 // localRun is true if app is build for local run

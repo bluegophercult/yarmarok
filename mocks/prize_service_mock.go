@@ -49,6 +49,20 @@ func (mr *MockPrizeServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockPrizeService)(nil).Create), arg0)
 }
 
+// Delete mocks base method.
+func (m *MockPrizeService) Delete(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockPrizeServiceMockRecorder) Delete(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPrizeService)(nil).Delete), arg0)
+}
+
 // Edit mocks base method.
 func (m *MockPrizeService) Edit(arg0 string, arg1 *service.PrizeRequest) error {
 	m.ctrl.T.Helper()
