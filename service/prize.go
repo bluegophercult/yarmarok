@@ -13,15 +13,12 @@ type Prize struct {
 	CreatedAt   time.Time
 }
 
-// PrizeCreateRequest is a request for creating a new prize.
-type PrizeCreateRequest struct {
+// PrizeRequest is a request for creating a new prize.
+type PrizeRequest struct {
 	Name        string
 	TicketCost  int
 	Description string
 }
-
-// PrizeEditRequest is a request for updating a prize.
-type PrizeEditRequest Prize
 
 // PrizeListResult is a response for listing prizes.
 type PrizeListResult struct {
@@ -34,8 +31,9 @@ var _ PrizeService = (*PrizeManager)(nil)
 //
 //go:generate mockgen -destination=../mocks/prize_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service PrizeService
 type PrizeService interface {
-	Create(p *PrizeCreateRequest) (*CreateResult, error)
-	Edit(p *PrizeEditRequest) (*Result, error)
+	Create(p *PrizeRequest) (*CreateResult, error)
+	Edit(id string, p *PrizeRequest) error
+	Delete(id string) error
 	List() (*PrizeListResult, error)
 }
 
@@ -61,7 +59,7 @@ func NewPrizeManager(ps PrizeStorage) *PrizeManager {
 }
 
 // Create creates a new prize
-func (pm *PrizeManager) Create(p *PrizeCreateRequest) (*CreateResult, error) {
+func (pm *PrizeManager) Create(p *PrizeRequest) (*CreateResult, error) {
 	prize := toPrize(p)
 	if err := pm.prizeStorage.Create(prize); err != nil {
 		return nil, err
@@ -70,18 +68,22 @@ func (pm *PrizeManager) Create(p *PrizeCreateRequest) (*CreateResult, error) {
 	return &CreateResult{ID: prize.ID}, nil
 }
 
-// Edit updates a Prize TODO: edit after donate representation
-func (pm *PrizeManager) Edit(p *PrizeEditRequest) (*Result, error) {
-	prize, err := pm.prizeStorage.Get(p.ID)
+// Edit updates a Prize.
+func (pm *PrizeManager) Edit(id string, p *PrizeRequest) error {
+	prize, err := pm.prizeStorage.Get(id)
 	if err != nil {
-		return &Result{StatusError}, err
+		return err
 	}
 
-	if err := pm.prizeStorage.Update(prize); err != nil {
-		return &Result{StatusError}, err
-	}
+	prize.Name = p.Name
+	prize.TicketCost = p.TicketCost
+	prize.Description = p.Description
 
-	return &Result{StatusSuccess}, nil
+	return pm.prizeStorage.Update(prize)
+}
+
+func (pm *PrizeManager) Delete(id string) error {
+	return pm.prizeStorage.Delete(id)
 }
 
 // List returns all prizes.
@@ -94,7 +96,7 @@ func (pm *PrizeManager) List() (*PrizeListResult, error) {
 	return &PrizeListResult{Prizes: prizes}, nil
 }
 
-func toPrize(p *PrizeCreateRequest) *Prize {
+func toPrize(p *PrizeRequest) *Prize {
 	return &Prize{
 		ID:          StringUUID(),
 		Name:        p.Name,

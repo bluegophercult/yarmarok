@@ -35,7 +35,7 @@ func (m *MockPrizeService) EXPECT() *MockPrizeServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockPrizeService) Create(arg0 *service.PrizeCreateRequest) (*service.CreateResult, error) {
+func (m *MockPrizeService) Create(arg0 *service.PrizeRequest) (*service.CreateResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(*service.CreateResult)
@@ -50,18 +50,17 @@ func (mr *MockPrizeServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
 }
 
 // Edit mocks base method.
-func (m *MockPrizeService) Edit(arg0 *service.PrizeEditRequest) (*service.Result, error) {
+func (m *MockPrizeService) Edit(arg0 string, arg1 *service.PrizeRequest) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Edit", arg0)
-	ret0, _ := ret[0].(*service.Result)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Edit", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Edit indicates an expected call of Edit.
-func (mr *MockPrizeServiceMockRecorder) Edit(arg0 interface{}) *gomock.Call {
+func (mr *MockPrizeServiceMockRecorder) Edit(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Edit", reflect.TypeOf((*MockPrizeService)(nil).Edit), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Edit", reflect.TypeOf((*MockPrizeService)(nil).Edit), arg0, arg1)
 }
 
 // List mocks base method.
