@@ -1,5 +1,5 @@
 /*
-DISCLAIMER: Optional feature designed for mapping busines logic services to transport layer.
+DISCLAIMER: Optional feature designed for mapping busines logic services to HTTP handlers.
 */
 package web
 
