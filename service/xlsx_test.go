@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kaznasho/yarmarok/service"
 	"github.com/stretchr/testify/require"
 	"github.com/xuri/excelize/v2"
 )
@@ -36,9 +37,9 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 		},
 		"slice of structs": {
 			collections: []interface{}{
-				&Raffle{"raffle_id", "organizer_id", "Raffle", "Wow wow wow", time.Now()},
-				Prize{"prize_id", "Super prize", 42, "cat in the bag", time.Now()},
-				[]Participant{
+				&service.Raffle{"raffle_id", "organizer_id", "Raffle", "Wow wow wow", time.Now()},
+				service.Prize{"prize_id", "Super prize", 42, "cat in the bag", time.Now()},
+				[]service.Participant{
 					{"participant_id_1", "Bob George", "323421341", "nope", time.Now()},
 					{"participant_id_2", "Mr Kitty", "123455", "mew mew", time.Now()},
 					{"participant_id_3", "Mr Cat", "123456", "mew mew", time.Now()},
@@ -111,7 +112,7 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			em := NewXLSX()
+			em := service.NewXLSX()
 
 			buf := new(bytes.Buffer)
 			err := em.WriteXLSX(buf, tc.collections...)

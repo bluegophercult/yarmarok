@@ -34,7 +34,11 @@ type PrizeListResult struct {
 	Prizes []Prize
 }
 
+var _ PrizeService = (*PrizeManager)(nil)
+
 // PrizeService is a service for prizes.
+//
+//go:generate mockgen -destination=../mocks/prize_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service PrizeService
 type PrizeService interface {
 	Create(p *PrizeCreateRequest) (*CreateResult, error)
 	Edit(p *PrizeEditRequest) (*Result, error)
@@ -42,6 +46,8 @@ type PrizeService interface {
 }
 
 // PrizeStorage is a storage for prizes.
+//
+//go:generate mockgen -destination=../mocks/prize_storage_mock.go -package=mocks github.com/kaznasho/yarmarok/service PrizeStorage
 type PrizeStorage interface {
 	Create(*Prize) error
 	Get(id string) (*Prize, error)
@@ -96,10 +102,10 @@ func (pm *PrizeManager) List() (*PrizeListResult, error) {
 
 func toPrize(p *PrizeCreateRequest) *Prize {
 	return &Prize{
-		ID:          stringUUID(),
+		ID:          StringUUID(),
 		Name:        p.Name,
 		TicketCost:  p.TicketCost,
 		Description: p.Description,
-		CreatedAt:   timeNow(),
+		CreatedAt:   TimeNow(),
 	}
 }

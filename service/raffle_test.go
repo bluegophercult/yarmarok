@@ -1,26 +1,26 @@
-package service
+package service_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kaznasho/yarmarok/mocks"
+	"github.com/kaznasho/yarmarok/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-//go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
-
 func TestRaffle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	storageMock := NewMockRaffleStorage(ctrl)
+	storageMock := mocks.NewMockRaffleStorage(ctrl)
 
-	manager := NewRaffleManager(storageMock)
+	manager := service.NewRaffleManager(storageMock)
 
 	t.Run("init", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			req := RaffleInitRequest{
+			req := service.RaffleInitRequest{
 				Name: "raffle_name_1",
 				Note: "raffle_note_1",
 			}
@@ -36,7 +36,7 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			req := RaffleInitRequest{
+			req := service.RaffleInitRequest{
 				Name: "raffle_name_1",
 				Note: "raffle_note_1",
 			}
@@ -47,7 +47,7 @@ func TestRaffle(t *testing.T) {
 			setUUIDMock(mockedID)
 			setTimeNowMock(mockedTime)
 
-			mockedRaffle := &Raffle{
+			mockedRaffle := &service.Raffle{
 				ID:        mockedID,
 				Name:      req.Name,
 				Note:      req.Note,
@@ -79,11 +79,11 @@ func TestRaffle(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			id := "raffle_id_1"
 
-			mockedRaffle := &Raffle{
+			mockedRaffle := &service.Raffle{
 				ID:          id,
 				Name:        "raffle_name_1",
 				Note:        "raffle_note_1",
-				CreatedAt:   timeNow().UTC(),
+				CreatedAt:   service.TimeNow().UTC(),
 				OrganizerID: "organizer_id_1",
 			}
 
@@ -108,24 +108,24 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			mockedRaffles := []Raffle{
+			mockedRaffles := []service.Raffle{
 				{
 					ID:          "raffle_id_1",
 					Name:        "raffle_name_1",
 					Note:        "raffle_note_1",
-					CreatedAt:   timeNow().UTC(),
+					CreatedAt:   service.TimeNow().UTC(),
 					OrganizerID: "organizer_id_1",
 				},
 				{
 					ID:          "raffle_id_2",
 					Name:        "raffle_name_2",
 					Note:        "raffle_note_2",
-					CreatedAt:   timeNow().UTC(),
+					CreatedAt:   service.TimeNow().UTC(),
 					OrganizerID: "organizer_id_1",
 				},
 			}
 
-			expected := &RaffleListResponse{
+			expected := &service.RaffleListResponse{
 				Raffles: mockedRaffles,
 			}
 
@@ -139,23 +139,23 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("Export non-empty collection s", func(t *testing.T) {
 		id := "raffle_id_1"
-		raf := &Raffle{ID: id, Name: "Raffle Test"} // Add more fields as needed
-		participants := []Participant{
+		raf := &service.Raffle{ID: id, Name: "Raffle Test"} // Add more fields as needed
+		participants := []service.Participant{
 			{ID: "p1", Name: "Participant 1"},
 			{ID: "p2", Name: "Participant 2"},
 		}
-		prizes := []Prize{
+		prizes := []service.Prize{
 			{ID: "pr1", Name: "Prize 1"},
 			{ID: "pr2", Name: "Prize 2"},
 		}
 
 		storageMock.EXPECT().Get(id).Return(raf, nil).Times(1)
 
-		prtStorage := NewMockParticipantStorage(ctrl)
+		prtStorage := mocks.NewMockParticipantStorage(ctrl)
 		storageMock.EXPECT().ParticipantStorage(id).Return(prtStorage).Times(1)
 		prtStorage.EXPECT().GetAll().Return(participants, nil).Times(1)
 
-		przStorage := NewMockPrizeStorage(ctrl)
+		przStorage := mocks.NewMockPrizeStorage(ctrl)
 		storageMock.EXPECT().PrizeStorage(id).Return(przStorage).Times(1)
 		przStorage.EXPECT().GetAll().Return(prizes, nil).Times(1)
 
@@ -167,16 +167,14 @@ func TestRaffle(t *testing.T) {
 	})
 }
 
-var _ RaffleService = &RaffleManager{}
-
 func setUUIDMock(uuid string) {
-	stringUUID = func() string {
+	service.StringUUID = func() string {
 		return uuid
 	}
 }
 
 func setTimeNowMock(t time.Time) {
-	timeNow = func() time.Time {
+	service.TimeNow = func() time.Time {
 		return t
 	}
 }

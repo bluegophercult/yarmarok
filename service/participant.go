@@ -34,7 +34,11 @@ type ParticipantListResult struct {
 	Participants []Participant
 }
 
+var _ ParticipantService = (*ParticipantManager)(nil)
+
 // ParticipantService is a service for participants.
+//
+//go:generate mockgen -destination=../mocks/participant_service_mock.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantService
 type ParticipantService interface {
 	Create(p *ParticipantAddRequest) (*CreateResult, error)
 	Edit(p *ParticipantEditRequest) (*Result, error)
@@ -42,6 +46,8 @@ type ParticipantService interface {
 }
 
 // ParticipantStorage is a storage for participants.
+//
+//go:generate mockgen -destination=../mocks/participant_storage_mock.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantStorage
 type ParticipantStorage interface {
 	Create(*Participant) error
 	Get(id string) (*Participant, error)
@@ -100,10 +106,10 @@ func (pm *ParticipantManager) List() (*ParticipantListResult, error) {
 
 func toParticipant(p *ParticipantAddRequest) *Participant {
 	return &Participant{
-		ID:        stringUUID(),
+		ID:        StringUUID(),
 		Name:      p.Name,
 		Phone:     p.Phone,
 		Note:      p.Note,
-		CreatedAt: timeNow(),
+		CreatedAt: TimeNow(),
 	}
 }

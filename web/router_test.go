@@ -14,19 +14,15 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/kaznasho/yarmarok/mocks"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
-	"github.com/kaznasho/yarmarok/web/mocks"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-//go:generate mockgen -destination=mocks/mock_organizer.go -package=mocks github.com/kaznasho/yarmarok/service OrganizerService
-//go:generate mockgen -destination=mocks/mock_raffle.go -package=mocks github.com/kaznasho/yarmarok/service RaffleService
-//go:generate mockgen -destination=mocks/mock_participant.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantService
 
 func TestRouter(t *testing.T) {
 	ctrl := gomock.NewController(t)

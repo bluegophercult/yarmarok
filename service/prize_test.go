@@ -1,19 +1,19 @@
-package service
+package service_test
 
 import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kaznasho/yarmarok/mocks"
+	"github.com/kaznasho/yarmarok/service"
 	"github.com/stretchr/testify/assert"
 )
-
-//go:generate mockgen -destination=mock_prize_storage_test.go -package=service github.com/kaznasho/yarmarok/service PrizeStorage
 
 func TestPrizeManager(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	storageMock := NewMockPrizeStorage(ctrl)
-	manager := NewPrizeManager(storageMock)
+	storageMock := mocks.NewMockPrizeStorage(ctrl)
+	manager := service.NewPrizeManager(storageMock)
 
 	testID := "prize_id_1"
 
@@ -21,72 +21,74 @@ func TestPrizeManager(t *testing.T) {
 		t.Run("prize_success", func(t *testing.T) {
 			storageMock.EXPECT().Create(gomock.Any()).Return(nil)
 
-			res, err := manager.Create(&PrizeCreateRequest{
-				Name:        "prize_name_1",
-				TicketCost:  1234,
-				Description: "prize_description_1",
-			})
+			res, err := manager.Create(
+				&service.PrizeCreateRequest{
+					Name:        "prize_name_1",
+					TicketCost:  1234,
+					Description: "prize_description_1",
+				})
 
 			assert.NoError(t, err)
 			assert.NotNil(t, res)
 		})
 
 		t.Run("prize_already_exists", func(t *testing.T) {
-			storageMock.EXPECT().Create(gomock.Any()).Return(ErrPrizeAlreadyExists)
+			storageMock.EXPECT().Create(gomock.Any()).Return(service.ErrPrizeAlreadyExists)
 
-			prizeManager := NewPrizeManager(storageMock)
+			prizeManager := service.NewPrizeManager(storageMock)
 
-			res, err := prizeManager.Create(&PrizeCreateRequest{
-				Name:        "prize_name_1",
-				TicketCost:  1234,
-				Description: "prize_description_1",
-			})
+			res, err := prizeManager.Create(
+				&service.PrizeCreateRequest{
+					Name:        "prize_name_1",
+					TicketCost:  1234,
+					Description: "prize_description_1",
+				})
 
 			assert.Error(t, err)
-			assert.ErrorIs(t, err, ErrPrizeAlreadyExists)
+			assert.ErrorIs(t, err, service.ErrPrizeAlreadyExists)
 			assert.Nil(t, res)
 		})
 	})
 
 	t.Run("edit", func(t *testing.T) {
 		t.Run("prize_success", func(t *testing.T) {
-			storageMock.EXPECT().Get(gomock.Any()).Return(&Prize{}, nil)
+			storageMock.EXPECT().Get(gomock.Any()).Return(&service.Prize{}, nil)
 			storageMock.EXPECT().Update(gomock.Any()).Return(nil)
 
-			res, err := manager.Edit(&PrizeEditRequest{ID: testID})
+			res, err := manager.Edit(&service.PrizeEditRequest{ID: testID})
 
 			assert.NoError(t, err)
 			assert.NotNil(t, res)
 		})
 
 		t.Run("prize_not_found", func(t *testing.T) {
-			storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrPrizeAlreadyExists)
+			storageMock.EXPECT().Get(gomock.Any()).Return(nil, service.ErrPrizeAlreadyExists)
 
-			res, err := manager.Edit(&PrizeEditRequest{ID: testID})
+			res, err := manager.Edit(&service.PrizeEditRequest{ID: testID})
 
 			assert.Error(t, err)
-			assert.ErrorIs(t, err, ErrPrizeAlreadyExists)
-			assert.Equal(t, &Result{StatusError}, res)
+			assert.ErrorIs(t, err, service.ErrPrizeAlreadyExists)
+			assert.Equal(t, &service.Result{service.StatusError}, res)
 		})
 
 		t.Run("update_prize_error", func(t *testing.T) {
 			mockedErr := assert.AnError
 
-			storageMock.EXPECT().Get(gomock.Any()).Return(&Prize{}, nil)
+			storageMock.EXPECT().Get(gomock.Any()).Return(&service.Prize{}, nil)
 			storageMock.EXPECT().Update(gomock.Any()).Return(mockedErr)
 
-			res, err := manager.Edit(&PrizeEditRequest{ID: testID})
+			res, err := manager.Edit(&service.PrizeEditRequest{ID: testID})
 
 			assert.Error(t, err)
 			assert.ErrorIs(t, err, mockedErr)
-			assert.Equal(t, &Result{StatusError}, res)
+			assert.Equal(t, &service.Result{service.StatusError}, res)
 		})
 	})
 
 	t.Run("list", func(t *testing.T) {
 
 		t.Run("prize_success", func(t *testing.T) {
-			storageMock.EXPECT().GetAll().Return([]Prize{}, nil)
+			storageMock.EXPECT().GetAll().Return([]service.Prize{}, nil)
 
 			res, err := manager.List()
 
