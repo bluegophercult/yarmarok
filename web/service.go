@@ -3,79 +3,114 @@ DISCLAIMER: Optional feature designed for mapping busines logic services to HTTP
 */
 package web
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
-// Service is an interface for CRUD operations.
-type Service[I In, O Out] interface {
-	Create(I) (ID, error)
-	Get(ID) (O, error)
-	Edit(ID, I) error
+var ErrNotImplemented = errors.New("not implemented")
+
+type Creator[T any] interface {
+	Create(T) (ID, error)
+}
+
+type Getter[T any] interface {
+	Get(ID) (T, error)
+}
+
+type Editor[T any] interface {
+	Edit(ID, T) error
+}
+
+type Deleter interface {
 	Delete(ID) error
-	List() ([]O, error)
+}
+
+type Lister[T any] interface {
+	List() ([]T, error)
 }
 
 // ServiceFunc is responsible for fetching a service from request data.
-type ServiceFunc[S any] func(*http.Request) (S, error)
+type ServiceFunc[T any] func(*http.Request) (T, error)
 
-// ServiceHandler is responsible for handling HTTP requests.
-type ServiceHandler[S Service[I, O], I In, O Out] struct{ ServiceFunc[S] }
+func newServiceFunc[T any](fn ServiceFunc[T]) ServiceFunc[T] { return fn }
 
-// newServiceHandler creates a new instance of ServiceHandler with the given ServiceFunc.
-func newServiceHandler[S Service[I, O], I In, O Out](fn ServiceFunc[S]) ServiceHandler[S, I, O] {
-	return ServiceHandler[S, I, O]{
-		ServiceFunc: fn,
-	}
-}
-
-func (m ServiceHandler[_, I, _]) Create() http.HandlerFunc {
+func (sf ServiceFunc[T]) Create() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		svc, err := m.ServiceFunc(req)
+		val, err := sf(req)
 		if err != nil {
 			respond(rw, err)
 		}
 
-		newMethod[Create[I]](svc.Create).Handle(rw, req)
+		svc, ok := any(val).(Creator[T])
+		if !ok {
+			respond(rw, ErrNotImplemented)
+		}
+
+		newMethod[Create[T]](svc.Create).Handle(rw, req)
 	}
 }
 
-func (m ServiceHandler[_, _, O]) Get() http.HandlerFunc {
+func (sf ServiceFunc[T]) Get() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		svc, err := m.ServiceFunc(req)
+		val, err := sf(req)
 		if err != nil {
 			respond(rw, err)
 		}
-		newMethod[Get[O]](svc.Get).Handle(rw, req)
+
+		svc, ok := any(val).(Creator[T])
+		if !ok {
+			respond(rw, ErrNotImplemented)
+		}
+
+		newMethod[Create[T]](svc.Create).Handle(rw, req)
 	}
 }
 
-func (m ServiceHandler[_, I, _]) Update() http.HandlerFunc {
+func (sf ServiceFunc[T]) Edit() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		svc, err := m.ServiceFunc(req)
+		val, err := sf(req)
 		if err != nil {
 			respond(rw, err)
 		}
-		newMethod[Update[I]](svc.Edit).Handle(rw, req)
+
+		svc, ok := any(val).(Editor[T])
+		if !ok {
+			respond(rw, ErrNotImplemented)
+		}
+
+		newMethod[Update[T]](svc.Edit).Handle(rw, req)
 	}
 }
 
-func (m ServiceHandler[_, _, _]) Delete() http.HandlerFunc {
+func (sf ServiceFunc[T]) Delete() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		svc, err := m.ServiceFunc(req)
+		val, err := sf(req)
 		if err != nil {
 			respond(rw, err)
+		}
+
+		svc, ok := any(val).(Deleter)
+		if !ok {
+			respond(rw, ErrNotImplemented)
 		}
 
 		newMethod[Delete](svc.Delete).Handle(rw, req)
 	}
 }
 
-func (m ServiceHandler[_, _, O]) List() http.HandlerFunc {
+func (sf ServiceFunc[T]) List() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
-		svc, err := m.ServiceFunc(req)
+		val, err := sf(req)
 		if err != nil {
 			respond(rw, err)
 		}
 
-		newMethod[List[O]](svc.List).Handle(rw, req)
+		svc, ok := any(val).(Lister[T])
+		if !ok {
+			respond(rw, ErrNotImplemented)
+		}
+
+		newMethod[List[T]](svc.List).Handle(rw, req)
 	}
 }
