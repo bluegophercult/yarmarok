@@ -10,27 +10,18 @@ import (
 
 var ErrNotImplemented = errors.New("not implemented")
 
-type Creator[T any] interface {
-	Create(T) (ID, error)
-}
+// CRUD interfaces mirror the CRUD functions,
+// that must be implemented in the business logic layer.
+type (
+	Creator[T any] interface{ Create(T) (string, error) }
+	Getter[T any]  interface{ Get(string) (T, error) }
+	Editor[T any]  interface{ Edit(string, T) error }
+	Deleter        interface{ Delete(string) error }
+	Lister[T any]  interface{ List() ([]T, error) }
+)
 
-type Getter[T any] interface {
-	Get(ID) (T, error)
-}
-
-type Editor[T any] interface {
-	Edit(ID, T) error
-}
-
-type Deleter interface {
-	Delete(ID) error
-}
-
-type Lister[T any] interface {
-	List() ([]T, error)
-}
-
-// ServiceFunc is responsible for fetching a service from request data.
+// ServiceFunc is responsible for fetching a service from request data,
+// and wrap CRUD functions service implements the corresponding CRUD interface.
 type ServiceFunc[T any] func(*http.Request) (T, error)
 
 func newServiceFunc[T any](fn ServiceFunc[T]) ServiceFunc[T] { return fn }

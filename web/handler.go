@@ -5,18 +5,14 @@ import (
 	"path"
 )
 
-type ( // Input/Output types.
-	In  any
-	Out any
-	ID  = string
-)
-
-type ( // CRUD functions.
-	Create[I In] func(I) (ID, error)
-	Get[O Out]   func(ID) (O, error)
-	Update[I In] func(ID, I) error
-	Delete       func(ID) error
-	List[O Out]  func() ([]O, error)
+// CRUD functions accept parameter T,
+// which can be a new, updated or created entity.
+type (
+	Create[T any] func(T) (id string, err error)
+	Get[T any]    func(id string) (T, error)
+	Update[T any] func(id string, upd T) error
+	Delete        func(id string) error
+	List[T any]   func() ([]T, error)
 )
 
 // newMethod creates a new instance of CRUD-Func.
@@ -33,7 +29,7 @@ func (m Create[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 		respond(rw, err)
 	}
 
-	respond(rw, struct{ ID ID }{id})
+	respond(rw, struct{ ID string }{id})
 }
 
 func (m Get[_]) Handle(rw http.ResponseWriter, req *http.Request) {
