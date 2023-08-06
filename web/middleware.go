@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/rs/cors"
@@ -66,14 +67,16 @@ func (r *Router) loggingMiddleware(next http.Handler) http.Handler {
 func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		defer func() {
-			if err := recover(); err != nil {
+			if rec := recover(); rec != nil {
 				r.logger.WithFields(logger.Fields{
 					"uri":    req.RequestURI,
 					"method": req.Method,
-					"error":  err,
+					"rec":    rec,
+					"trace":  string(debug.Stack()),
 				}).Error("panic recovered")
+
+				w.WriteHeader(http.StatusInternalServerError)
 			}
-			w.WriteHeader(http.StatusInternalServerError)
 		}()
 
 		next.ServeHTTP(w, req)
