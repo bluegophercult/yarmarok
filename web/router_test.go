@@ -502,7 +502,7 @@ func TestRecoverMiddleware(t *testing.T) {
 	require.NotNil(t, router)
 
 	t.Run("panic_recovery", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, "/", nil)
 		require.NoError(t, err)
 
 		h := func(rw http.ResponseWriter, r *http.Request) { panic("test panic") }
@@ -513,7 +513,7 @@ func TestRecoverMiddleware(t *testing.T) {
 	})
 
 	t.Run("no_panic", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, "/", nil)
 		require.NoError(t, err)
 
 		h := func(rw http.ResponseWriter, r *http.Request) {}
