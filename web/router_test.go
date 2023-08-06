@@ -529,14 +529,13 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 
 	osMock := mocks.NewMockOrganizerService(ctrl)
 	organizerID := "organizer_id_1"
-	rafflePath := joinPath(ApiPath, RafflesPath)
 
 	router, err := NewRouter(osMock, logger.NewNoOpLogger())
 	require.NoError(t, err)
 	require.NotNil(t, router)
 
 	t.Run("success", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, rafflePath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		req.Header.Set(GoogleUserIDHeader, organizerID)
@@ -552,7 +551,7 @@ func TestApplyOrganizerMiddleware(t *testing.T) {
 	})
 
 	t.Run("no_organizer_id", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, rafflePath, nil)
+		req, err := newRequestWithOrigin(http.MethodPost, RafflesPath, nil)
 		require.NoError(t, err)
 
 		stub := newHandlerStub()
