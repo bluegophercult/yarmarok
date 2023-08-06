@@ -26,11 +26,6 @@ type ParticipantRequest struct {
 	Note  string
 }
 
-// ParticipantListResult is a response for listing participants.
-type ParticipantListResult struct {
-	Participants []Participant
-}
-
 // ParticipantService is a service for participants.
 type ParticipantService interface {
 	Create(*ParticipantRequest) (string, error)
