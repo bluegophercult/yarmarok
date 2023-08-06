@@ -70,6 +70,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 			r.Get("/", router.listRaffles)
 			r.Route(raffleIDPlaceholder, func(r chi.Router) { // "/api/raffles/{raffle_id}"
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
+
 				r.Route(ParticipantsPath, func(r chi.Router) { // "/api/raffles/{raffle_id}/participants"
 					ps := newServiceFunc[service.ParticipantService, *service.ParticipantRequest, service.Participant](router.getParticipantService)
 					r.Post("/", ps.Create())
@@ -77,6 +78,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 					r.Put(participantIDPlaceholder, ps.Edit())
 					r.Delete(participantIDPlaceholder, ps.Delete())
 				})
+
 			})
 		})
 	})
