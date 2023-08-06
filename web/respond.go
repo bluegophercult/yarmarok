@@ -15,25 +15,22 @@ func respond(rw http.ResponseWriter, data any) {
 		return
 	}
 
-	code := http.StatusOK
-	if _, ok := data.(error); ok {
-		code = http.StatusInternalServerError
-	}
-
 	var buf bytes.Buffer
 	if err := encodeBody(&buf, data); err != nil {
 		err = fmt.Errorf("encoding to buffer: %w", err)
-		respond(rw, err)
+		respondErr(rw, err)
 		return
 	}
-
-	rw.WriteHeader(code)
 
 	if _, err := buf.WriteTo(rw); err != nil {
 		err = fmt.Errorf("writing response: %w", err)
-		respond(rw, err)
+		respondErr(rw, err)
 		return
 	}
+}
+
+func respondErr(rw http.ResponseWriter, err error) {
+	http.Error(rw, err.Error(), http.StatusInternalServerError)
 }
 
 // decodeBody reads data from a body and converts it to any.
