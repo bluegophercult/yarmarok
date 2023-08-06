@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 //go:generate mockgen -destination=mock_participant_storage_test.go -package=service github.com/kaznasho/yarmarok/service ParticipantStorage
@@ -15,16 +15,16 @@ func TestParticipantManagerAdd(t *testing.T) {
 	storageMock := NewMockParticipantStorage(ctrl)
 	manager := NewParticipantManager(storageMock)
 
+	prt := &ParticipantRequest{
+		Name:  "John Doe",
+		Phone: "1234567890",
+		Note:  "Test participant",
+	}
+
 	t.Run("add participant", func(t *testing.T) {
 		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
-
-		_, err := manager.Create(&ParticipantRequest{
-			Name:  "John Doe",
-			Phone: "1234567890",
-			Note:  "Test participant",
-		})
-
-		assert.NoError(t, err)
+		_, err := manager.Create(prt)
+		require.NoError(t, err)
 	})
 
 	t.Run("add_already_exists", func(t *testing.T) {
@@ -34,14 +34,8 @@ func TestParticipantManagerAdd(t *testing.T) {
 		storageMock.EXPECT().Create(gomock.Any()).Return(ErrParticipantAlreadyExists)
 
 		participantManager := NewParticipantManager(storageMock)
-
-		_, err := participantManager.Create(&ParticipantRequest{
-			Name:  "John Doe",
-			Phone: "1234567890",
-			Note:  "Test participant",
-		})
-
-		assert.ErrorIs(t, err, ErrParticipantAlreadyExists)
+		_, err := participantManager.Create(prt)
+		require.ErrorIs(t, err, ErrParticipantAlreadyExists)
 	})
 }
 
@@ -51,23 +45,21 @@ func TestParticipantManagerEdit(t *testing.T) {
 	storageMock := NewMockParticipantStorage(ctrl)
 	manager := NewParticipantManager(storageMock)
 
+	id := "participant_id_1"
+	prt := &ParticipantRequest{Name: "John Doe", Phone: "1234567890", Note: "Test participant"}
 	t.Run("edit participant", func(t *testing.T) {
 		storageMock.EXPECT().Get(gomock.Any()).Return(&Participant{}, nil)
 		storageMock.EXPECT().Update(gomock.Any()).Return(nil)
 
-		_, err := manager.Edit(&ParticipantEditRequest{ID: "test-id"})
-
-		assert.NoError(t, err)
+		err := manager.Edit(id, prt)
+		require.NoError(t, err)
 	})
 
 	t.Run("participant not found", func(t *testing.T) {
 		storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrParticipantNotFound)
 
-		_, err := manager.Edit(&ParticipantEditRequest{
-			ID: "test-id",
-		})
-
-		assert.ErrorIs(t, err, ErrParticipantNotFound)
+		err := manager.Edit(id, prt)
+		require.ErrorIs(t, err, ErrParticipantNotFound)
 	})
 }
 
@@ -82,6 +74,6 @@ func TestParticipantManagerList(t *testing.T) {
 
 		_, err := manager.List()
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }
