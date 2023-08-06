@@ -5,17 +5,17 @@ import (
 	"path"
 )
 
-// CRUD functions accept parameter T,
-// which can be a new, updated or created entity.
+// CRUD functions accept I/O parameters,
+// which correspond to new/updated or existing/created entity.
 type (
-	Create[T any] func(T) (id string, err error)
-	Get[T any]    func(id string) (T, error)
-	Update[T any] func(id string, upd T) error
+	Create[I any] func(I) (id string, err error)
+	Get[O any]    func(id string) (O, error)
+	Update[I any] func(id string, upd I) error
 	Delete        func(id string) error
-	List[T any]   func() ([]T, error)
+	List[O any]   func() ([]O, error)
 )
 
-// newMethod creates a new instance of CRUD-Func.
+// newMethod creates a new instance of CRUD-func.
 func newMethod[F any](fn F) F { return fn }
 
 func (m Create[I]) Handle(rw http.ResponseWriter, req *http.Request) {
