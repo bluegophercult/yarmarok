@@ -122,7 +122,7 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
 	xslx := NewXLSX()
 
 	buf := new(bytes.Buffer)
-	if err := xslx.WriteXLSX(buf, raf, prtList.Participants, przList.Prizes); err != nil {
+	if err := xslx.WriteXLSX(buf, raf, prtList, przList.Prizes); err != nil {
 		return nil, fmt.Errorf("write xlsx: %w", err)
 	}
 

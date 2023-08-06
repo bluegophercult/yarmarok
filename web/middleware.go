@@ -72,8 +72,8 @@ func (r *Router) recoverMiddleware(next http.Handler) http.Handler {
 					"method": req.Method,
 					"error":  err,
 				}).Error("panic recovered")
+				w.WriteHeader(http.StatusInternalServerError)
 			}
-			w.WriteHeader(http.StatusInternalServerError)
 		}()
 
 		next.ServeHTTP(w, req)

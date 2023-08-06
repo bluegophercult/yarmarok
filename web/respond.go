@@ -24,6 +24,7 @@ func respond(rw http.ResponseWriter, data any) {
 	if err := encodeBody(&buf, data); err != nil {
 		err = fmt.Errorf("encoding to buffer: %w", err)
 		respond(rw, err)
+		return
 	}
 
 	rw.WriteHeader(code)
@@ -31,6 +32,7 @@ func respond(rw http.ResponseWriter, data any) {
 	if _, err := buf.WriteTo(rw); err != nil {
 		err = fmt.Errorf("writing response: %w", err)
 		respond(rw, err)
+		return
 	}
 }
 

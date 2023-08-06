@@ -20,7 +20,8 @@ const (
 	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
 
-	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
+	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
+	participantIDPlaceholder = "/{" + participantIDParam + "}"
 )
 
 // localRun is true if app is build for local run
@@ -70,9 +71,11 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 			r.Route(raffleIDPlaceholder, func(r chi.Router) { // "/api/raffles/{raffle_id}"
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
 				r.Route(ParticipantsPath, func(r chi.Router) { // "/api/raffles/{raffle_id}/participants"
-					r.Post("/", router.createParticipant)
-					r.Put("/", router.updateParticipant)
-					r.Get("/", router.listParticipants)
+					ps := newServiceFunc[service.ParticipantService, *service.ParticipantRequest, service.Participant](router.getParticipantService)
+					r.Post("/", ps.Create())
+					r.Get("/", ps.List())
+					r.Put(participantIDPlaceholder, ps.Edit())
+					r.Delete(participantIDPlaceholder, ps.Delete())
 				})
 			})
 		})
@@ -137,36 +140,6 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		r.logger.WithError(err).Error("writing xlsx failed")
 	}
-}
-
-func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	newMethodHandler(participantService.Create, r.logger.Logger).ServeHTTP(w, req)
-}
-
-func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	newMethodHandler(participantService.Edit, r.logger.Logger).ServeHTTP(w, req)
-}
-
-func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
 }
 
 func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {

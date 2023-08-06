@@ -22,11 +22,13 @@ func (m Create[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
 	if err := decodeBody(req.Body, &in); err != nil {
 		respond(rw, err)
+		return
 	}
 
 	id, err := m(in)
 	if err != nil {
 		respond(rw, err)
+		return
 	}
 
 	respond(rw, struct{ ID string }{id})
@@ -38,6 +40,7 @@ func (m Get[_]) Handle(rw http.ResponseWriter, req *http.Request) {
 	out, err := m(id)
 	if err != nil {
 		respond(rw, err)
+		return
 	}
 
 	respond(rw, out)
@@ -48,12 +51,13 @@ func (m Update[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
 	if err := decodeBody(req.Body, &in); err != nil {
 		respond(rw, err)
+		return
 	}
 
 	id := path.Base(req.URL.String())
-
 	if err := m(id, in); err != nil {
 		respond(rw, err)
+		return
 	}
 }
 
@@ -71,6 +75,7 @@ func (m List[O]) Handle(rw http.ResponseWriter, _ *http.Request) {
 	out, err := m()
 	if err != nil {
 		respond(rw, err)
+		return
 	}
 
 	respond(rw, struct{ Data []O }{out})
