@@ -109,20 +109,20 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
 		return nil, fmt.Errorf("get raffle: %w", err)
 	}
 
-	prtList, err := rm.ParticipantService(id).List()
+	prts, err := rm.ParticipantService(id).List()
 	if err != nil {
 		return nil, fmt.Errorf("get participants: %w", err)
 	}
 
-	przList, err := rm.PrizeService(id).List()
+	przs, err := rm.PrizeService(id).List()
 	if err != nil {
 		return nil, fmt.Errorf("get prizes: %w", err)
 	}
 
-	xslx := NewXLSX()
+	xlsx := NewXLSX()
 
 	buf := new(bytes.Buffer)
-	if err := xslx.WriteXLSX(buf, raf, prtList, przList.Prizes); err != nil {
+	if err := xlsx.WriteXLSX(buf, raf, prts, przs.Prizes); err != nil {
 		return nil, fmt.Errorf("write xlsx: %w", err)
 	}
 
