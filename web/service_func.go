@@ -14,7 +14,7 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 		return nil, err
 	}
 
-	raffleID, err := extractRaffleID(req)
+	raffleID, err :=  extractParam(req, raffleIDParam)
 	if err != nil {
 		return nil, err
 	}
