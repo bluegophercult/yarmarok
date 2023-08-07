@@ -2,7 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -16,11 +15,16 @@ const (
 	ApiPath          = "/api"
 	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
+)
 
+const (
 	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
+)
 
-	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
+const (
+	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
+	participantIDPlaceholder = "/{" + participantIDParam + "}"
 )
 
 // localRun is true if app is build for local run
@@ -71,8 +75,9 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
 				r.Route(ParticipantsPath, func(r chi.Router) { // "/api/raffles/{raffle_id}/participants"
 					r.Post("/", router.createParticipant)
-					r.Put("/", router.updateParticipant)
 					r.Get("/", router.listParticipants)
+					r.Put(participantIDPlaceholder, router.editParticipant)
+					r.Delete(participantIDPlaceholder, router.deleteParticipant)
 				})
 			})
 		})
@@ -96,27 +101,21 @@ func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
-	organizerID, err := extractOrganizerID(req)
+	raffleService, err := r.getRaffleService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	raffleService := r.organizerService.RaffleService(organizerID)
-
-	m := newNoRequestMethodHandler(raffleService.List, r.logger.Logger)
-
-	m.ServeHTTP(w, req)
+	newNoRequestMethodHandler(raffleService.List, r.logger.Logger).ServeHTTP(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
-	organizerID, err := extractOrganizerID(req)
+	raffleService, err := r.getRaffleService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
-
-	raffleService := r.organizerService.RaffleService(organizerID)
 
 	raffleID, err := extractParam(req, raffleIDParam)
 	if err != nil {
@@ -126,7 +125,6 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 
 	resp, err := raffleService.Export(raffleID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -140,78 +138,41 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+	svc, err := r.getParticipantService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	newMethodHandler(participantService.Create, r.logger.Logger).ServeHTTP(w, req)
+	newCreate(svc.Create).Handle(w, req)
 }
 
-func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getParticipantService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	newMethodHandler(participantService.Edit, r.logger.Logger).ServeHTTP(w, req)
+	newEdit(svc.Edit).Handle(w, req)
+}
+
+func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getParticipantService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newDelete(svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+	svc, err := r.getParticipantService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
-}
-
-func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
-	organizerID, err := extractOrganizerID(req)
-	if err != nil {
-		return nil, err
-	}
-
-	raffleID, err := extractParam(req, raffleIDParam)
-	if err != nil || raffleID == "" {
-		return nil, ErrMissingID
-	}
-
-	participantService := r.organizerService.RaffleService(organizerID).ParticipantService(raffleID)
-
-	return participantService, nil
-}
-
-func extractOrganizerID(r *http.Request) (id string, err error) {
-	defer func() {
-		if localRun && err != nil {
-			err = nil
-			id = "dummy_test_user"
-		}
-	}()
-
-	ids := r.Header.Values(GoogleUserIDHeader)
-
-	if len(ids) != 1 {
-		return "", ErrAmbiguousOrganizerIDHeader
-	}
-
-	id = ids[0]
-	if id == "" {
-		return "", ErrAmbiguousOrganizerIDHeader
-	}
-
-	return id, nil
-}
-
-func extractParam(req *http.Request, param string) (string, error) {
-	val := chi.URLParam(req, param)
-	if param == "" {
-		return "", fmt.Errorf("missing param: %s", param)
-	}
-
-	return val, nil
+	newList(svc.List).Handle(w, req)
 }
