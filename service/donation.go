@@ -32,7 +32,7 @@ type DonationListResult struct {
 }
 
 type DonationService interface {
-	AddDonation(d *DonationAddRequest) (*InitResult, error)
+	AddDonation(d *DonationAddRequest) (*CreateResult, error)
 	EditDonation(d *DonationEditRequest) (*Result, error)
 	ListDonation() (*DonationListResult, error)
 	// DeleteDonation????
@@ -60,13 +60,13 @@ func NewDonationManager(ds DonationStorage, ps ParticipantStorage, pzs PrizeStor
 	}
 }
 
-func (dm *DonationManager) AddDonation(d *DonationAddRequest) (*InitResult, error) {
+func (dm *DonationManager) AddDonation(d *DonationAddRequest) (*CreateResult, error) {
 	donation := toDonation(d)
 	if err := dm.donationStorage.Create(dm.participantStorage, dm.prizeStorage, donation); err != nil {
 		return nil, err
 	}
 
-	return &InitResult{ID: donation.ID}, nil
+	return &CreateResult{ID: donation.ID}, nil
 }
 
 func (dm *DonationManager) EditDonation(d *DonationEditRequest) (*Result, error) {
