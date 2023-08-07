@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -14,9 +15,9 @@ func (r *Router) getParticipantService(req *http.Request) (service.ParticipantSe
 		return nil, err
 	}
 
-	raffleID, err := extractRaffleID(req)
+	raffleID, err := extractParam(req, raffleIDParam)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrMissingID, err)
 	}
 
 	return raffleService.ParticipantService(raffleID), nil
@@ -29,15 +30,6 @@ func (r *Router) getRaffleService(req *http.Request) (service.RaffleService, err
 	}
 
 	return r.organizerService.RaffleService(organizerID), nil
-}
-
-func extractRaffleID(req *http.Request) (id string, err error) {
-	raffleID, err := extractParam(req, raffleIDParam)
-	if err != nil {
-		return "", ErrMissingID
-	}
-
-	return raffleID, nil
 }
 
 func extractOrganizerID(r *http.Request) (id string, err error) {
