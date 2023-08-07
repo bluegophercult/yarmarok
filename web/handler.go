@@ -28,6 +28,12 @@ type ListResponse[O any] struct {
 // newHandler creates a new instance of CRUD-func.
 func newHandler[T any](fn T) T { return fn }
 
+func newCreate[I any](fn Create[I]) Create[I] { return fn }
+func newGet[O any](fn Get[O]) Get[O]          { return fn }
+func newEdit[I any](fn Edit[I]) Edit[I]       { return fn }
+func newDelete(fn Delete) Delete              { return fn }
+func newList[O any](fn List[O]) List[O]       { return fn }
+
 func (m Create[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
 	if err := decodeBody(req.Body, &in); err != nil {
