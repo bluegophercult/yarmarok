@@ -2,6 +2,7 @@ name: Build and test Go code
 
 on:
   push:
+    branches: [ "main" ]
     paths-ignore: [ "ui/**" ]
   pull_request:
     paths: [ "**.go" ]
