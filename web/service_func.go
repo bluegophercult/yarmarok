@@ -56,7 +56,7 @@ func extractOrganizerID(r *http.Request) (id string, err error) {
 
 func extractParam(req *http.Request, param string) (string, error) {
 	val := chi.URLParam(req, param)
-	if param == "" {
+	if val == "" {
 		return "", fmt.Errorf("missing param: %s", param)
 	}
 
