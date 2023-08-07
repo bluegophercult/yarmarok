@@ -12,6 +12,10 @@ export const useRaffleStore = defineStore({
                 raffles: Raffles
             }>("/api/raffles")
             if (error.value) {
+                if (error.value.statusCode && error.value.statusCode === 500 && !window.location.href.endsWith("/api/login")) {
+                    navigateTo("/api/login", { external: true, replace: true, redirectCode: 302 })
+                    return
+                }
                 throw error.value
             }
 
