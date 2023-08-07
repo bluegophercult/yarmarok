@@ -537,33 +537,6 @@ func TestParticipant(t *testing.T) {
 		})
 	})
 }
-func TestRecoverMiddleware(t *testing.T) {
-	router, err := NewRouter(nil, logger.NewLogger(logger.LevelDebug))
-	require.NoError(t, err)
-	require.NotNil(t, router)
-
-	t.Run("panic_recovery", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, "/", nil)
-		require.NoError(t, err)
-
-		h := func(rw http.ResponseWriter, r *http.Request) { panic("test panic") }
-		rw := httptest.NewRecorder()
-
-		router.recoverMiddleware(http.HandlerFunc(h)).ServeHTTP(rw, req)
-		require.Equal(t, http.StatusInternalServerError, rw.Code)
-	})
-
-	t.Run("no_panic", func(t *testing.T) {
-		req, err := newRequestWithOrigin(http.MethodPost, "/", nil)
-		require.NoError(t, err)
-
-		h := func(rw http.ResponseWriter, r *http.Request) {}
-		rw := httptest.NewRecorder()
-
-		router.recoverMiddleware(http.HandlerFunc(h)).ServeHTTP(rw, req)
-		require.Equal(t, http.StatusOK, rw.Code)
-	})
-}
 
 func TestRecoverMiddleware(t *testing.T) {
 	router, err := NewRouter(nil, logger.NewLogger(logger.LevelDebug))
