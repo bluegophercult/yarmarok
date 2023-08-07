@@ -5,7 +5,17 @@
             <!-- TODO: Add if there will be a way to log out -->
             <!-- <LogOut/> -->
         </div>
-        <Prizes/>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+            <div class="w-full">
+                <Prizes/>
+            </div>
+            <div class="w-full col-span-1 md:col-span-2">
+                <PrizeDetails/>
+            </div>
+            <div class="w-full">
+                <Participants/>
+            </div>
+        </div>
     </div>
 
     <TheNotification/>

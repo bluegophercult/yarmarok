@@ -13,11 +13,12 @@ export const newPrizeSchema = object({
     name: string()
         .required("Назва обов'язкова"),
     ticketCost: number()
+        .when("name", { is: () => true, then: (schema) => schema.required() })
         .required("Ціна купону обов'язкова")
         .typeError("Ціна купону повинна бути числом")
         .integer("Ціна купону повинна бути цілим числом")
         .positive("Ціна купону повинна бути більша нуля"),
-    note: string(),
+    description: string(),
 })
 
 export type NewPrize = InferType<typeof newPrizeSchema>
