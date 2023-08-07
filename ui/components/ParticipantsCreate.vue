@@ -65,7 +65,7 @@ function closeModal() {
 function addParticipant() {
     newParticipantSchema.validate(newParticipant.value)
         .then(() => {
-            participantStore.addParticipant(newParticipant.value)
+            participantStore.addParticipant(selectedRaffle.value!.id, newParticipant.value)
             closeModal()
         })
         .catch((e: ValidationError) => {

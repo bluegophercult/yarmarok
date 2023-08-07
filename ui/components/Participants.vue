@@ -11,16 +11,23 @@
 <script setup lang="ts">
 import { useParticipantStore } from "~/store/participant"
 import { useRaffleStore } from "~/store/raffle"
+import { useNotificationStore } from "~/store/notification"
+
+const { showError } = useNotificationStore()
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
 
-const ParticipantStore = useParticipantStore()
+const participantStore = useParticipantStore()
 watch(selectedRaffle, () => {
     if (selectedRaffle.value) {
-        ParticipantStore.getParticipants(selectedRaffle.value.id)
+        participantStore.getParticipants(selectedRaffle.value.id)
+            .catch(e => {
+                console.error(e)
+                showError("Не вдалося отримати сиписок учасників!")
+            })
     } else {
-        ParticipantStore.clearParticipants()
+        participantStore.clearParticipants()
     }
 })
 </script>

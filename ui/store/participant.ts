@@ -6,20 +6,32 @@ export const useParticipantStore = defineStore({
         participants: <Participants>[],
     }),
     actions: {
-        getParticipants(raffleId: string) {
-            // TODO: API call
-            this.participants = <Participants>[
-                { id: "1", name: "Оксана" },
-                { id: "2", name: "Ярослав" },
-            ]
+        async getParticipants(raffleId: string) {
+            const { data, error } = await useApiFetch<{
+                items: Participants
+            }>(`/api/raffles/${ raffleId }/participants`)
+            if (error.value) {
+                throw error.value
+            }
+
+            this.participants = data.value!.items || <Participants>[]
         },
         clearParticipants() {
             this.participants = []
         },
-        addParticipant(newParticipant: NewParticipant) {
-            // TODO: API call
+        async addParticipant(raffleId: string, newParticipant: NewParticipant) {
+            const { data, error } = await useApiFetch<{
+                id: string,
+            }>(`/api/raffles/${ raffleId }/participants`, {
+                method: "POST",
+                body: newParticipant,
+            })
+            if (error.value) {
+                throw error.value
+            }
+
             this.participants.push(<Participant>{
-                id: `${ this.participants.length + 1 }`,
+                id: data.value!.id,
                 ...newParticipant,
             })
         },
