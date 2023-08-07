@@ -11,24 +11,24 @@ var (
 )
 
 type Donation struct {
-	ID            string
-	PrizeID       string
-	ParticipantID string
-	Amount        int
-	TicketNumber  int
-	Description   string
-	CreatedAt     time.Time
+	ID            string    `json:"id"`
+	PrizeID       string    `json:"prizeID"`
+	ParticipantID string    `json:"participantID"`
+	Amount        int       `json:"amount"`
+	TicketNumber  int       `json:"ticketNumber"`
+	Description   string    `json:"description"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
 type DonationAddRequest struct {
-	Amount      int
-	Description string
+	Amount      int    `json:"amount"`
+	Description string `json:"description"`
 }
 
 type DonationEditRequest Donation
 
 type DonationListResult struct {
-	Donations []Donation
+	Donations []Donation `json:"donations"`
 }
 
 type DonationService interface {
