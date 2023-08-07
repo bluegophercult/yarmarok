@@ -119,12 +119,13 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 
 	raffleID, err := extractParam(req, raffleIDParam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
 	resp, err := raffleService.Export(raffleID)
 	if err != nil {
+		respondErr(w, err)
 		return
 	}
 
