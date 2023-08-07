@@ -12,8 +12,8 @@ var (
 
 type Donation struct {
 	ID            string    `json:"id"`
-	PrizeID       string    `json:"prizeID"`
-	ParticipantID string    `json:"participantID"`
+	PrizeID       string    `json:"prizeId"`
+	ParticipantID string    `json:"participantId"`
 	Amount        int       `json:"amount"`
 	TicketNumber  int       `json:"ticketNumber"`
 	Description   string    `json:"description"`
