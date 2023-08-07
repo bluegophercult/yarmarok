@@ -20,7 +20,7 @@ var (
 
 // Organizer represents an organizer of the application.
 type Organizer struct {
-	ID string
+	ID string `json:"id"`
 }
 
 // OrganizerStorage is a storage for organizers.

@@ -7,18 +7,18 @@ import (
 
 // Participant represents a participant of the application.
 type Participant struct {
-	ID        string
-	Name      string
-	Phone     string
-	Note      string
-	CreatedAt time.Time
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Phone     string    `json:"phone"`
+	Note      string    `json:"note"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // ParticipantRequest is a request for creating a new/updated participant.
 type ParticipantRequest struct {
-	Name  string
-	Phone string
-	Note  string
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
+	Note  string `json:"note"`
 }
 
 // ParticipantService is a service for participants.
