@@ -33,7 +33,7 @@ func (r *Router) getRaffleService(req *http.Request) (service.RaffleService, err
 
 func extractRaffleID(req *http.Request) (id string, err error) {
 	raffleID, err := extractParam(req, raffleIDParam)
-	if err != nil || raffleID == "" {
+	if err != nil {
 		return "", ErrMissingID
 	}
 
