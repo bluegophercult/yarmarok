@@ -119,6 +119,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 							r.Delete(donationIDPlaceholder, router.deleteDonation)
 						})
 					})
+
 				})
 			})
 		})
