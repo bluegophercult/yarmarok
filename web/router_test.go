@@ -94,6 +94,7 @@ func TestRaffle(t *testing.T) {
 			writer := httptest.NewRecorder()
 			router.ServeHTTP(writer, req)
 			require.Equal(t, http.StatusOK, writer.Code)
+			assertJSONResponse(t, CreateResponse{raffleID}, writer.Body)
 		})
 
 		t.Run("error", func(t *testing.T) {
