@@ -9,165 +9,115 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-//go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
-
 func TestRaffle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	storageMock := NewMockRaffleStorage(ctrl)
+	rsMock := NewMockRaffleStorage(ctrl)
+	rm := NewRaffleManager(rsMock)
 
-	manager := NewRaffleManager(storageMock)
+	req := RaffleRequest{
+		Name: "raffle_name_1",
+		Note: "raffle_note_1",
+	}
 
-	t.Run("init", func(t *testing.T) {
+	mockedID := "raffle_id_1"
+	mockedTime := time.Now().UTC()
+	mockedErr := assert.AnError
+
+	mockedRaffle := Raffle{
+		ID:        mockedID,
+		Name:      req.Name,
+		Note:      req.Note,
+		CreatedAt: mockedTime,
+	}
+
+	t.Run("create", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			req := RaffleInitRequest{
-				Name: "raffle_name_1",
-				Note: "raffle_note_1",
-			}
+			rsMock.EXPECT().Create(gomock.Any()).Return(mockedErr)
 
-			mockedErr := assert.AnError
-
-			storageMock.EXPECT().Create(gomock.Any()).Return(mockedErr).Times(1)
-
-			res, err := manager.Create(&req)
-			assert.Error(t, err)
-			assert.Equal(t, mockedErr, err)
-			assert.Nil(t, res)
+			res, err := rm.Create(&req)
+			require.ErrorIs(t, err, mockedErr)
+			require.Empty(t, res)
 		})
 
 		t.Run("success", func(t *testing.T) {
-			req := RaffleInitRequest{
-				Name: "raffle_name_1",
-				Note: "raffle_note_1",
-			}
-
-			mockedID := "raffle_id_1"
-			mockedTime := time.Now().UTC()
-
 			setUUIDMock(mockedID)
 			setTimeNowMock(mockedTime)
 
-			mockedRaffle := &Raffle{
-				ID:        mockedID,
-				Name:      req.Name,
-				Note:      req.Note,
-				CreatedAt: mockedTime,
-			}
+			rsMock.EXPECT().Create(&mockedRaffle).Return(nil)
 
-			storageMock.EXPECT().Create(mockedRaffle).Return(nil).Times(1)
-
-			res, err := manager.Create(&req)
-			assert.NoError(t, err)
-			assert.Equal(t, mockedID, res.ID)
+			resID, err := rm.Create(&req)
+			require.NoError(t, err)
+			require.Equal(t, mockedID, resID)
 		})
 	})
 
 	t.Run("get", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			id := "raffle_id_1"
+			rsMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
 
-			mockedErr := assert.AnError
-
-			storageMock.EXPECT().Get(id).Return(nil, mockedErr).Times(1)
-
-			res, err := manager.Get(id)
-			assert.Error(t, err)
-			assert.Equal(t, mockedErr, err)
-			assert.Nil(t, res)
+			res, err := rm.Get(mockedID)
+			require.ErrorIs(t, err, mockedErr)
+			require.Nil(t, res)
 		})
 
 		t.Run("success", func(t *testing.T) {
-			id := "raffle_id_1"
+			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
 
-			mockedRaffle := &Raffle{
-				ID:          id,
-				Name:        "raffle_name_1",
-				Note:        "raffle_note_1",
-				CreatedAt:   timeNow().UTC(),
-				OrganizerID: "organizer_id_1",
-			}
-
-			storageMock.EXPECT().Get(id).Return(mockedRaffle, nil).Times(1)
-
-			res, err := manager.Get(id)
-			assert.NoError(t, err)
-			assert.Equal(t, mockedRaffle, res)
+			raf, err := rm.Get(mockedID)
+			require.NoError(t, err)
+			require.Equal(t, &mockedRaffle, raf)
 		})
 	})
 
 	t.Run("list", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			mockedErr := assert.AnError
+			rsMock.EXPECT().GetAll().Return(nil, mockedErr)
 
-			storageMock.EXPECT().GetAll().Return(nil, mockedErr).Times(1)
-
-			res, err := manager.List()
-			assert.Error(t, err)
-			assert.ErrorIs(t, err, mockedErr)
-			assert.Nil(t, res)
+			res, err := rm.List()
+			require.ErrorIs(t, err, mockedErr)
+			require.Nil(t, res)
 		})
 
 		t.Run("success", func(t *testing.T) {
-			mockedRaffles := []Raffle{
-				{
-					ID:          "raffle_id_1",
-					Name:        "raffle_name_1",
-					Note:        "raffle_note_1",
-					CreatedAt:   timeNow().UTC(),
-					OrganizerID: "organizer_id_1",
-				},
-				{
-					ID:          "raffle_id_2",
-					Name:        "raffle_name_2",
-					Note:        "raffle_note_2",
-					CreatedAt:   timeNow().UTC(),
-					OrganizerID: "organizer_id_1",
-				},
-			}
+			raffles := []Raffle{mockedRaffle, mockedRaffle, mockedRaffle}
 
-			expected := &RaffleListResponse{
-				Raffles: mockedRaffles,
-			}
+			rsMock.EXPECT().GetAll().Return(raffles, nil)
 
-			storageMock.EXPECT().GetAll().Return(mockedRaffles, nil).Times(1)
-
-			res, err := manager.List()
-			assert.NoError(t, err)
-			assert.Equal(t, expected, res)
+			res, err := rm.List()
+			require.NoError(t, err)
+			require.Equal(t, raffles, res)
 		})
 	})
 
 	t.Run("Export non-empty collection s", func(t *testing.T) {
-		id := "raffle_id_1"
-		raf := &Raffle{ID: id, Name: "Raffle Test"} // Add more fields as needed
-		participants := []Participant{
+		raf := &Raffle{ID: mockedID, Name: "Raffle Test"}
+		prts := []Participant{
 			{ID: "p1", Name: "Participant 1"},
 			{ID: "p2", Name: "Participant 2"},
 		}
-		prizes := []Prize{
+		przs := []Prize{
 			{ID: "pr1", Name: "Prize 1"},
 			{ID: "pr2", Name: "Prize 2"},
 		}
 
-		storageMock.EXPECT().Get(id).Return(raf, nil).Times(1)
+		rsMock.EXPECT().Get(mockedID).Return(raf, nil)
 
-		prtStorage := NewMockParticipantStorage(ctrl)
-		storageMock.EXPECT().ParticipantStorage(id).Return(prtStorage).Times(1)
-		prtStorage.EXPECT().GetAll().Return(participants, nil).Times(1)
+		psMock := NewMockParticipantStorage(ctrl)
+		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
+		psMock.EXPECT().GetAll().Return(prts, nil)
 
-		przStorage := NewMockPrizeStorage(ctrl)
-		storageMock.EXPECT().PrizeStorage(id).Return(przStorage).Times(1)
-		przStorage.EXPECT().GetAll().Return(prizes, nil).Times(1)
+		pzMock := NewMockPrizeStorage(ctrl)
+		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
+		pzMock.EXPECT().GetAll().Return(przs, nil)
 
-		resp, err := manager.Export(id)
+		res, err := rm.Export(mockedID)
 		require.NoError(t, err)
-		require.NotNil(t, resp)
-		require.Equal(t, "yarmarok_"+id+".xlsx", resp.FileName)
-		require.NotEmpty(t, resp.Content)
+		require.NotNil(t, res)
+		require.Equal(t, "yarmarok_"+mockedID+".xlsx", res.FileName)
+		require.NotEmpty(t, res.Content)
 	})
 }
-
-var _ RaffleService = &RaffleManager{}
 
 func setUUIDMock(uuid string) {
 	stringUUID = func() string {

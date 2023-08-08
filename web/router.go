@@ -87,54 +87,50 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 }
 
 func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
-	organizerID, err := extractOrganizerID(req)
+	svc, err := r.getRaffleService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	raffleService := r.organizerService.RaffleService(organizerID)
-
-	m := newMethodHandler(raffleService.Create, r.logger.Logger)
-
-	m.ServeHTTP(w, req)
+	newCreate(svc.Create).Handle(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
-	raffleService, err := r.getRaffleService(req)
+	svc, err := r.getRaffleService(req)
 	if err != nil {
 		respondErr(w, err)
 		return
 	}
 
-	newNoRequestMethodHandler(raffleService.List, r.logger.Logger).ServeHTTP(w, req)
+	newList(svc.List).Handle(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
-	raffleService, err := r.getRaffleService(req)
+	svc, err := r.getRaffleService(req)
 	if err != nil {
 		respondErr(w, err)
 		return
 	}
 
-	raffleID, err := extractParam(req, raffleIDParam)
+	id, err := extractParam(req, raffleIDParam)
 	if err != nil {
 		respondErr(w, err)
 		return
 	}
 
-	resp, err := raffleService.Export(raffleID)
+	res, err := svc.Export(id)
 	if err != nil {
 		respondErr(w, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-	w.Header().Set("Content-Disposition", "attachment; filename="+resp.FileName)
+	w.Header().Set("Content-Disposition", "attachment; filename="+res.FileName)
 
-	if _, err := w.Write(resp.Content); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		r.logger.WithError(err).Error("writing xlsx failed")
+	if _, err := w.Write(res.Content); err != nil {
+		respondErr(w, err)
+		r.logger.WithError(err).Error("writing xlsx")
 	}
 }
 
