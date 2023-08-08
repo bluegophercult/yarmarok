@@ -2,108 +2,125 @@ package service
 
 import (
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-//go:generate mockgen -destination=mock_prize_storage_test.go -package=service github.com/kaznasho/yarmarok/service PrizeStorage
-
-func TestPrizeManager(t *testing.T) {
+func TestPrize(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	pzMock := NewMockPrizeStorage(ctrl)
+	pm := NewPrizeManager(pzMock)
 
-	storageMock := NewMockPrizeStorage(ctrl)
-	manager := NewPrizeManager(storageMock)
+	prz := &PrizeRequest{
+		Name:        "prize_name_1",
+		TicketCost:  1234,
+		Description: "prize_description_1",
+	}
 
-	testID := "prize_id_1"
+	mockedID := "prize_id_1"
+	mockedTime := time.Now().UTC()
+	mockedErr := assert.AnError
 
-	t.Run("add", func(t *testing.T) {
-		t.Run("prize_success", func(t *testing.T) {
-			storageMock.EXPECT().Create(gomock.Any()).Return(nil)
+	mockedPrize := Prize{
+		ID:          mockedID,
+		Name:        "prize_name_1",
+		TicketCost:  1234,
+		Description: "prize_description_1",
+		CreatedAt:   mockedTime,
+	}
 
-			res, err := manager.Create(&PrizeCreateRequest{
-				Name:        "prize_name_1",
-				TicketCost:  1234,
-				Description: "prize_description_1",
-			})
+	t.Run("create", func(t *testing.T) {
+		t.Run("error", func(t *testing.T) {
+			pzMock.EXPECT().Create(gomock.Any()).Return(mockedErr)
 
-			assert.NoError(t, err)
-			assert.NotNil(t, res)
+			res, err := pm.Create(prz)
+			require.ErrorIs(t, err, mockedErr)
+			require.Empty(t, res)
 		})
 
-		t.Run("prize_already_exists", func(t *testing.T) {
-			storageMock.EXPECT().Create(gomock.Any()).Return(ErrPrizeAlreadyExists)
+		t.Run("success", func(t *testing.T) {
+			setUUIDMock(mockedID)
+			setTimeNowMock(mockedTime)
 
-			prizeManager := NewPrizeManager(storageMock)
+			pzMock.EXPECT().Create(&mockedPrize).Return(nil)
 
-			res, err := prizeManager.Create(&PrizeCreateRequest{
-				Name:        "prize_name_1",
-				TicketCost:  1234,
-				Description: "prize_description_1",
-			})
+			resID, err := pm.Create(prz)
+			require.NoError(t, err)
+			require.Equal(t, mockedID, resID)
+		})
+	})
 
-			assert.Error(t, err)
-			assert.ErrorIs(t, err, ErrPrizeAlreadyExists)
-			assert.Nil(t, res)
+	t.Run("get", func(t *testing.T) {
+		t.Run("error", func(t *testing.T) {
+			pzMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
+
+			res, err := pm.Get(mockedID)
+			require.ErrorIs(t, err, mockedErr)
+			require.Nil(t, res)
+		})
+
+		t.Run("success", func(t *testing.T) {
+			pzMock.EXPECT().Get(mockedID).Return(&mockedPrize, nil)
+
+			prz, err := pm.Get(mockedID)
+			require.NoError(t, err)
+			require.Equal(t, &mockedPrize, prz)
 		})
 	})
 
 	t.Run("edit", func(t *testing.T) {
-		t.Run("prize_success", func(t *testing.T) {
-			storageMock.EXPECT().Get(gomock.Any()).Return(&Prize{}, nil)
-			storageMock.EXPECT().Update(gomock.Any()).Return(nil)
+		t.Run("success", func(t *testing.T) {
+			pzMock.EXPECT().Get(mockedID).Return(&mockedPrize, nil)
+			pzMock.EXPECT().Update(&mockedPrize).Return(nil)
 
-			res, err := manager.Edit(&PrizeEditRequest{ID: testID})
-
-			assert.NoError(t, err)
-			assert.NotNil(t, res)
+			err := pm.Edit(mockedID, prz)
+			require.NoError(t, err)
 		})
 
-		t.Run("prize_not_found", func(t *testing.T) {
-			storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrPrizeAlreadyExists)
+		t.Run("not_found", func(t *testing.T) {
+			pzMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
 
-			res, err := manager.Edit(&PrizeEditRequest{ID: testID})
+			err := pm.Edit(mockedID, prz)
+			require.ErrorIs(t, err, ErrNotFound)
+		})
+	})
 
-			assert.Error(t, err)
-			assert.ErrorIs(t, err, ErrPrizeAlreadyExists)
-			assert.Equal(t, &Result{StatusError}, res)
+	t.Run("delete", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			pzMock.EXPECT().Delete(mockedID).Return(nil)
+
+			err := pm.Delete(mockedID)
+			require.NoError(t, err)
 		})
 
-		t.Run("update_prize_error", func(t *testing.T) {
-			mockedErr := assert.AnError
+		t.Run("not_found", func(t *testing.T) {
+			pzMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
 
-			storageMock.EXPECT().Get(gomock.Any()).Return(&Prize{}, nil)
-			storageMock.EXPECT().Update(gomock.Any()).Return(mockedErr)
-
-			res, err := manager.Edit(&PrizeEditRequest{ID: testID})
-
-			assert.Error(t, err)
-			assert.ErrorIs(t, err, mockedErr)
-			assert.Equal(t, &Result{StatusError}, res)
+			err := pm.Delete(mockedID)
+			require.ErrorIs(t, err, ErrNotFound)
 		})
 	})
 
 	t.Run("list", func(t *testing.T) {
+		t.Run("error", func(t *testing.T) {
+			pzMock.EXPECT().GetAll().Return(nil, mockedErr)
 
-		t.Run("prize_success", func(t *testing.T) {
-			storageMock.EXPECT().GetAll().Return([]Prize{}, nil)
-
-			res, err := manager.List()
-
-			assert.NoError(t, err)
-			assert.NotNil(t, res)
+			res, err := pm.List()
+			require.ErrorIs(t, err, mockedErr)
+			require.Nil(t, res)
 		})
 
-		t.Run("prize_error", func(t *testing.T) {
-			mockedErr := assert.AnError
+		t.Run("success", func(t *testing.T) {
+			raffles := []Prize{mockedPrize, mockedPrize, mockedPrize}
 
-			storageMock.EXPECT().GetAll().Return(nil, mockedErr)
+			pzMock.EXPECT().GetAll().Return(raffles, nil)
 
-			res, err := manager.List()
-
-			assert.Error(t, err)
-			assert.ErrorIs(t, err, mockedErr)
-			assert.Nil(t, res)
+			res, err := pm.List()
+			require.NoError(t, err)
+			require.Equal(t, raffles, res)
 		})
 	})
 }

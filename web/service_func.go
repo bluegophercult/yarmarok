@@ -9,6 +9,20 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
+func (r *Router) getPrizeService(req *http.Request) (service.PrizeService, error) {
+	raffleService, err := r.getRaffleService(req)
+	if err != nil {
+		return nil, err
+	}
+
+	raffleID, err := extractParam(req, raffleIDParam)
+	if err != nil {
+		return nil, errors.Join(ErrMissingID, err)
+	}
+
+	return raffleService.PrizeService(raffleID), nil
+}
+
 func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
 	raffleService, err := r.getRaffleService(req)
 	if err != nil {
