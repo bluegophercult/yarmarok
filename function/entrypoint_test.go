@@ -85,7 +85,7 @@ func TestEntrypoint(t *testing.T) {
 
 func dummyRequest(t *testing.T) *http.Request {
 	t.Helper()
-	raffleInit := service.RaffleInitRequest{
+	raffleInit := service.RaffleRequest{
 		Name: "raffle_1",
 		Note: "note_1",
 	}
