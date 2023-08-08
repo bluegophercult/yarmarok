@@ -839,7 +839,7 @@ func TestRecoverMiddleware(t *testing.T) {
 	})
 }
 
-func TestApplOrganizerMiddleware(t *testing.T) {
+func TestApplyOrganizerMiddleware(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	osMock := mocks.NewMockOrganizerService(ctrl)
