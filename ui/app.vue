@@ -1,15 +1,15 @@
 <template>
     <div class="grid gap-2 p-4">
-        <div class="flex gap-2 justify-between">
+        <div class="flex justify-between gap-2">
             <Raffles class="flex-grow"/>
             <!-- TODO: Add if there will be a way to log out -->
             <!-- <LogOut/> -->
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <div class="grid grid-cols-1 gap-2 md:grid-cols-4">
             <div class="w-full">
                 <Prizes/>
             </div>
-            <div class="w-full col-span-1 md:col-span-2">
+            <div class="col-span-1 w-full md:col-span-2">
                 <PrizeDetails/>
             </div>
             <div class="w-full">

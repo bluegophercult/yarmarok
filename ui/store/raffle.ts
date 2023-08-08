@@ -9,7 +9,7 @@ export const useRaffleStore = defineStore({
     actions: {
         async getRaffles() {
             const { data, error } = await useApiFetch<{
-                raffles: Raffles
+                items: Raffles
             }>("/api/raffles")
             if (error.value) {
                 if (error.value.statusCode && error.value.statusCode === 500 && !window.location.href.endsWith("/api/login")) {
@@ -19,7 +19,7 @@ export const useRaffleStore = defineStore({
                 throw error.value
             }
 
-            this.raffles = data.value!.raffles || <Raffles>[]
+            this.raffles = data.value!.items || <Raffles>[]
             this.selectFirstRaffle()
         },
         async addRaffle(newRaffle: NewRaffle) {

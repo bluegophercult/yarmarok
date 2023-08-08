@@ -2,7 +2,7 @@
     <client-only>
         <transition name="m-fade">
             <div v-if="shown"
-                 class="absolute top-4 right-4 ml-4 z-10 flex items-center gap-2 rounded-lg bg-white p-2 shadow-md ring-1 ring-black ring-opacity-5 max-w-80">
+                 class="absolute top-4 right-4 z-10 ml-4 flex items-center gap-2 rounded-lg bg-white p-2 shadow-md ring-1 ring-black ring-opacity-5 max-w-80">
                 <button type="button" @click="hideNotification">
                     <Icon name="heroicons:x-mark"
                           class="h-7 w-7 text-gray-600 transition duration-200 hover:text-teal-400"/>

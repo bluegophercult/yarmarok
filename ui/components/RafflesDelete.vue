@@ -1,13 +1,13 @@
 <template>
     <TheModal :is-open="isOpen" :close-modal="closeModal">
-        <template #title>Видалити розіграш?</template>
+        <template #title>Точно видалити розіграш?</template>
 
         <div>
             {{ raffle.name }}
         </div>
 
         <div class="mt-4 flex gap-4">
-            <TheButton :click="deleteRaffle" full-width>Видалили</TheButton>
+            <TheButton :click="deleteRaffle" danger full-width>Видалили</TheButton>
             <TheButton :click="closeModal" full-width secondary>Закрити</TheButton>
         </div>
     </TheModal>
