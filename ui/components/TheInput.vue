@@ -1,8 +1,8 @@
 <template>
     <label class="flex flex-col gap-1">
         <span>{{ label }} <span v-if="required" class="text-sm text-red-400">*</span></span>
-        <input :type="number ? 'number' : 'text'" :value="modelValue ? modelValue : ''"
-               :placeholder="placeholder ? placeholder : ''" :required="required" :min="min" :max="max"
+        <input :type="number ? 'number' : 'text'" :value="modelValue ? modelValue.toString() : ''"
+               :placeholder="placeholder ? placeholder : ''" :min="min" :max="max"
                @input="$emit('update:modelValue', $event.target.value.trim())"
                class="rounded-md border-0 px-3 py-2 ring-1 ring-black ring-opacity-30 transition duration-100 focus:outline-none focus:ring-1 focus:ring-teal-400"/>
     </label>
@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 defineProps<{
-    modelValue?: string,
+    modelValue?: any,
     number?: boolean,
     min?: number,
     max?: number,

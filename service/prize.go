@@ -12,18 +12,18 @@ var (
 
 // Prize represents a prize of the application.
 type Prize struct {
-	ID          string
-	Name        string
-	TicketCost  int
-	Description string
-	CreatedAt   time.Time
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	TicketCost  int       `json:"ticketCost"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 // PrizeCreateRequest is a request for creating a new prize.
 type PrizeCreateRequest struct {
-	Name        string
-	TicketCost  int
-	Description string
+	Name        string `json:"name"`
+	TicketCost  int    `json:"ticketCost"`
+	Description string `json:"description"`
 }
 
 // PrizeEditRequest is a request for updating a prize.
@@ -31,7 +31,7 @@ type PrizeEditRequest Prize
 
 // PrizeListResult is a response for listing prizes.
 type PrizeListResult struct {
-	Prizes []Prize
+	Prizes []Prize `json:"prizes"`
 }
 
 // PrizeService is a service for prizes.

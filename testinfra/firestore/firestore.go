@@ -66,6 +66,7 @@ func RunInstance(t *testing.T) (*Instance, error) {
 
 	ctx := context.Background()
 	req := testcontainers.ContainerRequest{
+		Name:           "yarmarok-firestore",
 		FromDockerfile: fromDockerfile,
 		ExposedPorts:   []string{fmt.Sprintf("%s:%s", defaultPort, "8080/tcp")},
 		WaitingFor:     wait.ForExposedPort(),
@@ -74,8 +75,8 @@ func RunInstance(t *testing.T) (*Instance, error) {
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
+		Reuse:            true,
 	})
-
 	if err != nil {
 		return nil, fmt.Errorf("create container: %w", err)
 	}

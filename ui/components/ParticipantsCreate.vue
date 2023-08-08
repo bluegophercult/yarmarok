@@ -1,14 +1,14 @@
 <template>
-    <TheButton @click="openModal" :disabled="!selectedRaffle" full-width>Додати приз</TheButton>
+    <TheButton @click="openModal" :disabled="!selectedRaffle" full-width>Додати учасника</TheButton>
 
     <TheModal :is-open="isOpen" :close-modal="closeModal">
-        <template #title>Додати новий приз</template>
+        <template #title>Додати нового учасника</template>
 
-        <form @submit.prevent="addPrize">
+        <form @submit.prevent="addParticipant">
             <div class="flex flex-col gap-2">
-                <TheInput v-model="newPrize.name" label="Назва" required/>
-                <TheInput v-model="newPrize.ticketCost" number :min="1" label="Ціна купону" required/>
-                <TheTextArea v-model="newPrize.description" label="Опис"/>
+                <TheInput v-model="newParticipant.name" label="Ім'я" required/>
+                <TheInput v-model="newParticipant.phone" label="Номер телефону" required/>
+                <TheTextArea v-model="newParticipant.note" label="Нотатка"/>
             </div>
 
             <transition name="m-fade">
@@ -27,19 +27,19 @@
 </template>
 
 <script setup lang="ts">
-import { usePrizeStore } from "~/store/prize"
+import { useParticipantStore } from "~/store/participant"
 import { Ref } from "@vue/reactivity"
 import { ValidationError } from "yup"
-import { NewPrize, newPrizeSchema } from "~/types/prize"
+import { NewParticipant, newParticipantSchema } from "~/types/participant"
 import { useRaffleStore } from "~/store/raffle"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
 
-const prizeStore = usePrizeStore()
-const newPrize: Ref<NewPrize> = ref(<NewPrize>{
+const participantStore = useParticipantStore()
+const newParticipant: Ref<NewParticipant> = ref(<NewParticipant>{
     name: "",
-    ticketCost: 10,
+    phone: "",
     note: "",
 })
 
@@ -54,18 +54,18 @@ function openModal() {
 function closeModal() {
     isOpen.value = false
     setTimeout(() => {
-        newPrize.value = <NewPrize>{
+        newParticipant.value = <NewParticipant>{
             name: "",
-            ticketCost: 10,
+            phone: "",
             note: "",
         }
     }, 200)
 }
 
-function addPrize() {
-    newPrizeSchema.validate(newPrize.value)
+function addParticipant() {
+    newParticipantSchema.validate(newParticipant.value)
         .then(() => {
-            prizeStore.addPrize(newPrize.value)
+            participantStore.addParticipant(selectedRaffle.value!.id, newParticipant.value)
             closeModal()
         })
         .catch((e: ValidationError) => {
