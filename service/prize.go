@@ -1,13 +1,8 @@
 package service
 
 import (
-	"errors"
+	"fmt"
 	"time"
-)
-
-var (
-	ErrPrizeAlreadyExists = errors.New("prize already exists")
-	ErrPrizeNotFound      = errors.New("prize not found")
 )
 
 // Prize represents a prize of the application.
@@ -19,29 +14,25 @@ type Prize struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
-// PrizeCreateRequest is a request for creating a new prize.
-type PrizeCreateRequest struct {
+// PrizeRequest is a request for creating a new prize.
+type PrizeRequest struct {
 	Name        string `json:"name"`
 	TicketCost  int    `json:"ticketCost"`
 	Description string `json:"description"`
 }
 
-// PrizeEditRequest is a request for updating a prize.
-type PrizeEditRequest Prize
-
-// PrizeListResult is a response for listing prizes.
-type PrizeListResult struct {
-	Prizes []Prize `json:"prizes"`
-}
-
 // PrizeService is a service for prizes.
 type PrizeService interface {
-	Create(p *PrizeCreateRequest) (*CreateResult, error)
-	Edit(p *PrizeEditRequest) (*Result, error)
-	List() (*PrizeListResult, error)
+	Create(*PrizeRequest) (id string, err error)
+	Get(id string) (*Prize, error)
+	Edit(id string, p *PrizeRequest) error
+	Delete(id string) error
+	List() ([]Prize, error)
 }
 
 // PrizeStorage is a storage for prizes.
+
+//go:generate mockgen -destination=mock_prize_storage_test.go -package=service github.com/kaznasho/yarmarok/service PrizeStorage
 type PrizeStorage interface {
 	Create(*Prize) error
 	Get(id string) (*Prize, error)
@@ -61,40 +52,63 @@ func NewPrizeManager(ps PrizeStorage) *PrizeManager {
 }
 
 // Create creates a new prize
-func (pm *PrizeManager) Create(p *PrizeCreateRequest) (*CreateResult, error) {
+func (pm *PrizeManager) Create(p *PrizeRequest) (string, error) {
 	prize := toPrize(p)
 	if err := pm.prizeStorage.Create(prize); err != nil {
-		return nil, err
+		return "", fmt.Errorf("create prize: %w", err)
 	}
 
-	return &CreateResult{ID: prize.ID}, nil
+	return prize.ID, nil
 }
 
-// Edit updates a Prize TODO: edit after donate representation
-func (pm *PrizeManager) Edit(p *PrizeEditRequest) (*Result, error) {
-	prize, err := pm.prizeStorage.Get(p.ID)
+// Get returns a Prize.
+func (pm *PrizeManager) Get(id string) (*Prize, error) {
+	prize, err := pm.prizeStorage.Get(id)
 	if err != nil {
-		return &Result{StatusError}, err
+		return nil, fmt.Errorf("get prize: %w", err)
 	}
+
+	return prize, nil
+}
+
+// Edit updates a Prize.
+func (pm *PrizeManager) Edit(id string, p *PrizeRequest) error {
+	prize, err := pm.prizeStorage.Get(id)
+	if err != nil {
+		return fmt.Errorf("get prize: %w", err)
+	}
+
+	prize.Name = p.Name
+	prize.TicketCost = p.TicketCost
+	prize.Description = p.Description
 
 	if err := pm.prizeStorage.Update(prize); err != nil {
-		return &Result{StatusError}, err
+		return fmt.Errorf("update prize: %w", err)
 	}
 
-	return &Result{StatusSuccess}, nil
+	return nil
 }
 
-// List returns all prizes.
-func (pm *PrizeManager) List() (*PrizeListResult, error) {
+// Delete removes a Prize.
+func (pm *PrizeManager) Delete(id string) error {
+	if err := pm.prizeStorage.Delete(id); err != nil {
+		return fmt.Errorf("delete prize: %w", err)
+	}
+
+	return nil
+}
+
+// List returns Prize list.
+func (pm *PrizeManager) List() ([]Prize, error) {
 	prizes, err := pm.prizeStorage.GetAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get all prizes: %w", err)
 	}
 
-	return &PrizeListResult{Prizes: prizes}, nil
+	return prizes, nil
 }
 
-func toPrize(p *PrizeCreateRequest) *Prize {
+func toPrize(p *PrizeRequest) *Prize {
 	return &Prize{
 		ID:          stringUUID(),
 		Name:        p.Name,
