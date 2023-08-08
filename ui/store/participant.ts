@@ -35,12 +35,25 @@ export const useParticipantStore = defineStore({
                 ...newParticipant,
             })
         },
-        updateParticipant(updatedParticipant: Participant) {
-            // TODO: API call
+        async updateParticipant(raffleId: string, updatedParticipant: Participant) {
+            const { error } = await useApiFetch(`/api/raffles/${ raffleId }/participants/${ updatedParticipant.id }`, {
+                method: "PUT",
+                body: updatedParticipant,
+            })
+            if (error.value) {
+                throw error.value
+            }
+
             this.participants[this.participants.findIndex(participant => participant.id == updatedParticipant.id)] = updatedParticipant
         },
-        deleteParticipant(id: string) {
-            // TODO: API call
+        async deleteParticipant(raffleId: string, id: string) {
+            const { error } = await useApiFetch(`/api/raffles/${ raffleId }/participants/${ id }`, {
+                method: "DELETE",
+            })
+            if (error.value) {
+                throw error.value
+            }
+
             this.participants = this.participants.filter(participant => participant.id !== id)
         },
     },

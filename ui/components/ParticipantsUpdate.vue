@@ -28,6 +28,13 @@
 import { useParticipantStore } from "~/store/participant"
 import { newParticipantSchema, Participant } from "~/types/participant"
 import { ValidationError } from "yup"
+import { useRaffleStore } from "~/store/raffle"
+import { useNotificationStore } from "~/store/notification"
+
+const raffleStore = useRaffleStore()
+const { selectedRaffle } = storeToRefs(raffleStore)
+
+const { showError } = useNotificationStore()
 
 const participantStore = useParticipantStore()
 
@@ -49,7 +56,10 @@ onBeforeUpdate(() => {
 function updateRaffle() {
     newParticipantSchema.validate(updatedParticipant.value)
         .then(() => {
-            participantStore.updateParticipant(updatedParticipant.value)
+            participantStore.updateParticipant(selectedRaffle.value!.id, updatedParticipant.value).catch(e => {
+                console.error(e)
+                showError("Не вдалося змінити учасника!")
+            })
             props.closeModal()
         })
         .catch((e: ValidationError) => {

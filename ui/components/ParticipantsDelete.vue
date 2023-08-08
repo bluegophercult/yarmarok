@@ -16,6 +16,8 @@
 <script setup lang="ts">
 import { useParticipantStore } from "~/store/participant"
 import { Participant } from "~/types/participant"
+import { useRaffleStore } from "~/store/raffle"
+import { useNotificationStore } from "~/store/notification"
 
 const props = defineProps<{
     participant: Participant
@@ -23,12 +25,20 @@ const props = defineProps<{
     closeModal: () => void,
 }>()
 
+const raffleStore = useRaffleStore()
+const { selectedRaffle } = storeToRefs(raffleStore)
+
+const { showError } = useNotificationStore()
+
 const participantStore = useParticipantStore()
 
 function deleteParticipant() {
     props.closeModal()
     setTimeout(() => {
-        participantStore.deleteParticipant(props.participant.id)
+        participantStore.deleteParticipant(selectedRaffle.value!.id, props.participant.id).catch(e => {
+            console.error(e)
+            showError("Не вдалося видалити учасника!")
+        })
     }, 200)
 }
 </script>
