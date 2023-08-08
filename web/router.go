@@ -15,16 +15,19 @@ const (
 	ApiPath          = "/api"
 	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
+	PrizesPath       = "/prizes"
 )
 
 const (
 	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
+	prizeIDParam       = "prize_id"
 )
 
 const (
 	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
 	participantIDPlaceholder = "/{" + participantIDParam + "}"
+	prizeIDPlaceholder       = "/{" + prizeIDParam + "}"
 )
 
 // localRun is true if app is build for local run
@@ -66,18 +69,38 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	router.Use(router.headerMiddleware)
 	router.Use(router.organizerMiddleware)
 
-	router.Route(ApiPath, func(r chi.Router) { // "/api"
+	// "/api"
+	router.Route(ApiPath, func(r chi.Router) {
 		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
-		r.Route(RafflesPath, func(r chi.Router) { // "/api/raffles"
+
+		// "/api/raffles"
+		r.Route(RafflesPath, func(r chi.Router) {
 			r.Post("/", router.createRaffle)
 			r.Get("/", router.listRaffles)
-			r.Route(raffleIDPlaceholder, func(r chi.Router) { // "/api/raffles/{raffle_id}"
+
+			// "/api/raffles/{raffle_id}"
+			r.Route(raffleIDPlaceholder, func(r chi.Router) {
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
-				r.Route(ParticipantsPath, func(r chi.Router) { // "/api/raffles/{raffle_id}/participants"
+
+				// "/api/raffles/{raffle_id}/participants"
+				r.Route(ParticipantsPath, func(r chi.Router) {
 					r.Post("/", router.createParticipant)
 					r.Get("/", router.listParticipants)
+
+					// "/api/raffles/{raffle_id}/participants/{participant_id}"
 					r.Put(participantIDPlaceholder, router.editParticipant)
 					r.Delete(participantIDPlaceholder, router.deleteParticipant)
+				})
+
+				// "/api/raffles/{raffle_id}/prizes"
+				r.Route(PrizesPath, func(r chi.Router) {
+					r.Post("/", router.createPrize)
+					r.Get("/", router.listPrizes)
+
+					// "/api/raffles/{raffle_id}/prizes/{prize_id}"
+					r.Get(prizeIDPlaceholder, router.getPrize)
+					r.Put(prizeIDPlaceholder, router.editPrize)
+					r.Delete(prizeIDPlaceholder, router.deletePrize)
 				})
 			})
 		})
@@ -166,6 +189,56 @@ func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newList(svc.List).Handle(w, req)
+}
+
+func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newCreate(svc.Create).Handle(w, req)
+}
+
+func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newGet(svc.Get).Handle(w, req)
+}
+
+func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newEdit(svc.Edit).Handle(w, req)
+}
+
+func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newDelete(svc.Delete).Handle(w, req)
+}
+
+func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
 	if err != nil {
 		respondErr(w, err)
 		return
