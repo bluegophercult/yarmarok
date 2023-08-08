@@ -25,3 +25,8 @@ func NewFirestorePrizeStorage(client *firestore.CollectionRef, raffleID string) 
 		StorageBase: NewStorageBase(client, prizeIDExtractor),
 	}
 }
+
+// DonationStorage returns a donation storage.
+func (ps *FirestorePrizeStorage) DonationStorage(prizeID string) service.DonationStorage {
+	return NewFirestoreDonationStorage(ps.collectionReference.Doc(prizeID).Collection(donationCollection), ps, prizeID)
+}

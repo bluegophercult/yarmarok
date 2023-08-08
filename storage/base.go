@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kaznasho/yarmarok/service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/kaznasho/yarmarok/service"
 
 	"cloud.google.com/go/firestore"
 )
 
 // Storable is a type parameter constraint for all storable items.
 type Storable interface {
-	service.Raffle | service.Prize | service.Participant | service.Organizer
+	service.Raffle | service.Prize | service.Participant | service.Organizer | service.Donation
 }
 
 // IDExtractor is a typed function that extracts an ID from the item it serves.

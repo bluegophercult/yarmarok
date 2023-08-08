@@ -5,97 +5,111 @@ import (
 	"time"
 )
 
-var (
-	ErrDonationAlreadyExists = errors.New("donation already exists")
-	ErrDonationNotFound      = errors.New("donation not found")
-)
+type DonationService interface {
+	Create(*DonationRequest) (id string, err error)
+	Get(id string) (*Donation, error)
+	List() ([]Donation, error)
+	Edit(id string, d *DonationRequest) error
+	Delete(id string) error
+}
+
+type DonationStorage interface {
+	Create(*Donation) error
+	Get(id string) (*Donation, error)
+	GetAll() ([]Donation, error)
+	Update(*Donation) error
+	Delete(id string) error
+}
 
 type Donation struct {
 	ID            string    `json:"id"`
 	PrizeID       string    `json:"prizeId"`
 	ParticipantID string    `json:"participantId"`
 	Amount        int       `json:"amount"`
-	TicketNumber  int       `json:"ticketNumber"`
-	Description   string    `json:"description"`
+	TicketsNumber int       `json:"ticketsNumber"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
-type DonationAddRequest struct {
-	Amount      int    `json:"amount"`
-	Description string `json:"description"`
+type DonationRequest struct {
+	Amount        int    `json:"amount"`
+	ParticipantID string `json:"participantId"`
 }
 
-type DonationEditRequest Donation
+var (
+	ErrDonationAlreadyExists = errors.New("donation already exists")
+	ErrDonationNotFound      = errors.New("donation not found")
+)
 
-type DonationListResult struct {
-	Donations []Donation `json:"donations"`
-}
-
-type DonationService interface {
-	AddDonation(d *DonationAddRequest) (*CreateResult, error)
-	EditDonation(d *DonationEditRequest) (*Result, error)
-	ListDonation() (*DonationListResult, error)
-	// DeleteDonation????
-}
-
-type DonationStorage interface {
-	Create(participantStorage ParticipantStorage, prizeStorage PrizeStorage, d *Donation) error
-	Get(id string) (*Donation, error)
-	Update(*Donation) error
-	GetAll() ([]Donation, error)
-	Delete(id string) error
-}
+var _ DonationService = (*DonationManager)(nil)
 
 type DonationManager struct {
-	donationStorage    DonationStorage
-	participantStorage ParticipantStorage
-	prizeStorage       PrizeStorage
+	donationStorage DonationStorage
+	prizeStorage    PrizeStorage
 }
 
-func NewDonationManager(ds DonationStorage, ps ParticipantStorage, pzs PrizeStorage) *DonationManager {
+func NewDonationManager(ds DonationStorage, ps PrizeStorage) *DonationManager {
 	return &DonationManager{
-		donationStorage:    ds,
-		participantStorage: ps,
-		prizeStorage:       pzs,
+		donationStorage: ds,
+		prizeStorage:    ps,
 	}
 }
 
-func (dm *DonationManager) AddDonation(d *DonationAddRequest) (*CreateResult, error) {
+func (dm *DonationManager) Create(d *DonationRequest) (string, error) {
 	donation := toDonation(d)
-	if err := dm.donationStorage.Create(dm.participantStorage, dm.prizeStorage, donation); err != nil {
-		return nil, err
+
+	if err := dm.donationStorage.Create(donation); err != nil {
+		return "", err
 	}
 
-	return &CreateResult{ID: donation.ID}, nil
+	return donation.ID, nil
 }
 
-func (dm *DonationManager) EditDonation(d *DonationEditRequest) (*Result, error) {
-	donation, err := dm.donationStorage.Get(d.ID)
+func (dm *DonationManager) Edit(id string, d *DonationRequest) error {
+	donation, err := dm.donationStorage.Get(id)
 	if err != nil {
-		return &Result{StatusError}, err
+		return err
 	}
+
+	donation.Amount = d.Amount
+	donation.ParticipantID = d.ParticipantID
 
 	if err := dm.donationStorage.Update(donation); err != nil {
-		return &Result{StatusError}, err
+		return err
 	}
 
-	return &Result{StatusSuccess}, nil
+	return nil
 }
 
-func (dm *DonationManager) ListDonation() (*DonationListResult, error) {
+func (dm *DonationManager) List() ([]Donation, error) {
 	donations, err := dm.donationStorage.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	return &DonationListResult{Donations: donations}, nil
+	return donations, nil
 }
 
-func toDonation(d *DonationAddRequest) *Donation {
+func (dm *DonationManager) Get(id string) (*Donation, error) {
+	donation, err := dm.donationStorage.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return donation, nil
+}
+
+func (dm *DonationManager) Delete(id string) error {
+	if err := dm.donationStorage.Delete(id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func toDonation(d *DonationRequest) *Donation {
 	return &Donation{
-		ID:          stringUUID(),
-		Amount:      d.Amount,
-		Description: d.Description,
-		CreatedAt:   timeNow(),
+		ID:        stringUUID(),
+		Amount:    d.Amount,
+		CreatedAt: timeNow(),
 	}
 }

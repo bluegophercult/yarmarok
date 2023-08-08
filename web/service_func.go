@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+
 	"github.com/kaznasho/yarmarok/service"
 )
 
@@ -44,6 +45,20 @@ func (r *Router) getRaffleService(req *http.Request) (service.RaffleService, err
 	}
 
 	return r.organizerService.RaffleService(organizerID), nil
+}
+
+func (r *Router) getDonationService(req *http.Request) (service.DonationService, error) {
+	prizeService, err := r.getPrizeService(req)
+	if err != nil {
+		return nil, err
+	}
+
+	prizeID, err := extractParam(req, prizeIDParam)
+	if err != nil {
+		return nil, errors.Join(ErrMissingID, err)
+	}
+
+	return prizeService.DonationService(prizeID), nil
 }
 
 func extractOrganizerID(r *http.Request) (id string, err error) {

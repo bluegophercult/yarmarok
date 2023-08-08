@@ -16,18 +16,21 @@ const (
 	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
 	PrizesPath       = "/prizes"
+	DonationsPath    = "/donations"
 )
 
 const (
 	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
 	prizeIDParam       = "prize_id"
+	donationIDParam    = "donation_id"
 )
 
 const (
 	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
 	participantIDPlaceholder = "/{" + participantIDParam + "}"
 	prizeIDPlaceholder       = "/{" + prizeIDParam + "}"
+	donationIDPlaceholder    = "/{" + donationIDParam + "}"
 )
 
 // localRun is true if app is build for local run
@@ -105,7 +108,18 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 						r.Get("/", router.getPrize)
 						r.Put("/", router.editPrize)
 						r.Delete("/", router.deletePrize)
+
+						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
+						r.Route(DonationsPath, func(r chi.Router) {
+							r.Post("/", router.createDonation)
+							r.Get("/", router.listDonations)
+
+							r.Get(donationIDPlaceholder, router.getDonation)
+							r.Put(donationIDPlaceholder, router.editDonation)
+							r.Delete(donationIDPlaceholder, router.deleteDonation)
+						})
 					})
+
 				})
 			})
 		})
@@ -270,4 +284,44 @@ func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
 	}
 
 	newCreate(svc.Create).Handle(w, req)
+}
+
+func (r *Router) getDonation(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getDonationService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newGet(svc.Get).Handle(w, req)
+}
+
+func (r *Router) listDonations(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getDonationService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newList(svc.List).Handle(w, req)
+}
+
+func (r *Router) editDonation(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getDonationService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newEdit(svc.Edit).Handle(w, req)
+}
+
+func (r *Router) deleteDonation(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getDonationService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newDelete(svc.Delete).Handle(w, req)
 }

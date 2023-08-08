@@ -28,6 +28,7 @@ type PrizeService interface {
 	Edit(id string, p *PrizeRequest) error
 	Delete(id string) error
 	List() ([]Prize, error)
+	DonationService(id string) DonationService
 }
 
 // PrizeStorage is a storage for prizes.
@@ -39,6 +40,7 @@ type PrizeStorage interface {
 	Update(*Prize) error
 	GetAll() ([]Prize, error)
 	Delete(id string) error
+	DonationStorage(id string) DonationStorage
 }
 
 // PrizeManager is an implementation of PrizeService.
@@ -106,6 +108,11 @@ func (pm *PrizeManager) List() ([]Prize, error) {
 	}
 
 	return prizes, nil
+}
+
+// DonationService is a service for donations.
+func (pm *PrizeManager) DonationService(prizeID string) DonationService {
+	return NewDonationManager(pm.prizeStorage.DonationStorage(prizeID), pm.prizeStorage)
 }
 
 func toPrize(p *PrizeRequest) *Prize {
