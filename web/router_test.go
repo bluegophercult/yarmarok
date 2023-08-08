@@ -142,6 +142,77 @@ func TestRaffle(t *testing.T) {
 		})
 	})
 
+	t.Run("edit_raffle", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			raffleUpd := &service.RaffleRequest{
+				Name: "raffle_1",
+				Note: "note_1",
+			}
+
+			encoded, err := json.Marshal(raffleUpd)
+			require.NoError(t, err)
+
+			body := bytes.NewReader(encoded)
+
+			req, err := newRequestWithOrigin(http.MethodPut, joinPath(rafflePath, raffleID), body)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, organizerID)
+			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
+
+			rsMock := mocks.NewMockRaffleService(ctrl)
+			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+			rsMock.EXPECT().Edit(raffleID, raffleUpd).Return(nil)
+
+			rw := httptest.NewRecorder()
+			router.ServeHTTP(rw, req)
+			require.Equal(t, http.StatusOK, rw.Code)
+		})
+
+		t.Run("error", func(t *testing.T) {
+			upd := &service.RaffleRequest{
+				Name: "raffle_1",
+				Note: "note_1",
+			}
+
+			encoded, err := json.Marshal(upd)
+			require.NoError(t, err)
+
+			body := bytes.NewReader(encoded)
+
+			req, err := newRequestWithOrigin(http.MethodPut, joinPath(rafflePath, raffleID), body)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, organizerID)
+			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
+
+			rsMock := mocks.NewMockRaffleService(ctrl)
+			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+			rsMock.EXPECT().Edit(raffleID, upd).Return(errors.New("test error"))
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusInternalServerError, writer.Code)
+		})
+
+		t.Run("empty_body", func(t *testing.T) {
+			req, err := newRequestWithOrigin(http.MethodPut, joinPath(rafflePath, raffleID), emptyBody())
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, organizerID)
+			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
+
+			rsMock := mocks.NewMockRaffleService(ctrl)
+			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusInternalServerError, writer.Code)
+		})
+	})
+
 	t.Run("list_raffles", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			dummyTime := time.Now().UTC()

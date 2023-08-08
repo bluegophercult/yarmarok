@@ -49,6 +49,20 @@ func (mr *MockRaffleServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRaffleService)(nil).Create), arg0)
 }
 
+// Edit mocks base method.
+func (m *MockRaffleService) Edit(arg0 string, arg1 *service.RaffleRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Edit", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Edit indicates an expected call of Edit.
+func (mr *MockRaffleServiceMockRecorder) Edit(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Edit", reflect.TypeOf((*MockRaffleService)(nil).Edit), arg0, arg1)
+}
+
 // Export mocks base method.
 func (m *MockRaffleService) Export(arg0 string) (*service.RaffleExportResult, error) {
 	m.ctrl.T.Helper()
