@@ -33,7 +33,7 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("create", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Create(gomock.Any()).Return(mockedErr).Times(1)
+			rsMock.EXPECT().Create(gomock.Any()).Return(mockedErr)
 
 			res, err := rm.Create(&req)
 			require.ErrorIs(t, err, mockedErr)
@@ -44,7 +44,7 @@ func TestRaffle(t *testing.T) {
 			setUUIDMock(mockedID)
 			setTimeNowMock(mockedTime)
 
-			rsMock.EXPECT().Create(&mockedRaffle).Return(nil).Times(1)
+			rsMock.EXPECT().Create(&mockedRaffle).Return(nil)
 
 			resID, err := rm.Create(&req)
 			require.NoError(t, err)
@@ -54,7 +54,7 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("get", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, mockedErr).Times(1)
+			rsMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
 
 			res, err := rm.Get(mockedID)
 			require.ErrorIs(t, err, mockedErr)
@@ -62,17 +62,17 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil).Times(1)
+			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
 
-			id, err := rm.Get(mockedID)
+			raf, err := rm.Get(mockedID)
 			require.NoError(t, err)
-			require.Equal(t, &mockedRaffle, id)
+			require.Equal(t, &mockedRaffle, raf)
 		})
 	})
 
 	t.Run("list", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().GetAll().Return(nil, mockedErr).Times(1)
+			rsMock.EXPECT().GetAll().Return(nil, mockedErr)
 
 			res, err := rm.List()
 			require.ErrorIs(t, err, mockedErr)
@@ -80,9 +80,9 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			raffles := []Raffle{mockedRaffle, mockedRaffle}
+			raffles := []Raffle{mockedRaffle, mockedRaffle, mockedRaffle}
 
-			rsMock.EXPECT().GetAll().Return(raffles, nil).Times(1)
+			rsMock.EXPECT().GetAll().Return(raffles, nil)
 
 			res, err := rm.List()
 			require.NoError(t, err)
@@ -101,15 +101,15 @@ func TestRaffle(t *testing.T) {
 			{ID: "pr2", Name: "Prize 2"},
 		}
 
-		rsMock.EXPECT().Get(mockedID).Return(raf, nil).Times(1)
+		rsMock.EXPECT().Get(mockedID).Return(raf, nil)
 
 		psMock := NewMockParticipantStorage(ctrl)
-		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock).Times(1)
-		psMock.EXPECT().GetAll().Return(prts, nil).Times(1)
+		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
+		psMock.EXPECT().GetAll().Return(prts, nil)
 
 		pzMock := NewMockPrizeStorage(ctrl)
-		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock).Times(1)
-		pzMock.EXPECT().GetAll().Return(przs, nil).Times(1)
+		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
+		pzMock.EXPECT().GetAll().Return(przs, nil)
 
 		res, err := rm.Export(mockedID)
 		require.NoError(t, err)
