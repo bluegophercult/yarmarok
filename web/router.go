@@ -261,3 +261,13 @@ func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 
 	newList(svc.List).Handle(w, req)
 }
+
+func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getDonationService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newCreate(svc.Create).Handle(w, req)
+}
