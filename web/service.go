@@ -12,7 +12,7 @@ var ErrNotImplemented = errors.New("not implemented")
 // I - new/updated entity; O - output entity
 type (
 	Creator[I any] interface{ Create(I) (string, error) }
-	Getter[O any]  interface{ Get(string) (O, error) }
+	Getter[O any]  interface{ Get(string) (*O, error) }
 	Editor[I any]  interface{ Edit(string, I) error }
 	Deleter        interface{ Delete(string) error }
 	Lister[O any]  interface{ List() ([]O, error) }
@@ -47,7 +47,7 @@ func (s Service[T, _, O]) Get(rw http.ResponseWriter, req *http.Request) {
 		respondErr(rw, err)
 		return
 	}
-	newHandler[Get[O]](svc.Get).Handle(rw, req)
+	newHandler[Get[*O]](svc.Get).Handle(rw, req)
 }
 
 func (s Service[T, I, _]) Edit(rw http.ResponseWriter, req *http.Request) {
