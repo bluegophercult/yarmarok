@@ -80,6 +80,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 
 			// "/api/raffles/{raffle_id}"
 			r.Route(raffleIDPlaceholder, func(r chi.Router) {
+				r.Put("/", router.editRaffle)
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
 
 				// "/api/raffles/{raffle_id}/participants"
@@ -88,8 +89,10 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 					r.Get("/", router.listParticipants)
 
 					// "/api/raffles/{raffle_id}/participants/{participant_id}"
-					r.Put(participantIDPlaceholder, router.editParticipant)
-					r.Delete(participantIDPlaceholder, router.deleteParticipant)
+					r.Route(participantIDPlaceholder, func(r chi.Router) {
+						r.Put("/", router.editParticipant)
+						r.Delete("/", router.deleteParticipant)
+					})
 				})
 
 				// "/api/raffles/{raffle_id}/prizes"
@@ -98,9 +101,11 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 					r.Get("/", router.listPrizes)
 
 					// "/api/raffles/{raffle_id}/prizes/{prize_id}"
-					r.Get(prizeIDPlaceholder, router.getPrize)
-					r.Put(prizeIDPlaceholder, router.editPrize)
-					r.Delete(prizeIDPlaceholder, router.deletePrize)
+					r.Route(prizeIDPlaceholder, func(r chi.Router) {
+						r.Get("/", router.getPrize)
+						r.Put("/", router.editPrize)
+						r.Delete("/", router.deletePrize)
+					})
 				})
 			})
 		})
@@ -117,6 +122,16 @@ func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	newCreate(svc.Create).Handle(w, req)
+}
+
+func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getRaffleService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newEdit(svc.Edit).Handle(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {

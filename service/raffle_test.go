@@ -15,7 +15,7 @@ func TestRaffle(t *testing.T) {
 	rsMock := NewMockRaffleStorage(ctrl)
 	rm := NewRaffleManager(rsMock)
 
-	req := RaffleRequest{
+	raf := RaffleRequest{
 		Name: "raffle_name_1",
 		Note: "raffle_note_1",
 	}
@@ -26,8 +26,8 @@ func TestRaffle(t *testing.T) {
 
 	mockedRaffle := Raffle{
 		ID:        mockedID,
-		Name:      req.Name,
-		Note:      req.Note,
+		Name:      raf.Name,
+		Note:      raf.Note,
 		CreatedAt: mockedTime,
 	}
 
@@ -35,7 +35,7 @@ func TestRaffle(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
 			rsMock.EXPECT().Create(gomock.Any()).Return(mockedErr)
 
-			res, err := rm.Create(&req)
+			res, err := rm.Create(&raf)
 			require.ErrorIs(t, err, mockedErr)
 			require.Empty(t, res)
 		})
@@ -46,7 +46,7 @@ func TestRaffle(t *testing.T) {
 
 			rsMock.EXPECT().Create(&mockedRaffle).Return(nil)
 
-			resID, err := rm.Create(&req)
+			resID, err := rm.Create(&raf)
 			require.NoError(t, err)
 			require.Equal(t, mockedID, resID)
 		})
@@ -67,6 +67,21 @@ func TestRaffle(t *testing.T) {
 			raf, err := rm.Get(mockedID)
 			require.NoError(t, err)
 			require.Equal(t, &mockedRaffle, raf)
+		})
+	})
+
+	t.Run("edit", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
+			rsMock.EXPECT().Update(&mockedRaffle).Return(nil)
+			err := rm.Edit(mockedID, &raf)
+			require.NoError(t, err)
+		})
+
+		t.Run("not_found", func(t *testing.T) {
+			rsMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
+			err := rm.Edit(mockedID, &raf)
+			require.ErrorIs(t, err, ErrNotFound)
 		})
 	})
 

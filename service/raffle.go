@@ -40,6 +40,7 @@ type Raffle struct {
 type RaffleService interface {
 	Create(*RaffleRequest) (id string, err error)
 	Get(id string) (*Raffle, error)
+	Edit(id string, r *RaffleRequest) error
 	List() ([]Raffle, error)
 	Export(id string) (*RaffleExportResult, error)
 	ParticipantService(id string) ParticipantService
@@ -52,6 +53,7 @@ type RaffleService interface {
 type RaffleStorage interface {
 	Create(*Raffle) error
 	Get(id string) (*Raffle, error)
+	Update(*Raffle) error
 	GetAll() ([]Raffle, error)
 	ParticipantStorage(id string) ParticipantStorage
 	PrizeStorage(id string) PrizeStorage
@@ -90,6 +92,23 @@ func (rm *RaffleManager) Create(raf *RaffleRequest) (string, error) {
 // Get returns a raffle by id.
 func (rm *RaffleManager) Get(id string) (*Raffle, error) {
 	return rm.raffleStorage.Get(id)
+}
+
+// Edit edits a raffle.
+func (rm *RaffleManager) Edit(id string, r *RaffleRequest) error {
+	raffle, err := rm.Get(id)
+	if err != nil {
+		return fmt.Errorf("get raffle: %w", err)
+	}
+
+	raffle.Name = r.Name
+	raffle.Note = r.Note
+
+	if err := rm.raffleStorage.Update(raffle); err != nil {
+		return fmt.Errorf("update raffle: %w", err)
+	}
+
+	return nil
 }
 
 // List lists raffles in organizer's scope.
