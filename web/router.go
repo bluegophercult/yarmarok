@@ -74,37 +74,40 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
 
 		// "/api/raffles"
+		raffle := newService[service.RaffleService, *service.RaffleRequest, service.Raffle](router.getRaffleService)
 		r.Route(RafflesPath, func(r chi.Router) {
-			r.Post("/", router.createRaffle)
-			r.Get("/", router.listRaffles)
+			r.Post("/", raffle.Create)
+			r.Get("/", raffle.List)
 
 			// "/api/raffles/{raffle_id}"
 			r.Route(raffleIDPlaceholder, func(r chi.Router) {
-				r.Put("/", router.editRaffle)
+				r.Put("/", raffle.Edit)
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
 
 				// "/api/raffles/{raffle_id}/participants"
+				participant := newService[service.ParticipantService, *service.ParticipantRequest, service.Participant](router.getParticipantService)
 				r.Route(ParticipantsPath, func(r chi.Router) {
-					r.Post("/", router.createParticipant)
-					r.Get("/", router.listParticipants)
+					r.Post("/", participant.Create)
+					r.Get("/", participant.List)
 
 					// "/api/raffles/{raffle_id}/participants/{participant_id}"
 					r.Route(participantIDPlaceholder, func(r chi.Router) {
-						r.Put("/", router.editParticipant)
-						r.Delete("/", router.deleteParticipant)
+						r.Put("/", participant.Edit)
+						r.Delete("/", participant.Delete)
 					})
 				})
 
 				// "/api/raffles/{raffle_id}/prizes"
+				prize := newService[service.PrizeService, *service.PrizeRequest, service.Prize](router.getPrizeService)
 				r.Route(PrizesPath, func(r chi.Router) {
-					r.Post("/", router.createPrize)
-					r.Get("/", router.listPrizes)
+					r.Post("/", prize.Create)
+					r.Get("/", prize.List)
 
 					// "/api/raffles/{raffle_id}/prizes/{prize_id}"
 					r.Route(prizeIDPlaceholder, func(r chi.Router) {
-						r.Get("/", router.getPrize)
-						r.Put("/", router.editPrize)
-						r.Delete("/", router.deletePrize)
+						r.Get("/", prize.Get)
+						r.Put("/", prize.Edit)
+						r.Delete("/", prize.Delete)
 					})
 				})
 			})
@@ -112,36 +115,6 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	})
 
 	return router, nil
-}
-
-func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getRaffleService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newCreate(svc.Create).Handle(w, req)
-}
-
-func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getRaffleService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newEdit(svc.Edit).Handle(w, req)
-}
-
-func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getRaffleService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newList(svc.List).Handle(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
@@ -170,94 +143,4 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 		respondErr(w, err)
 		r.logger.WithError(err).Error("writing xlsx")
 	}
-}
-
-func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getParticipantService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newCreate(svc.Create).Handle(w, req)
-}
-
-func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getParticipantService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newEdit(svc.Edit).Handle(w, req)
-}
-
-func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getParticipantService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newDelete(svc.Delete).Handle(w, req)
-}
-
-func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getParticipantService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newList(svc.List).Handle(w, req)
-}
-
-func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getPrizeService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newCreate(svc.Create).Handle(w, req)
-}
-
-func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getPrizeService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newGet(svc.Get).Handle(w, req)
-}
-
-func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getPrizeService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newEdit(svc.Edit).Handle(w, req)
-}
-
-func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getPrizeService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newDelete(svc.Delete).Handle(w, req)
-}
-
-func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getPrizeService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	newList(svc.List).Handle(w, req)
 }
