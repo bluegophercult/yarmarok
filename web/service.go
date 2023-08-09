@@ -78,7 +78,7 @@ func (s Service[T, _, O]) List(rw http.ResponseWriter, req *http.Request) {
 	newHandler[List[O]](svc.List).Handle(rw, req)
 }
 
-// extractService fetch a service T from service func using request data
+// extractService fetch a service T from service func using request data.
 func extractService[T, S any](fn ServiceFunc[T], req *http.Request) (S, error) {
 	var svc S
 
