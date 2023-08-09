@@ -2,96 +2,136 @@ package service
 
 import (
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
 )
 
-//go:generate mockgen -destination=mock_donation_storage_test.go -package=service github.com/kaznasho/yarmarok/service DonationStorage
-
-func TestDonationManagerAddDonation(t *testing.T) {
+func TestDonationManagerCreateDonation(t *testing.T) {
 	ctrl := gomock.NewController(t)
-
 	storageMock := NewMockDonationStorage(ctrl)
-	participantStorageMock := NewMockParticipantStorage(ctrl)
 	prizeStorageMock := NewMockPrizeStorage(ctrl)
+	manager := NewDonationManager(storageMock, prizeStorageMock)
 
-	manager := NewDonationManager(storageMock, participantStorageMock, prizeStorageMock)
+	t.Run("Add donation", func(t *testing.T) {
+		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
 
-	testAmount := 100
-	testDescription := "Test description in donation"
-
-	t.Run("add donation", func(t *testing.T) {
-		storageMock.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
-
-		_, err := manager.AddDonation(&DonationAddRequest{
-			Amount:      testAmount,
-			Description: testDescription,
-		})
-
+		_, err := manager.Create(&DonationRequest{Amount: 777, ParticipantID: stringUUID()})
 		assert.NoError(t, err)
 	})
-	t.Run("add_already_exists", func(t *testing.T) {
+
+	t.Run("Add already existing donation", func(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		storageMock.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(ErrDonationAlreadyExists)
+		storageMock.EXPECT().Create(gomock.Any()).Return(ErrDonationAlreadyExists)
 
-		donationManager := NewDonationManager(storageMock, participantStorageMock, prizeStorageMock)
-
-		_, err := donationManager.AddDonation(&DonationAddRequest{
-			Amount:      testAmount,
-			Description: testDescription,
-		})
-
+		donationManager := NewDonationManager(storageMock, prizeStorageMock)
+		_, err := donationManager.Create(&DonationRequest{Amount: 777, ParticipantID: stringUUID()})
 		assert.ErrorIs(t, err, ErrDonationAlreadyExists)
 	})
 }
 
 func TestDonationManagerEditDonation(t *testing.T) {
 	ctrl := gomock.NewController(t)
-
 	storageMock := NewMockDonationStorage(ctrl)
-	participantStorageMock := NewMockParticipantStorage(ctrl)
 	prizeStorageMock := NewMockPrizeStorage(ctrl)
-
-	manager := NewDonationManager(storageMock, participantStorageMock, prizeStorageMock)
-
+	manager := NewDonationManager(storageMock, prizeStorageMock)
 	testID := "donation_test_id"
 
-	t.Run("edit donation", func(t *testing.T) {
-		storageMock.EXPECT().Get(gomock.Any()).Return(&Donation{}, nil)
-		storageMock.EXPECT().Update(gomock.Any()).Return(nil)
+	t.Run("Edit donation", func(t *testing.T) {
+		donationRequest := &DonationRequest{Amount: 999, ParticipantID: "participant_test_id"}
+		donation := &Donation{ParticipantID: "participant_test_id", Amount: 999}
+		storageMock.EXPECT().Get(testID).Return(&Donation{}, nil)
+		storageMock.EXPECT().Update(donation).Return(nil)
 
-		_, err := manager.EditDonation(&DonationEditRequest{ID: testID})
-
+		err := manager.Edit(testID, donationRequest)
 		assert.NoError(t, err)
 	})
 
-	t.Run("donation not found", func(t *testing.T) {
-		storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrDonationNotFound)
+	t.Run("Edit not found donation", func(t *testing.T) {
+		storageMock.EXPECT().Get(testID).Return(nil, ErrDonationNotFound)
 
-		_, err := manager.EditDonation(&DonationEditRequest{ID: testID})
-
+		err := manager.Edit(testID, &DonationRequest{Amount: 999, ParticipantID: "participant_test_id"})
 		assert.ErrorIs(t, err, ErrDonationNotFound)
 	})
 }
 
-func TestDonationManagerListDonation(t *testing.T) {
+func TestDonationManagerListDonations(t *testing.T) {
 	ctrl := gomock.NewController(t)
-
 	storageMock := NewMockDonationStorage(ctrl)
-	participantStorageMock := NewMockParticipantStorage(ctrl)
 	prizeStorageMock := NewMockPrizeStorage(ctrl)
+	manager := NewDonationManager(storageMock, prizeStorageMock)
 
-	manager := NewDonationManager(storageMock, participantStorageMock, prizeStorageMock)
+	t.Run("Success", func(t *testing.T) {
+		date := time.Now()
+		donations := []Donation{
+			{ID: "1", PrizeID: "1", ParticipantID: "1", Amount: 10, TicketsNumber: 1, CreatedAt: date},
+			{ID: "2", PrizeID: "1", ParticipantID: "2", Amount: 20, TicketsNumber: 2, CreatedAt: date.Add(time.Second)},
+		}
+		storageMock.EXPECT().GetAll().Return(donations, nil)
 
-	t.Run("list donations", func(t *testing.T) {
-		storageMock.EXPECT().GetAll().Return([]Donation{}, nil)
-
-		_, err := manager.ListDonation()
-
+		res, err := manager.List()
 		assert.NoError(t, err)
+		require.Equal(t, donations, res)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		storageMock.EXPECT().GetAll().Return(nil, assert.AnError)
+
+		res, err := manager.List()
+		require.ErrorIs(t, err, assert.AnError)
+		require.Nil(t, res)
+	})
+}
+
+func TestDonationManagerGetDonations(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	storageMock := NewMockDonationStorage(ctrl)
+	prizeStorageMock := NewMockPrizeStorage(ctrl)
+	manager := NewDonationManager(storageMock, prizeStorageMock)
+
+	t.Run("Success", func(t *testing.T) {
+		donation := &Donation{ID: "1", PrizeID: "1", ParticipantID: "1", Amount: 10, TicketsNumber: 1, CreatedAt: time.Now()}
+		storageMock.EXPECT().Get(donation.ID).Return(donation, nil)
+
+		res, err := manager.Get(donation.ID)
+		assert.NoError(t, err)
+		require.Equal(t, donation, res)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		donation := &Donation{ID: "1", PrizeID: "1", ParticipantID: "1", Amount: 10, TicketsNumber: 1, CreatedAt: time.Now()}
+		storageMock.EXPECT().Get(donation.ID).Return(nil, assert.AnError)
+
+		res, err := manager.Get(donation.ID)
+		require.ErrorIs(t, err, assert.AnError)
+		require.Nil(t, res)
+	})
+}
+
+func TestDonationManagerDeleteDonation(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	storageMock := NewMockDonationStorage(ctrl)
+	prizeStorageMock := NewMockPrizeStorage(ctrl)
+	manager := NewDonationManager(storageMock, prizeStorageMock)
+
+	t.Run("Success", func(t *testing.T) {
+		id := "donation_id"
+		storageMock.EXPECT().Delete(id).Return(nil)
+
+		err := manager.Delete(id)
+		require.NoError(t, err)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		id := "donation_id"
+		storageMock.EXPECT().Delete(id).Return(assert.AnError)
+
+		err := manager.Delete(id)
+		require.ErrorIs(t, err, assert.AnError)
 	})
 }

@@ -13,6 +13,7 @@ type DonationService interface {
 	Delete(id string) error
 }
 
+//go:generate mockgen -destination=mock_donation_storage_test.go -package=service github.com/kaznasho/yarmarok/service DonationStorage
 type DonationStorage interface {
 	Create(*Donation) error
 	Get(id string) (*Donation, error)
@@ -108,8 +109,9 @@ func (dm *DonationManager) Delete(id string) error {
 
 func toDonation(d *DonationRequest) *Donation {
 	return &Donation{
-		ID:        stringUUID(),
-		Amount:    d.Amount,
-		CreatedAt: timeNow(),
+		ID:            stringUUID(),
+		Amount:        d.Amount,
+		ParticipantID: d.ParticipantID,
+		CreatedAt:     timeNow(),
 	}
 }

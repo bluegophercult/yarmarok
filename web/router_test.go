@@ -29,6 +29,7 @@ import (
 //go:generate mockgen -destination=mocks/mock_raffle.go -package=mocks github.com/kaznasho/yarmarok/service RaffleService
 //go:generate mockgen -destination=mocks/mock_participant.go -package=mocks github.com/kaznasho/yarmarok/service ParticipantService
 //go:generate mockgen -destination=mocks/mock_prize.go -package=mocks github.com/kaznasho/yarmarok/service PrizeService
+//go:generate mockgen -destination=mocks/mock_donation.go -package=mocks github.com/kaznasho/yarmarok/service DonationService
 
 func TestLogin(t *testing.T) {
 	ctrl := gomock.NewController(t)
