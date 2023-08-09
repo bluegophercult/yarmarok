@@ -1,47 +1,37 @@
 package service
 
 import (
-	"errors"
+	"fmt"
 	"time"
-)
-
-var (
-	ErrParticipantAlreadyExists = errors.New("participant already exists")
-	ErrParticipantNotFound      = errors.New("participant not found")
 )
 
 // Participant represents a participant of the application.
 type Participant struct {
-	ID        string
-	Name      string
-	Phone     string
-	Note      string
-	CreatedAt time.Time
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Phone     string    `json:"phone"`
+	Note      string    `json:"note"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
-// ParticipantAddRequest is a request for creating a new participant.
-type ParticipantAddRequest struct {
-	Name  string
-	Phone string
-	Note  string
-}
-
-// ParticipantEditRequest is a request for updating a participant.
-type ParticipantEditRequest Participant
-
-// ParticipantListResult is a response for listing participants.
-type ParticipantListResult struct {
-	Participants []Participant
+// ParticipantRequest is a request for creating a new/updated participant.
+type ParticipantRequest struct {
+	Name  string `json:"name"`
+	Phone string `json:"phone"`
+	Note  string `json:"note"`
 }
 
 // ParticipantService is a service for participants.
 type ParticipantService interface {
-	Create(p *ParticipantAddRequest) (*CreateResult, error)
-	Edit(p *ParticipantEditRequest) (*Result, error)
-	List() (*ParticipantListResult, error)
+	Create(p *ParticipantRequest) (id string, err error)
+	Edit(id string, p *ParticipantRequest) error
+	Delete(id string) error
+	List() ([]Participant, error)
 }
 
 // ParticipantStorage is a storage for participants.
+//
+//go:generate mockgen -destination=mock_participant_storage_test.go -package=service github.com/kaznasho/yarmarok/service ParticipantStorage
 type ParticipantStorage interface {
 	Create(*Participant) error
 	Get(id string) (*Participant, error)
@@ -61,44 +51,53 @@ func NewParticipantManager(ps ParticipantStorage) *ParticipantManager {
 }
 
 // Create creates a new participant.
-func (pm *ParticipantManager) Create(p *ParticipantAddRequest) (*CreateResult, error) {
-	participant := toParticipant(p)
-	if err := pm.participantStorage.Create(participant); err != nil {
-		return nil, err
+func (pm *ParticipantManager) Create(p *ParticipantRequest) (string, error) {
+	prt := toParticipant(p)
+	if err := pm.participantStorage.Create(prt); err != nil {
+		return "", fmt.Errorf("creating participant: %w", err)
 	}
 
-	return &CreateResult{ID: participant.ID}, nil
+	return prt.ID, nil
 }
 
 // Edit updates a participant.
-func (pm *ParticipantManager) Edit(p *ParticipantEditRequest) (*Result, error) {
-	participant, err := pm.participantStorage.Get(p.ID)
+func (pm *ParticipantManager) Edit(id string, p *ParticipantRequest) error {
+	prt, err := pm.participantStorage.Get(id)
 	if err != nil {
-		return &Result{StatusError}, err
+		return fmt.Errorf("getting participant: %w", err)
 	}
 
-	participant.Name = p.Name
-	participant.Phone = p.Phone
-	participant.Note = p.Note
+	prt.Name = p.Name
+	prt.Phone = p.Phone
+	prt.Note = p.Note
 
-	if err := pm.participantStorage.Update(participant); err != nil {
-		return &Result{StatusError}, err
+	if err := pm.participantStorage.Update(prt); err != nil {
+		return fmt.Errorf("updating participant: %w", err)
 	}
 
-	return &Result{StatusSuccess}, nil
+	return nil
+}
+
+// Delete deletes a participant.
+func (pm *ParticipantManager) Delete(id string) error {
+	if err := pm.participantStorage.Delete(id); err != nil {
+		return fmt.Errorf("deleting participant: %w", err)
+	}
+
+	return nil
 }
 
 // List returns all participants.
-func (pm *ParticipantManager) List() (*ParticipantListResult, error) {
-	participants, err := pm.participantStorage.GetAll()
+func (pm *ParticipantManager) List() ([]Participant, error) {
+	prts, err := pm.participantStorage.GetAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getting all participants: %w", err)
 	}
 
-	return &ParticipantListResult{Participants: participants}, nil
+	return prts, nil
 }
 
-func toParticipant(p *ParticipantAddRequest) *Participant {
+func toParticipant(p *ParticipantRequest) *Participant {
 	return &Participant{
 		ID:        stringUUID(),
 		Name:      p.Name,

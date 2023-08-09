@@ -3,6 +3,8 @@
             :class="[
                 disabled ?
                      'bg-gray-100 text-gray-400 ring-gray-600' :
+                danger ?
+                    'bg-red-100 text-red-950 hover:bg-red-200 focus:bg-red-200 ring-red-600' :
                 secondary ?
                     'bg-gray-100 text-black hover:bg-gray-200 focus:bg-gray-200 ring-gray-600' :
                     'bg-teal-100 text-teal-950 hover:bg-teal-200 focus:bg-teal-200 ring-teal-600',
@@ -18,6 +20,7 @@ defineProps<{
     click?: () => void,
     submit?: boolean,
     secondary?: boolean,
+    danger?: boolean,
     disabled?: boolean,
     fullWidth?: boolean,
 }>()

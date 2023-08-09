@@ -35,10 +35,10 @@ func (m *MockRaffleService) EXPECT() *MockRaffleServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockRaffleService) Create(arg0 *service.RaffleInitRequest) (*service.CreateResult, error) {
+func (m *MockRaffleService) Create(arg0 *service.RaffleRequest) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", arg0)
-	ret0, _ := ret[0].(*service.CreateResult)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,11 +49,25 @@ func (mr *MockRaffleServiceMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRaffleService)(nil).Create), arg0)
 }
 
+// Edit mocks base method.
+func (m *MockRaffleService) Edit(arg0 string, arg1 *service.RaffleRequest) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Edit", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Edit indicates an expected call of Edit.
+func (mr *MockRaffleServiceMockRecorder) Edit(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Edit", reflect.TypeOf((*MockRaffleService)(nil).Edit), arg0, arg1)
+}
+
 // Export mocks base method.
-func (m *MockRaffleService) Export(arg0 string) (*service.RaffleExportResponse, error) {
+func (m *MockRaffleService) Export(arg0 string) (*service.RaffleExportResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Export", arg0)
-	ret0, _ := ret[0].(*service.RaffleExportResponse)
+	ret0, _ := ret[0].(*service.RaffleExportResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -80,10 +94,10 @@ func (mr *MockRaffleServiceMockRecorder) Get(arg0 interface{}) *gomock.Call {
 }
 
 // List mocks base method.
-func (m *MockRaffleService) List() (*service.RaffleListResponse, error) {
+func (m *MockRaffleService) List() ([]service.Raffle, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List")
-	ret0, _ := ret[0].(*service.RaffleListResponse)
+	ret0, _ := ret[0].([]service.Raffle)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

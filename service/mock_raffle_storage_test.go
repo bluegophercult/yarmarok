@@ -104,3 +104,17 @@ func (mr *MockRaffleStorageMockRecorder) PrizeStorage(arg0 interface{}) *gomock.
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrizeStorage", reflect.TypeOf((*MockRaffleStorage)(nil).PrizeStorage), arg0)
 }
+
+// Update mocks base method.
+func (m *MockRaffleStorage) Update(arg0 *Raffle) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockRaffleStorageMockRecorder) Update(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockRaffleStorage)(nil).Update), arg0)
+}

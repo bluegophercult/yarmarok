@@ -2,7 +2,6 @@ package web
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -16,11 +15,19 @@ const (
 	ApiPath          = "/api"
 	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
+	PrizesPath       = "/prizes"
+)
 
+const (
 	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
+	prizeIDParam       = "prize_id"
+)
 
-	raffleIDPlaceholder = "/{" + raffleIDParam + "}"
+const (
+	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
+	participantIDPlaceholder = "/{" + participantIDParam + "}"
+	prizeIDPlaceholder       = "/{" + prizeIDParam + "}"
 )
 
 // localRun is true if app is build for local run
@@ -62,17 +69,43 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	router.Use(router.headerMiddleware)
 	router.Use(router.organizerMiddleware)
 
-	router.Route(ApiPath, func(r chi.Router) { // "/api"
+	// "/api"
+	router.Route(ApiPath, func(r chi.Router) {
 		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
-		r.Route(RafflesPath, func(r chi.Router) { // "/api/raffles"
+
+		// "/api/raffles"
+		r.Route(RafflesPath, func(r chi.Router) {
 			r.Post("/", router.createRaffle)
 			r.Get("/", router.listRaffles)
-			r.Route(raffleIDPlaceholder, func(r chi.Router) { // "/api/raffles/{raffle_id}"
+
+			// "/api/raffles/{raffle_id}"
+			r.Route(raffleIDPlaceholder, func(r chi.Router) {
+				r.Put("/", router.editRaffle)
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
-				r.Route(ParticipantsPath, func(r chi.Router) { // "/api/raffles/{raffle_id}/participants"
+
+				// "/api/raffles/{raffle_id}/participants"
+				r.Route(ParticipantsPath, func(r chi.Router) {
 					r.Post("/", router.createParticipant)
-					r.Put("/", router.updateParticipant)
 					r.Get("/", router.listParticipants)
+
+					// "/api/raffles/{raffle_id}/participants/{participant_id}"
+					r.Route(participantIDPlaceholder, func(r chi.Router) {
+						r.Put("/", router.editParticipant)
+						r.Delete("/", router.deleteParticipant)
+					})
+				})
+
+				// "/api/raffles/{raffle_id}/prizes"
+				r.Route(PrizesPath, func(r chi.Router) {
+					r.Post("/", router.createPrize)
+					r.Get("/", router.listPrizes)
+
+					// "/api/raffles/{raffle_id}/prizes/{prize_id}"
+					r.Route(prizeIDPlaceholder, func(r chi.Router) {
+						r.Get("/", router.getPrize)
+						r.Put("/", router.editPrize)
+						r.Delete("/", router.deletePrize)
+					})
 				})
 			})
 		})
@@ -82,136 +115,149 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 }
 
 func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
-	organizerID, err := extractOrganizerID(req)
+	svc, err := r.getRaffleService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	raffleService := r.organizerService.RaffleService(organizerID)
+	newCreate(svc.Create).Handle(w, req)
+}
 
-	m := newMethodHandler(raffleService.Create, r.logger.Logger)
+func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getRaffleService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
 
-	m.ServeHTTP(w, req)
+	newEdit(svc.Edit).Handle(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
-	organizerID, err := extractOrganizerID(req)
+	svc, err := r.getRaffleService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	raffleService := r.organizerService.RaffleService(organizerID)
-
-	m := newNoRequestMethodHandler(raffleService.List, r.logger.Logger)
-
-	m.ServeHTTP(w, req)
+	newList(svc.List).Handle(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
-	organizerID, err := extractOrganizerID(req)
+	svc, err := r.getRaffleService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	raffleService := r.organizerService.RaffleService(organizerID)
-
-	raffleID, err := extractParam(req, raffleIDParam)
+	id, err := extractParam(req, raffleIDParam)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	resp, err := raffleService.Export(raffleID)
+	res, err := svc.Export(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondErr(w, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-	w.Header().Set("Content-Disposition", "attachment; filename="+resp.FileName)
+	w.Header().Set("Content-Disposition", "attachment; filename="+res.FileName)
 
-	if _, err := w.Write(resp.Content); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		r.logger.WithError(err).Error("writing xlsx failed")
+	if _, err := w.Write(res.Content); err != nil {
+		respondErr(w, err)
+		r.logger.WithError(err).Error("writing xlsx")
 	}
 }
 
 func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+	svc, err := r.getParticipantService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	newMethodHandler(participantService.Create, r.logger.Logger).ServeHTTP(w, req)
+	newCreate(svc.Create).Handle(w, req)
 }
 
-func (r *Router) updateParticipant(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getParticipantService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	newMethodHandler(participantService.Edit, r.logger.Logger).ServeHTTP(w, req)
+	newEdit(svc.Edit).Handle(w, req)
+}
+
+func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getParticipantService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newDelete(svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
-	participantService, err := r.getParticipantService(req)
+	svc, err := r.getParticipantService(req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondErr(w, err)
 		return
 	}
 
-	newNoRequestMethodHandler(participantService.List, r.logger.Logger).ServeHTTP(w, req)
+	newList(svc.List).Handle(w, req)
 }
 
-func (r *Router) getParticipantService(req *http.Request) (service.ParticipantService, error) {
-	organizerID, err := extractOrganizerID(req)
+func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
 	if err != nil {
-		return nil, err
+		respondErr(w, err)
+		return
 	}
 
-	raffleID, err := extractParam(req, raffleIDParam)
-	if err != nil || raffleID == "" {
-		return nil, ErrMissingID
-	}
-
-	participantService := r.organizerService.RaffleService(organizerID).ParticipantService(raffleID)
-
-	return participantService, nil
+	newCreate(svc.Create).Handle(w, req)
 }
 
-func extractOrganizerID(r *http.Request) (id string, err error) {
-	defer func() {
-		if localRun && err != nil {
-			err = nil
-			id = "dummy_test_user"
-		}
-	}()
-
-	ids := r.Header.Values(GoogleUserIDHeader)
-
-	if len(ids) != 1 {
-		return "", ErrAmbiguousOrganizerIDHeader
+func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
 	}
 
-	id = ids[0]
-	if id == "" {
-		return "", ErrAmbiguousOrganizerIDHeader
-	}
-
-	return id, nil
+	newGet(svc.Get).Handle(w, req)
 }
 
-func extractParam(req *http.Request, param string) (string, error) {
-	val := chi.URLParam(req, param)
-	if param == "" {
-		return "", fmt.Errorf("missing param: %s", param)
+func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
 	}
 
-	return val, nil
+	newEdit(svc.Edit).Handle(w, req)
+}
+
+func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newDelete(svc.Delete).Handle(w, req)
+}
+
+func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newList(svc.List).Handle(w, req)
 }

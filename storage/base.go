@@ -98,7 +98,10 @@ func (sb *StorageBase[Item]) GetAll() ([]Item, error) {
 		return nil, fmt.Errorf("get all items: %w", err)
 	}
 
+	// TODO: ErrNotFound if no docs.
+
 	items := make([]Item, 0, len(docs))
+
 	for _, doc := range docs {
 		var item Item
 		if err = doc.DataTo(&item); err != nil {
@@ -119,7 +122,7 @@ func (sb *StorageBase[Item]) Delete(id string) error {
 	}
 
 	if !exists {
-		return service.ErrAlreadyExists
+		return service.ErrNotFound
 	}
 
 	_, err = sb.collectionReference.Doc(id).Delete(context.Background())

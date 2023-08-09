@@ -1,10 +1,21 @@
 <template>
     <div class="grid gap-2 p-4">
-        <div class="flex gap-2 justify-between">
+        <div class="flex justify-between gap-2">
             <Raffles class="flex-grow"/>
-            <LogOut/>
+            <!-- TODO: Add if there will be a way to log out -->
+            <!-- <LogOut/> -->
         </div>
-        <Prizes/>
+        <div class="grid grid-cols-1 gap-2 md:grid-cols-4">
+            <div class="w-full">
+                <Prizes/>
+            </div>
+            <div class="col-span-1 w-full md:col-span-2">
+                <PrizeDetails/>
+            </div>
+            <div class="w-full">
+                <Participants/>
+            </div>
+        </div>
     </div>
 
     <TheNotification/>
@@ -21,11 +32,4 @@ useHead({
         { rel: "manifest", href: "/site.webmanifest" },
     ],
 })
-
-if (appConfig.isProduction) {
-    const auth = useCookie(appConfig.authCookieName)
-    if (auth.value !== "true") {
-        navigateTo("/api/login", { external: true, replace: true, redirectCode: 303 })
-    }
-}
 </script>

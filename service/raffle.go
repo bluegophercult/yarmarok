@@ -38,22 +38,28 @@ type Raffle struct {
 
 // RaffleService is a service for raffles.
 type RaffleService interface {
-	Create(*RaffleInitRequest) (*CreateResult, error)
+	Create(*RaffleRequest) (id string, err error)
 	Get(id string) (*Raffle, error)
-	List() (*RaffleListResponse, error)
-	Export(id string) (*RaffleExportResponse, error)
+	Edit(id string, r *RaffleRequest) error
+	List() ([]Raffle, error)
+	Export(id string) (*RaffleExportResult, error)
 	ParticipantService(id string) ParticipantService
 	PrizeService(id string) PrizeService
 }
 
 // RaffleStorage is a storage for raffles.
+//
+//go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
 type RaffleStorage interface {
 	Create(*Raffle) error
 	Get(id string) (*Raffle, error)
+	Update(*Raffle) error
 	GetAll() ([]Raffle, error)
 	ParticipantStorage(id string) ParticipantStorage
 	PrizeStorage(id string) PrizeStorage
 }
+
+var _ RaffleService = (*RaffleManager)(nil)
 
 // RaffleManager is an implementation of RaffleService.
 type RaffleManager struct {
@@ -68,7 +74,7 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 }
 
 // Create initializes a raffle.
-func (rm *RaffleManager) Create(raf *RaffleInitRequest) (*CreateResult, error) {
+func (rm *RaffleManager) Create(raf *RaffleRequest) (string, error) {
 	raffle := Raffle{
 		ID:        stringUUID(),
 		Name:      raf.Name,
@@ -76,14 +82,11 @@ func (rm *RaffleManager) Create(raf *RaffleInitRequest) (*CreateResult, error) {
 		CreatedAt: timeNow(),
 	}
 
-	err := rm.raffleStorage.Create(&raffle)
-	if err != nil {
-		return nil, err
+	if err := rm.raffleStorage.Create(&raffle); err != nil {
+		return "", err
 	}
 
-	return &CreateResult{
-		ID: raffle.ID,
-	}, nil
+	return raffle.ID, nil
 }
 
 // Get returns a raffle by id.
@@ -91,42 +94,57 @@ func (rm *RaffleManager) Get(id string) (*Raffle, error) {
 	return rm.raffleStorage.Get(id)
 }
 
+// Edit edits a raffle.
+func (rm *RaffleManager) Edit(id string, r *RaffleRequest) error {
+	raffle, err := rm.Get(id)
+	if err != nil {
+		return fmt.Errorf("get raffle: %w", err)
+	}
+
+	raffle.Name = r.Name
+	raffle.Note = r.Note
+
+	if err := rm.raffleStorage.Update(raffle); err != nil {
+		return fmt.Errorf("update raffle: %w", err)
+	}
+
+	return nil
+}
+
 // List lists raffles in organizer's scope.
-func (rm *RaffleManager) List() (*RaffleListResponse, error) {
+func (rm *RaffleManager) List() ([]Raffle, error) {
 	raffles, err := rm.raffleStorage.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get all raffles: %w", err)
 	}
 
-	return &RaffleListResponse{
-		Raffles: raffles,
-	}, nil
+	return raffles, nil
 }
 
-func (rm *RaffleManager) Export(id string) (*RaffleExportResponse, error) {
+func (rm *RaffleManager) Export(id string) (*RaffleExportResult, error) {
 	raf, err := rm.Get(id)
 	if err != nil {
 		return nil, fmt.Errorf("get raffle: %w", err)
 	}
 
-	prtList, err := rm.ParticipantService(id).List()
+	prts, err := rm.ParticipantService(id).List()
 	if err != nil {
 		return nil, fmt.Errorf("get participants: %w", err)
 	}
 
-	przList, err := rm.PrizeService(id).List()
+	przs, err := rm.PrizeService(id).List()
 	if err != nil {
 		return nil, fmt.Errorf("get prizes: %w", err)
 	}
 
-	xslx := NewXLSX()
+	xlsx := NewXLSX()
 
 	buf := new(bytes.Buffer)
-	if err := xslx.WriteXLSX(buf, raf, prtList.Participants, przList.Prizes); err != nil {
+	if err := xlsx.WriteXLSX(buf, raf, prts, przs); err != nil {
 		return nil, fmt.Errorf("write xlsx: %w", err)
 	}
 
-	resp := RaffleExportResponse{
+	resp := RaffleExportResult{
 		FileName: fmt.Sprintf("yarmarok_%s.xlsx", raf.ID),
 		Content:  buf.Bytes(),
 	}
@@ -144,11 +162,19 @@ func (rm *RaffleManager) PrizeService(id string) PrizeService {
 	return NewPrizeManager(rm.raffleStorage.PrizeStorage(id))
 }
 
-// RaffleInitRequest is a request for initializing a raffle.
-type RaffleInitRequest struct {
+// RaffleRequest is a request for initializing a raffle.
+type RaffleRequest struct {
 	Name string `json:"name"`
 	Note string `json:"note"`
 }
+
+// RaffleExportResult is a response for exporting a raffle sub-collections.
+type RaffleExportResult struct {
+	FileName string `json:"fileName"`
+	Content  []byte `json:"content"`
+}
+
+// TODO: remove CreateResult & Result.
 
 // CreateResult is a generic result of entity creation.
 type CreateResult struct {
@@ -158,15 +184,4 @@ type CreateResult struct {
 // Result is a generic result with status.
 type Result struct {
 	Status string `json:"status"`
-}
-
-// RaffleListResponse is a response for listing raffles.
-type RaffleListResponse struct {
-	Raffles []Raffle `json:"raffles"`
-}
-
-// RaffleExportResponse is a response for exporting a raffle sub-collections.
-type RaffleExportResponse struct {
-	FileName string `json:"fileName"`
-	Content  []byte `json:"content"`
 }

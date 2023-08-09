@@ -1,87 +1,79 @@
 package service
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-//go:generate mockgen -destination=mock_participant_storage_test.go -package=service github.com/kaznasho/yarmarok/service ParticipantStorage
-
-func TestParticipantManagerAdd(t *testing.T) {
+func TestParticipant(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	psMock := NewMockParticipantStorage(ctrl)
+	pm := NewParticipantManager(psMock)
 
-	storageMock := NewMockParticipantStorage(ctrl)
-	manager := NewParticipantManager(storageMock)
+	id := "participant_id"
+	p := &ParticipantRequest{
+		Name:  "John Doe",
+		Phone: "1234567890",
+		Note:  "Test participant",
+	}
 
-	t.Run("add participant", func(t *testing.T) {
-		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
-
-		_, err := manager.Create(&ParticipantAddRequest{
-			Name:  "John Doe",
-			Phone: "1234567890",
-			Note:  "Test participant",
+	t.Run("add", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			psMock.EXPECT().Create(gomock.Any()).Return(nil)
+			_, err := pm.Create(p)
+			require.NoError(t, err)
 		})
 
-		assert.NoError(t, err)
+		t.Run("already_exists", func(t *testing.T) {
+			psMock.EXPECT().Create(gomock.Any()).Return(ErrAlreadyExists)
+			_, err := pm.Create(p)
+			require.ErrorIs(t, err, ErrAlreadyExists)
+		})
 	})
 
-	t.Run("add_already_exists", func(t *testing.T) {
-		mockCtrl := gomock.NewController(t)
-		defer mockCtrl.Finish()
-
-		storageMock.EXPECT().Create(gomock.Any()).Return(ErrParticipantAlreadyExists)
-
-		participantManager := NewParticipantManager(storageMock)
-
-		_, err := participantManager.Create(&ParticipantAddRequest{
-			Name:  "John Doe",
-			Phone: "1234567890",
-			Note:  "Test participant",
+	t.Run("edit", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			psMock.EXPECT().Get(gomock.Any()).Return(&Participant{}, nil)
+			psMock.EXPECT().Update(gomock.Any()).Return(nil)
+			err := pm.Edit(id, p)
+			require.NoError(t, err)
 		})
 
-		assert.ErrorIs(t, err, ErrParticipantAlreadyExists)
-	})
-}
-
-func TestParticipantManagerEdit(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	storageMock := NewMockParticipantStorage(ctrl)
-	manager := NewParticipantManager(storageMock)
-
-	t.Run("edit participant", func(t *testing.T) {
-		storageMock.EXPECT().Get(gomock.Any()).Return(&Participant{}, nil)
-		storageMock.EXPECT().Update(gomock.Any()).Return(nil)
-
-		_, err := manager.Edit(&ParticipantEditRequest{ID: "test-id"})
-
-		assert.NoError(t, err)
+		t.Run("not_found", func(t *testing.T) {
+			psMock.EXPECT().Get(gomock.Any()).Return(nil, ErrNotFound)
+			err := pm.Edit(id, p)
+			require.ErrorIs(t, err, ErrNotFound)
+		})
 	})
 
-	t.Run("participant not found", func(t *testing.T) {
-		storageMock.EXPECT().Get(gomock.Any()).Return(nil, ErrParticipantNotFound)
-
-		_, err := manager.Edit(&ParticipantEditRequest{
-			ID: "test-id",
+	t.Run("delete", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			psMock.EXPECT().Delete(gomock.Any()).Return(nil)
+			err := pm.Delete(id)
+			require.NoError(t, err)
 		})
 
-		assert.ErrorIs(t, err, ErrParticipantNotFound)
+		t.Run("not_found", func(t *testing.T) {
+			psMock.EXPECT().Delete(gomock.Any()).Return(ErrNotFound)
+			err := pm.Delete(id)
+			require.ErrorIs(t, err, ErrNotFound)
+		})
 	})
-}
 
-func TestParticipantManagerList(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	t.Run("list", func(t *testing.T) {
+		t.Run("success", func(t *testing.T) {
+			psMock.EXPECT().GetAll().Return([]Participant{}, nil)
+			_, err := pm.List()
+			require.NoError(t, err)
+		})
 
-	storageMock := NewMockParticipantStorage(ctrl)
-	manager := NewParticipantManager(storageMock)
-
-	t.Run("list participants", func(t *testing.T) {
-		storageMock.EXPECT().GetAll().Return([]Participant{}, nil)
-
-		_, err := manager.List()
-
-		assert.NoError(t, err)
+		t.Run("error", func(t *testing.T) {
+			psMock.EXPECT().GetAll().Return(nil, errors.New("test error"))
+			_, err := pm.List()
+			require.Error(t, err)
+		})
 	})
 }
