@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// DonationService is a service for donations.
 type DonationService interface {
 	Create(*DonationRequest) (id string, err error)
 	Get(id string) (*Donation, error)
@@ -13,6 +14,8 @@ type DonationService interface {
 	Delete(id string) error
 }
 
+// DonationStorage is a storage for donations.
+//
 //go:generate mockgen -destination=mock_donation_storage_test.go -package=service github.com/kaznasho/yarmarok/service DonationStorage
 type DonationStorage interface {
 	Create(*Donation) error
@@ -22,6 +25,7 @@ type DonationStorage interface {
 	Delete(id string) error
 }
 
+// Donation represents a donation of the application.
 type Donation struct {
 	ID            string    `json:"id"`
 	PrizeID       string    `json:"prizeId"`
@@ -31,6 +35,7 @@ type Donation struct {
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
+// DonationRequest is a request for creating/updating a donation.
 type DonationRequest struct {
 	Amount        int    `json:"amount"`
 	ParticipantID string `json:"participantId"`
@@ -43,11 +48,13 @@ var (
 
 var _ DonationService = (*DonationManager)(nil)
 
+// DonationManager is an implementation of DonationService.
 type DonationManager struct {
 	donationStorage DonationStorage
 	prizeStorage    PrizeStorage
 }
 
+// NewDonationManager creates a new DonationManager.
 func NewDonationManager(ds DonationStorage, ps PrizeStorage) *DonationManager {
 	return &DonationManager{
 		donationStorage: ds,
@@ -55,6 +62,7 @@ func NewDonationManager(ds DonationStorage, ps PrizeStorage) *DonationManager {
 	}
 }
 
+// Create creates a new Donation.
 func (dm *DonationManager) Create(d *DonationRequest) (string, error) {
 	donation := toDonation(d)
 
@@ -65,6 +73,7 @@ func (dm *DonationManager) Create(d *DonationRequest) (string, error) {
 	return donation.ID, nil
 }
 
+// Edit updates a Donation.
 func (dm *DonationManager) Edit(id string, d *DonationRequest) error {
 	donation, err := dm.donationStorage.Get(id)
 	if err != nil {
@@ -81,6 +90,7 @@ func (dm *DonationManager) Edit(id string, d *DonationRequest) error {
 	return nil
 }
 
+// List returns a Donation list.
 func (dm *DonationManager) List() ([]Donation, error) {
 	donations, err := dm.donationStorage.GetAll()
 	if err != nil {
@@ -90,6 +100,7 @@ func (dm *DonationManager) List() ([]Donation, error) {
 	return donations, nil
 }
 
+// Get returns a Donation.
 func (dm *DonationManager) Get(id string) (*Donation, error) {
 	donation, err := dm.donationStorage.Get(id)
 	if err != nil {
@@ -99,6 +110,7 @@ func (dm *DonationManager) Get(id string) (*Donation, error) {
 	return donation, nil
 }
 
+// Delete deletes a Donation.
 func (dm *DonationManager) Delete(id string) error {
 	if err := dm.donationStorage.Delete(id); err != nil {
 		return err
