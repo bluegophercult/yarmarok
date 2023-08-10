@@ -114,7 +114,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 
             
 						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
-            donation := newService[service.DonationService, *service.DonationRequest, service.Donation](router.geDonationService)
+            donation := newService[service.DonationService, *service.DonationRequest, service.Donation](router.getDonationService)
 						r.Route(DonationsPath, func(r chi.Router) {
 							r.Post("/", donation.Create)
 							r.Get("/", donation.List)
