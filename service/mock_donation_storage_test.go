@@ -34,17 +34,17 @@ func (m *MockDonationStorage) EXPECT() *MockDonationStorageMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockDonationStorage) Create(arg0 ParticipantStorage, arg1 PrizeStorage, arg2 *Donation) error {
+func (m *MockDonationStorage) Create(arg0 *Donation) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Create", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockDonationStorageMockRecorder) Create(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockDonationStorageMockRecorder) Create(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockDonationStorage)(nil).Create), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockDonationStorage)(nil).Create), arg0)
 }
 
 // Delete mocks base method.

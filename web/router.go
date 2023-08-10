@@ -16,18 +16,21 @@ const (
 	RafflesPath      = "/raffles"
 	ParticipantsPath = "/participants"
 	PrizesPath       = "/prizes"
+	DonationsPath    = "/donations"
 )
 
 const (
 	raffleIDParam      = "raffle_id"
 	participantIDParam = "participant_id"
 	prizeIDParam       = "prize_id"
+	donationIDParam    = "donation_id"
 )
 
 const (
 	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
 	participantIDPlaceholder = "/{" + participantIDParam + "}"
 	prizeIDPlaceholder       = "/{" + prizeIDParam + "}"
+	donationIDPlaceholder    = "/{" + donationIDParam + "}"
 )
 
 // localRun is true if app is build for local run
@@ -108,7 +111,23 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 						r.Get("/", prize.Get)
 						r.Put("/", prize.Edit)
 						r.Delete("/", prize.Delete)
+
+            
+						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
+            donation := newService[service.DonationService, *service.DonationRequest, service.Donation](router.geDonationService)
+						r.Route(DonationsPath, func(r chi.Router) {
+							r.Post("/", donation.Create)
+							r.Get("/", donation.List)
+
+							// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations/{donation_id}"
+							r.Route(donationIDPlaceholder, func(r chi.Router) {
+								r.Get("/", donation.Get)
+								r.Put("/", donation.Edit)
+								r.Delete("/", donation.Delete)
+							})
+						})
 					})
+
 				})
 			})
 		})

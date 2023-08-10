@@ -61,6 +61,20 @@ func (mr *MockPrizeStorageMockRecorder) Delete(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPrizeStorage)(nil).Delete), arg0)
 }
 
+// DonationStorage mocks base method.
+func (m *MockPrizeStorage) DonationStorage(arg0 string) DonationStorage {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DonationStorage", arg0)
+	ret0, _ := ret[0].(DonationStorage)
+	return ret0
+}
+
+// DonationStorage indicates an expected call of DonationStorage.
+func (mr *MockPrizeStorageMockRecorder) DonationStorage(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DonationStorage", reflect.TypeOf((*MockPrizeStorage)(nil).DonationStorage), arg0)
+}
+
 // Get mocks base method.
 func (m *MockPrizeStorage) Get(arg0 string) (*Prize, error) {
 	m.ctrl.T.Helper()
