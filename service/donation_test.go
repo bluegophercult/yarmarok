@@ -20,7 +20,7 @@ func TestDonationManagerCreateDonation(t *testing.T) {
 		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
 
 		_, err := manager.Create(&DonationRequest{Amount: 777, ParticipantID: stringUUID()})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("Add already existing donation", func(t *testing.T) {
@@ -31,7 +31,7 @@ func TestDonationManagerCreateDonation(t *testing.T) {
 
 		donationManager := NewDonationManager(storageMock, prizeStorageMock)
 		_, err := donationManager.Create(&DonationRequest{Amount: 777, ParticipantID: stringUUID()})
-		assert.ErrorIs(t, err, ErrDonationAlreadyExists)
+		require.ErrorIs(t, err, ErrDonationAlreadyExists)
 	})
 }
 
@@ -49,14 +49,14 @@ func TestDonationManagerEditDonation(t *testing.T) {
 		storageMock.EXPECT().Update(donation).Return(nil)
 
 		err := manager.Edit(testID, donationRequest)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("Edit not found donation", func(t *testing.T) {
 		storageMock.EXPECT().Get(testID).Return(nil, ErrDonationNotFound)
 
 		err := manager.Edit(testID, &DonationRequest{Amount: 999, ParticipantID: "participant_test_id"})
-		assert.ErrorIs(t, err, ErrDonationNotFound)
+		require.ErrorIs(t, err, ErrDonationNotFound)
 	})
 }
 
@@ -75,7 +75,7 @@ func TestDonationManagerListDonations(t *testing.T) {
 		storageMock.EXPECT().GetAll().Return(donations, nil)
 
 		res, err := manager.List()
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		require.Equal(t, donations, res)
 	})
 
@@ -99,16 +99,16 @@ func TestDonationManagerGetDonations(t *testing.T) {
 		storageMock.EXPECT().Get(donation.ID).Return(donation, nil)
 
 		res, err := manager.Get(donation.ID)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		require.Equal(t, donation, res)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		donation := &Donation{ID: "1", PrizeID: "1", ParticipantID: "1", Amount: 10, TicketsNumber: 1, CreatedAt: time.Now()}
-		storageMock.EXPECT().Get(donation.ID).Return(nil, assert.AnError)
+		id := "donation_id"
+		storageMock.EXPECT().Get(id).Return(nil, ErrNotFound)
 
-		res, err := manager.Get(donation.ID)
-		require.ErrorIs(t, err, assert.AnError)
+		res, err := manager.Get(id)
+		require.ErrorIs(t, err, ErrNotFound)
 		require.Nil(t, res)
 	})
 }
