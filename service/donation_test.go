@@ -53,10 +53,10 @@ func TestDonationManagerEditDonation(t *testing.T) {
 	})
 
 	t.Run("Edit not found donation", func(t *testing.T) {
-		storageMock.EXPECT().Get(testID).Return(nil, ErrDonationNotFound)
+		storageMock.EXPECT().Get(testID).Return(nil, ErrNotFound)
 
 		err := manager.Edit(testID, &DonationRequest{Amount: 999, ParticipantID: "participant_test_id"})
-		require.ErrorIs(t, err, ErrDonationNotFound)
+		require.ErrorIs(t, err, ErrNotFound)
 	})
 }
 
@@ -129,9 +129,9 @@ func TestDonationManagerDeleteDonation(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		id := "donation_id"
-		storageMock.EXPECT().Delete(id).Return(assert.AnError)
+		storageMock.EXPECT().Delete(id).Return(ErrNotFound)
 
 		err := manager.Delete(id)
-		require.ErrorIs(t, err, assert.AnError)
+		require.ErrorIs(t, err, ErrNotFound)
 	})
 }
