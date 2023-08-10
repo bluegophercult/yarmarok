@@ -1,10 +1,11 @@
 {
 	"info": {
-		"_postman_id": "d4f7f55c-9243-494b-8b90-3ebd7f9a3d02",
+		"_postman_id": "4e1485ce-21f2-4a71-b78a-a68fd2131078",
 		"name": "Yarmarok",
 		"description": "Yarmarok collection",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "28016921"
+		"_exporter_id": "28676269",
+		"_collection_link": "https://martian-flare-999277.postman.co/workspace/Yarmarok~639df73d-275c-43a2-a6ff-2c29b0adcdac/collection/28676269-4e1485ce-21f2-4a71-b78a-a68fd2131078?action=share&creator=28676269&source=collection_link"
 	},
 	"item": [
 		{
@@ -15,12 +16,26 @@
 					"item": [
 						{
 							"name": "Add Donation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Store the \"id\" attribute value from the response in the environment variable \"donation_id\"",
+											"var responseBody = pm.response.json();",
+											"var donationId = responseBody.id;",
+											"pm.environment.set(\"donation_id\", donationId);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"ContributorID\": \"{{$randomUUID}}\",\n    \"Amount\": {{$randomInt}}\n}",
+									"raw": "{\n    \"ParticipantID\": \"{{$randomUUID}}\",\n    \"Amount\": {{$randomInt}}\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -42,11 +57,121 @@
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+											"value": "{{raffle_id}}"
 										},
 										{
 											"key": "prize_id",
-											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+											"value": "{{prize_id}}"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Add Donation",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n    \"Amount\": 300\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"{{raffles}}",
+												":raffle_id",
+												"{{prizes}}",
+												":prize_id",
+												"{{donations}}"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\"\n}"
+								}
+							]
+						},
+						{
+							"name": "Edit Donation",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"ParticipantID\": \"{{$randomUUID}}\",\n    \"Amount\": {{$randomInt}}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id",
+										"{{donations}}",
+										":donation_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "{{raffle_id}}"
+										},
+										{
+											"key": "prize_id",
+											"value": "{{prize_id}}"
+										},
+										{
+											"key": "donation_id",
+											"value": "{{donation_id}}"
 										}
 									]
 								}
@@ -128,15 +253,18 @@
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+											"value": "{{raffle_id}}",
+											"type": "string"
 										},
 										{
 											"key": "prize_id",
-											"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+											"value": "{{prize_id}}",
+											"type": "string"
 										},
 										{
 											"key": "donation_id",
-											"value": "3856065c-74f9-44c4-b514-3e83bca1888d"
+											"value": "{{donation_id}}",
+											"type": "string"
 										}
 									]
 								}
@@ -205,11 +333,94 @@
 									"variable": [
 										{
 											"key": "raffle_id",
-											"value": ""
+											"value": "{{raffle_id}}",
+											"type": "string"
 										},
 										{
 											"key": "prize_id",
-											"value": ""
+											"value": "{{prize_id}}",
+											"type": "string"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "List Donations",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"{{raffles}}",
+												":raffle_id",
+												"{{prizes}}",
+												":prize_id",
+												"{{donations}}"
+											],
+											"variable": [
+												{
+													"key": "raffle_id",
+													"value": "00001bf5-a64b-4f78-ba56-dfb4d398aae9"
+												},
+												{
+													"key": "prize_id",
+													"value": "bf54d620-39a7-4a84-9c65-2273b59a806b"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"Donations\": [\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        },\n        {\n            \"ID\": \"3856065c-74f9-44c4-b514-3e83bca1888d\",\n            \"ContributorID\": \"e0a6120a-426c-47b5-b4f3-931fbc925cd8\",\n            \"Amount\": 300,\n            \"CreatedAt\": \"2023-07-03T16:57:42.964036Z\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "Get Donation",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/{{donations}}/:donation_id",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"{{raffles}}",
+										":raffle_id",
+										"{{prizes}}",
+										":prize_id",
+										"{{donations}}",
+										":donation_id"
+									],
+									"variable": [
+										{
+											"key": "raffle_id",
+											"value": "{{raffle_id}}"
+										},
+										{
+											"key": "prize_id",
+											"value": "{{prize_id}}"
+										},
+										{
+											"key": "donation_id",
+											"value": "{{donation_id}}"
 										}
 									]
 								}
@@ -347,6 +558,20 @@
 				},
 				{
 					"name": "Create Prize",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Store the \"id\" attribute value from the response in the environment variable \"prize_id\"",
+									"var responseBody = pm.response.json();",
+									"var prizeId = responseBody.id;",
+									"pm.environment.set(\"prize_id\", prizeId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -372,7 +597,7 @@
 							"variable": [
 								{
 									"key": "raffle_id",
-									"value": ""
+									"value": "{{raffle_id}}"
 								}
 							]
 						}
@@ -1016,7 +1241,10 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"// Store the \"id\" attribute value from the response in the environment variable \"raffle_id\"",
+							"var responseBody = pm.response.json();",
+							"var raffleId = responseBody.id;",
+							"pm.environment.set(\"raffle_id\", raffleId);"
 						],
 						"type": "text/javascript"
 					}
