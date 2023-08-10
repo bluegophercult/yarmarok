@@ -114,9 +114,12 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 							r.Post("/", router.createDonation)
 							r.Get("/", router.listDonations)
 
-							r.Get(donationIDPlaceholder, router.getDonation)
-							r.Put(donationIDPlaceholder, router.editDonation)
-							r.Delete(donationIDPlaceholder, router.deleteDonation)
+							// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations/{donation_id}"
+							r.Route(donationIDPlaceholder, func(r chi.Router) {
+								r.Get("/", router.getDonation)
+								r.Put("/", router.editDonation)
+								r.Delete("/", router.deleteDonation)
+							})
 						})
 					})
 
