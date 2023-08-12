@@ -69,24 +69,24 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	r.Use(r.headerMiddleware)
 	r.Use(r.organizerMiddleware)
 
-	r.Map(loginEndpoint)
-	r.Map(raffleEndpoint)
-	r.Map(participantEndpoint)
-	r.Map(prizeEndpoint)
-	r.Map(donationEndpoint)
+	r.Map(loginRoute)
+	r.Map(raffleRoute)
+	r.Map(participantRoute)
+	r.Map(prizeRoute)
+	r.Map(donationRoute)
 
 	return r, nil
 }
 
 func (r *Router) Map(route func(*Router)) { route(r) }
 
-func loginEndpoint(r *Router) {
+func loginRoute(r *Router) {
 	r.Route(ApiPath, func(r chi.Router) {
 		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
 	})
 }
 
-func raffleEndpoint(r *Router) {
+func raffleRoute(r *Router) {
 	raffle := newService[service.RaffleService, *service.RaffleRequest, service.Raffle](r.getRaffleService)
 
 	r.Route(raffleGroup, func(router chi.Router) {
@@ -99,7 +99,7 @@ func raffleEndpoint(r *Router) {
 	})
 }
 
-func participantEndpoint(r *Router) {
+func participantRoute(r *Router) {
 	participant := newService[service.ParticipantService, *service.ParticipantRequest, service.Participant](r.getParticipantService)
 
 	r.Route(participantGroup, func(router chi.Router) {
@@ -112,7 +112,7 @@ func participantEndpoint(r *Router) {
 	})
 }
 
-func prizeEndpoint(r *Router) {
+func prizeRoute(r *Router) {
 	prize := newService[service.PrizeService, *service.PrizeRequest, service.Prize](r.getPrizeService)
 
 	r.Route(prizeGroup, func(router chi.Router) {
@@ -126,7 +126,7 @@ func prizeEndpoint(r *Router) {
 	})
 }
 
-func donationEndpoint(r *Router) {
+func donationRoute(r *Router) {
 	donation := newService[service.DonationService, *service.DonationRequest, service.Donation](r.getDonationService)
 
 	r.Route(donationGroup, func(router chi.Router) {
