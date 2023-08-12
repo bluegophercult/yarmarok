@@ -1,7 +1,6 @@
 package web
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -35,15 +34,6 @@ const (
 
 // localRun is true if app is build for local run
 var localRun = false
-
-var (
-	// ErrAmbiguousOrganizerIDHeader is returned when
-	// the organizer id header is not set or is ambiguous.
-	ErrAmbiguousOrganizerIDHeader = errors.New("ambiguous organizer id format")
-
-	// ErrMissingID is returned when id is missing.
-	ErrMissingID = errors.New("missing id")
-)
 
 // Router is responsible for routing requests
 // to the corresponding services.
@@ -112,9 +102,8 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 						r.Put("/", prize.Edit)
 						r.Delete("/", prize.Delete)
 
-            
 						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
-            donation := newService[service.DonationService, *service.DonationRequest, service.Donation](router.getDonationService)
+						donation := newService[service.DonationService, *service.DonationRequest, service.Donation](router.getDonationService)
 						r.Route(DonationsPath, func(r chi.Router) {
 							r.Post("/", donation.Create)
 							r.Get("/", donation.List)
