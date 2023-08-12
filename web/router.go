@@ -39,9 +39,6 @@ const (
 	donationIDPlaceholder    = "/{" + donationIDParam + "}"
 )
 
-// localRun is true if app is build for local run
-var localRun = false
-
 // Router is responsible for routing requests
 // to the corresponding services.
 type Router struct {

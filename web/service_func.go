@@ -18,6 +18,9 @@ var (
 	ErrMissingID = errors.New("missing id")
 )
 
+// localRun is true if app is build for local run
+var localRun = false
+
 func (r *Router) getPrizeService(req *http.Request) (service.PrizeService, error) {
 	raffleService, err := r.getRaffleService(req)
 	if err != nil {
