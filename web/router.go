@@ -29,7 +29,7 @@ const (
 	raffleGroup      = ApiPath + RafflesPath
 	participantGroup = raffleGroup + raffleIDPlaceholder + ParticipantsPath
 	prizeGroup       = raffleGroup + raffleIDPlaceholder + PrizesPath
-	donationGroup    = raffleGroup + raffleIDPlaceholder + PrizesPath + prizeIDPlaceholder + DonationsPath
+	donationGroup    = prizeGroup + prizeIDPlaceholder + DonationsPath
 )
 
 const (
