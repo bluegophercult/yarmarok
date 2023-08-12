@@ -57,7 +57,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 		organizerService: os,
 		logger: log.WithFields(
 			logger.Fields{
-				"component": "r",
+				"component": "router",
 				"trace_id":  uuid.New().String(),
 			},
 		),
