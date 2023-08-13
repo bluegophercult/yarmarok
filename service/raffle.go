@@ -166,15 +166,3 @@ type RaffleExportResult struct {
 	FileName string `json:"fileName"`
 	Content  []byte `json:"content"`
 }
-
-// TODO: remove CreateResult & Result.
-
-// CreateResult is a generic result of entity creation.
-type CreateResult struct {
-	ID string `json:"id"`
-}
-
-// Result is a generic result with status.
-type Result struct {
-	Status string `json:"status"`
-}
