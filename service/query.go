@@ -50,12 +50,13 @@ type OrderBy struct {
 func (q Query) WithFilter(field string, op Operator, val any) Query {
 	filter := &Filter{Field: field, Operator: op, Value: val}
 
-	if q.Filter == nil {
-		q.Filter.Next = filter
+	head := q.Filter
+	if head == nil {
+		q.Filter = filter
 		return q
 	}
 
-	last := q.Filter
+	last := head
 	for last.Next != nil {
 		last = last.Next
 	}
