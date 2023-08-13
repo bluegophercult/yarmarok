@@ -8,13 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	// StatusSuccess is a success status sent by the service to the client.
-	StatusSuccess = "success"
-	// StatusError is an error status sent by the service to the client.
-	StatusError = "error"
-)
-
 // stringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
 var stringUUID = func() string {
