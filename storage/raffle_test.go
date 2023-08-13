@@ -89,4 +89,21 @@ func TestRaffle(t *testing.T) {
 		require.Len(t, raffles, 2)
 		require.Equal(t, created, raffles)
 	})
+
+	t.Run("query", func(t *testing.T) {
+		raf3 := &service.Raffle{
+			ID:          "raffle_id_3",
+			Name:        "raffle_name_3",
+			Note:        "raffle_note_3",
+			CreatedAt:   time.Now().UTC().Truncate(time.Millisecond),
+			OrganizerID: "to be replaced",
+		}
+
+		err = rs.Create(raf3)
+		require.NoError(t, err)
+
+		raffles, err := rs.Query(new(service.Query).WithFilter("id", service.EQ, raf3.ID))
+		require.NoError(t, err)
+		require.Equal(t, []*service.Raffle{raf3}, raffles)
+	})
 }

@@ -55,6 +55,7 @@ type RaffleStorage interface {
 	Get(id string) (*Raffle, error)
 	Update(*Raffle) error
 	GetAll() ([]Raffle, error)
+	Query(Query) ([]Raffle, error)
 	ParticipantStorage(id string) ParticipantStorage
 	PrizeStorage(id string) PrizeStorage
 }
