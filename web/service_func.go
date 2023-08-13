@@ -10,6 +10,17 @@ import (
 	"github.com/kaznasho/yarmarok/service"
 )
 
+var (
+	// ErrAmbiguousOrganizerIDHeader is returned when the organizer id header is not set or is ambiguous.
+	ErrAmbiguousOrganizerIDHeader = errors.New("ambiguous organizer id format")
+
+	// ErrMissingID is returned when id is missing.
+	ErrMissingID = errors.New("missing id")
+)
+
+// localRun is true if app is build for local run
+var localRun = false
+
 func (r *Router) getPrizeService(req *http.Request) (service.PrizeService, error) {
 	raffleService, err := r.getRaffleService(req)
 	if err != nil {

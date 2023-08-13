@@ -1,7 +1,6 @@
 package web
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -27,22 +26,17 @@ const (
 )
 
 const (
+	raffleGroup      = ApiPath + RafflesPath
+	participantGroup = raffleGroup + raffleIDPlaceholder + ParticipantsPath
+	prizeGroup       = raffleGroup + raffleIDPlaceholder + PrizesPath
+	donationGroup    = prizeGroup + prizeIDPlaceholder + DonationsPath
+)
+
+const (
 	raffleIDPlaceholder      = "/{" + raffleIDParam + "}"
 	participantIDPlaceholder = "/{" + participantIDParam + "}"
 	prizeIDPlaceholder       = "/{" + prizeIDParam + "}"
 	donationIDPlaceholder    = "/{" + donationIDParam + "}"
-)
-
-// localRun is true if app is build for local run
-var localRun = false
-
-var (
-	// ErrAmbiguousOrganizerIDHeader is returned when
-	// the organizer id header is not set or is ambiguous.
-	ErrAmbiguousOrganizerIDHeader = errors.New("ambiguous organizer id format")
-
-	// ErrMissingID is returned when id is missing.
-	ErrMissingID = errors.New("missing id")
 )
 
 // Router is responsible for routing requests
@@ -55,7 +49,7 @@ type Router struct {
 
 // NewRouter creates a new Router
 func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error) {
-	router := &Router{
+	r := &Router{
 		Router:           chi.NewRouter(),
 		organizerService: os,
 		logger: log.WithFields(
@@ -66,75 +60,84 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 		),
 	}
 
-	router.Use(router.corsMiddleware)
-	router.Use(router.loggingMiddleware)
-	router.Use(router.recoverMiddleware)
-	router.Use(router.headerMiddleware)
-	router.Use(router.organizerMiddleware)
+	r.Use(r.corsMiddleware)
+	r.Use(r.loggingMiddleware)
+	r.Use(r.recoverMiddleware)
+	r.Use(r.headerMiddleware)
+	r.Use(r.organizerMiddleware)
 
-	// "/api"
-	router.Route(ApiPath, func(r chi.Router) {
+	r.Map(loginRoute)
+	r.Map(raffleRoute)
+	r.Map(participantRoute)
+	r.Map(prizeRoute)
+	r.Map(donationRoute)
+
+	return r, nil
+}
+
+func (r *Router) Map(route func(*Router)) { route(r) }
+
+func loginRoute(r *Router) {
+	r.Route(ApiPath, func(r chi.Router) {
 		r.Handle("/login", http.RedirectHandler("/", http.StatusSeeOther))
+	})
+}
 
-		// "/api/raffles"
-		raffle := newService[service.RaffleService, *service.RaffleRequest, service.Raffle](router.getRaffleService)
-		r.Route(RafflesPath, func(r chi.Router) {
-			r.Post("/", raffle.Create)
-			r.Get("/", raffle.List)
+func raffleRoute(r *Router) {
+	raffle := newService[service.RaffleService, *service.RaffleRequest, service.Raffle](r.getRaffleService)
 
-			// "/api/raffles/{raffle_id}"
-			r.Route(raffleIDPlaceholder, func(r chi.Router) {
-				r.Put("/", raffle.Edit)
-				r.Get("/download-xlsx", router.downloadRaffleXLSX)
-
-				// "/api/raffles/{raffle_id}/participants"
-				participant := newService[service.ParticipantService, *service.ParticipantRequest, service.Participant](router.getParticipantService)
-				r.Route(ParticipantsPath, func(r chi.Router) {
-					r.Post("/", participant.Create)
-					r.Get("/", participant.List)
-
-					// "/api/raffles/{raffle_id}/participants/{participant_id}"
-					r.Route(participantIDPlaceholder, func(r chi.Router) {
-						r.Put("/", participant.Edit)
-						r.Delete("/", participant.Delete)
-					})
-				})
-
-				// "/api/raffles/{raffle_id}/prizes"
-				prize := newService[service.PrizeService, *service.PrizeRequest, service.Prize](router.getPrizeService)
-				r.Route(PrizesPath, func(r chi.Router) {
-					r.Post("/", prize.Create)
-					r.Get("/", prize.List)
-
-					// "/api/raffles/{raffle_id}/prizes/{prize_id}"
-					r.Route(prizeIDPlaceholder, func(r chi.Router) {
-						r.Get("/", prize.Get)
-						r.Put("/", prize.Edit)
-						r.Delete("/", prize.Delete)
-
-            
-						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
-            donation := newService[service.DonationService, *service.DonationRequest, service.Donation](router.getDonationService)
-						r.Route(DonationsPath, func(r chi.Router) {
-							r.Post("/", donation.Create)
-							r.Get("/", donation.List)
-
-							// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations/{donation_id}"
-							r.Route(donationIDPlaceholder, func(r chi.Router) {
-								r.Get("/", donation.Get)
-								r.Put("/", donation.Edit)
-								r.Delete("/", donation.Delete)
-							})
-						})
-					})
-
-				})
-			})
+	r.Route(raffleGroup, func(router chi.Router) {
+		router.Post("/", raffle.Create)
+		router.Get("/", raffle.List)
+		router.Route(raffleIDPlaceholder, func(router chi.Router) {
+			router.Put("/", raffle.Edit)
+			router.Get("/download-xlsx", r.downloadRaffleXLSX)
 		})
 	})
-
-	return router, nil
 }
+
+func participantRoute(r *Router) {
+	participant := newService[service.ParticipantService, *service.ParticipantRequest, service.Participant](r.getParticipantService)
+
+	r.Route(participantGroup, func(router chi.Router) {
+		router.Post("/", participant.Create)
+		router.Get("/", participant.List)
+		router.Route(participantIDPlaceholder, func(router chi.Router) {
+			router.Put("/", participant.Edit)
+			router.Delete("/", participant.Delete)
+		})
+	})
+}
+
+func prizeRoute(r *Router) {
+	prize := newService[service.PrizeService, *service.PrizeRequest, service.Prize](r.getPrizeService)
+
+	r.Route(prizeGroup, func(router chi.Router) {
+		router.Post("/", prize.Create)
+		router.Get("/", prize.List)
+		router.Route(prizeIDPlaceholder, func(router chi.Router) {
+			router.Get("/", prize.Get)
+			router.Put("/", prize.Edit)
+			router.Delete("/", prize.Delete)
+		})
+	})
+}
+
+func donationRoute(r *Router) {
+	donation := newService[service.DonationService, *service.DonationRequest, service.Donation](r.getDonationService)
+
+	r.Route(donationGroup, func(router chi.Router) {
+		router.Post("/", donation.Create)
+		router.Get("/", donation.List)
+		router.Route(donationIDPlaceholder, func(router chi.Router) {
+			router.Get("/", donation.Get)
+			router.Put("/", donation.Edit)
+			router.Delete("/", donation.Delete)
+		})
+	})
+}
+
+/* Handlers */
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
