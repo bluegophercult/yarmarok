@@ -151,3 +151,85 @@ func (sb *StorageBase[Item]) Exists(id string) (bool, error) {
 func isNotFound(err error) bool {
 	return status.Code(err) == codes.NotFound
 }
+
+func (sb *StorageBase[Item]) Query(query service.Query) ([]Item, error) {
+	q := sb.collectionReference.Query
+
+	for f := query.Filter; f != nil; f = f.Next {
+		q = q.Where(f.Field, toOperator(f.Operator), f.Value)
+	}
+
+	if query.OrderBy != nil {
+		q = q.OrderBy(query.OrderBy.Field, toDirection(query.OrderBy.Direction))
+	}
+
+	if query.Limit > 0 {
+		q = q.Limit(query.Limit)
+	}
+
+	if query.Offset > 0 {
+		q = q.Offset(query.Offset)
+	}
+
+	docs, err := q.Documents(context.Background()).GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("querying items: %w", err)
+	}
+
+	l := len(docs)
+	if l == 0 {
+		return nil, service.ErrNotFound
+	}
+
+	items := make([]Item, l)
+
+	for i := range docs {
+		var item Item
+		if err := docs[i].DataTo(&item); err != nil {
+			return nil, fmt.Errorf("decode items: %w", err)
+		}
+
+		items[i] = item
+	}
+
+	return items, nil
+
+}
+
+func toOperator(op service.Operator) string {
+	switch op {
+	case service.LT:
+		return "<"
+	case service.LTE:
+		return "<="
+	case service.EQ:
+		return "=="
+	case service.GT:
+		return ">"
+	case service.GTE:
+		return ">="
+	case service.NE:
+		return "!="
+	case service.IN:
+		return "in"
+	case service.NI:
+		return "not_in"
+	case service.CN:
+		return "array_contains"
+	case service.CA:
+		return "array_contains_any"
+	default:
+		return ""
+	}
+}
+
+func toDirection(op service.Direction) firestore.Direction {
+	switch op {
+	case service.ASC:
+		return 1
+	case service.DESC:
+		return 2
+	default:
+		return 0
+	}
+}
