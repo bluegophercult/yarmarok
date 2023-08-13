@@ -6,15 +6,10 @@ import (
 )
 
 var (
-	// ErrOrganizerAlreadyExists is returned when an organizer already exists.
-	ErrOrganizerAlreadyExists = errors.New("organizer already exists")
-
-	// ErrRaffleAlreadyExists is returned when a raffle already exists.
-	ErrRaffleAlreadyExists = errors.New("raffle already exists")
-
-	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+	// ErrAlreadyExists is returned when a raffle already exists.
 	ErrAlreadyExists = errors.New("item already exists")
-	// ErrRaffleAlreadyExists is returned when a raffle already exists.
+
+	// ErrNotFound is returned when a raffle already exists.
 	ErrNotFound = errors.New("item not found")
 )
 
