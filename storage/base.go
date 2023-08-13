@@ -156,11 +156,11 @@ func (sb *StorageBase[Item]) Query(query service.Query) ([]Item, error) {
 	q := sb.collectionReference.Query
 
 	for f := query.Filter; f != nil; f = f.Next {
-		q = q.Where(f.Field, toOperator(f.Operator), f.Value)
+		q = q.Where(f.Field, toOp(f.Operator), f.Value)
 	}
 
 	if query.OrderBy != nil {
-		q = q.OrderBy(query.OrderBy.Field, toDirection(query.OrderBy.Direction))
+		q = q.OrderBy(query.OrderBy.Field, toDir(query.OrderBy.Direction))
 	}
 
 	if query.Limit > 0 {
@@ -196,7 +196,7 @@ func (sb *StorageBase[Item]) Query(query service.Query) ([]Item, error) {
 
 }
 
-func toOperator(op service.Operator) string {
+func toOp(op service.Operator) string {
 	switch op {
 	case service.LT:
 		return "<"
@@ -223,12 +223,12 @@ func toOperator(op service.Operator) string {
 	}
 }
 
-func toDirection(op service.Direction) firestore.Direction {
+func toDir(op service.Direction) firestore.Direction {
 	switch op {
 	case service.ASC:
-		return 1
+		return firestore.Asc
 	case service.DESC:
-		return 2
+		return firestore.Desc
 	default:
 		return 0
 	}

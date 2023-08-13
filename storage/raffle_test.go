@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kaznasho/yarmarok/testinfra"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kaznasho/yarmarok/service"
-	"github.com/kaznasho/yarmarok/testinfra"
 	"github.com/kaznasho/yarmarok/testinfra/firestore"
 )
 
@@ -91,19 +91,41 @@ func TestRaffle(t *testing.T) {
 	})
 
 	t.Run("query", func(t *testing.T) {
-		raf3 := &service.Raffle{
-			ID:          "raffle_id_3",
-			Name:        "raffle_name_3",
-			Note:        "raffle_note_3",
-			CreatedAt:   time.Now().UTC().Truncate(time.Millisecond),
-			OrganizerID: "to be replaced",
-		}
+		raf3 := &service.Raffle{ID: "raffle_id_3", Name: "E Raffle", Note: "note3", CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}
+		raf4 := &service.Raffle{ID: "raffle_id_4", Name: "F Raffle", Note: "note4", CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}
+		raf5 := &service.Raffle{ID: "raffle_id_5", Name: "G Raffle", Note: "note5", CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}
+		raf6 := &service.Raffle{ID: "raffle_id_6", Name: "H Raffle", Note: "note6", CreatedAt: time.Now().UTC().Truncate(time.Millisecond)}
 
 		err = rs.Create(raf3)
 		require.NoError(t, err)
-
-		raffles, err := rs.Query(new(service.Query).WithFilter("id", service.EQ, raf3.ID))
+		err = rs.Create(raf4)
 		require.NoError(t, err)
-		require.Equal(t, []*service.Raffle{raf3}, raffles)
+		err = rs.Create(raf5)
+		require.NoError(t, err)
+		err = rs.Create(raf6)
+		require.NoError(t, err)
+
+		query := new(service.Query).
+			WithFilter("Name", service.GT, "C Raffle").
+			WithOrderBy("Name", service.ASC).
+			WithLimit(3)
+
+		raffles, err := rs.Query(query)
+		require.NoError(t, err)
+		require.Equal(t, []service.Raffle{*raf3, *raf4, *raf5}, raffles)
+
+		query = new(service.Query).
+			WithFilter("Name", service.GTE, "E Raffle").
+			WithFilter("Note", service.EQ, "note3").
+			WithOrderBy("Name", service.DESC).
+			WithLimit(2)
+
+		raffles, err = rs.Query(query)
+		require.NoError(t, err)
+		require.Equal(t, []service.Raffle{*raf3}, raffles)
+
+		query = new(service.Query).WithFilter("ID", service.IN, []string{"fake_id_1"})
+		raffles, err = rs.Query(query)
+		require.ErrorIs(t, err, service.ErrNotFound)
 	})
 }
