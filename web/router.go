@@ -84,6 +84,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 			// "/api/raffles/{raffle_id}"
 			r.Route(raffleIDPlaceholder, func(r chi.Router) {
 				r.Put("/", router.editRaffle)
+				r.Delete("/", router.deleteRaffle)
 				r.Get("/download-xlsx", router.downloadRaffleXLSX)
 
 				// "/api/raffles/{raffle_id}/participants"
@@ -149,6 +150,16 @@ func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	newEdit(svc.Edit).Handle(w, req)
+}
+
+func (r *Router) deleteRaffle(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getRaffleService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	newDelete(svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {

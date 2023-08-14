@@ -41,6 +41,7 @@ type RaffleService interface {
 	Create(*RaffleRequest) (id string, err error)
 	Get(id string) (*Raffle, error)
 	Edit(id string, r *RaffleRequest) error
+	Delete(id string) error
 	List() ([]Raffle, error)
 	Export(id string) (*RaffleExportResult, error)
 	ParticipantService(id string) ParticipantService
@@ -54,6 +55,7 @@ type RaffleStorage interface {
 	Create(*Raffle) error
 	Get(id string) (*Raffle, error)
 	Update(*Raffle) error
+	Delete(id string) error
 	GetAll() ([]Raffle, error)
 	ParticipantStorage(id string) ParticipantStorage
 	PrizeStorage(id string) PrizeStorage
@@ -106,6 +108,15 @@ func (rm *RaffleManager) Edit(id string, r *RaffleRequest) error {
 
 	if err := rm.raffleStorage.Update(raffle); err != nil {
 		return fmt.Errorf("update raffle: %w", err)
+	}
+
+	return nil
+}
+
+// Delete a raffle.
+func (rm *RaffleManager) Delete(id string) error {
+	if err := rm.raffleStorage.Delete(id); err != nil {
+		return fmt.Errorf("deleting participant: %w", err)
 	}
 
 	return nil
