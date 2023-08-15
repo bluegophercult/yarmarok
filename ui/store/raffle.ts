@@ -39,8 +39,15 @@ export const useRaffleStore = defineStore({
             })
             this.selectFirstRaffle()
         },
-        updateRaffle(updatedRaffle: Raffle) {
-            // TODO: API call
+        async updateRaffle(updatedRaffle: Raffle) {
+            const { error } = await useApiFetch(`/api/raffles/${ updatedRaffle.id }`, {
+                method: "PUT",
+                body: updatedRaffle,
+            })
+            if (error.value) {
+                throw error.value
+            }
+
             this.raffles[this.raffles.findIndex(raffle => raffle.id == updatedRaffle.id)] = updatedRaffle
             this.selectedRaffle = updatedRaffle
         },

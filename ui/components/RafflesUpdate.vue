@@ -27,6 +27,7 @@
 import { useRaffleStore } from "~/store/raffle"
 import { newRaffleSchema, Raffle } from "~/types/raffle"
 import { ValidationError } from "yup"
+import { useNotificationStore } from "~/store/notification"
 
 const props = defineProps<{
     raffle: Raffle
@@ -35,6 +36,8 @@ const props = defineProps<{
 }>()
 
 const raffleStore = useRaffleStore()
+
+const { showError } = useNotificationStore()
 
 const errorMsg = ref("")
 const updatedRaffle = ref(<Raffle>{ ...props.raffle })
@@ -48,7 +51,10 @@ onBeforeUpdate(() => {
 function updateRaffle() {
     newRaffleSchema.validate(updatedRaffle.value)
         .then(() => {
-            raffleStore.updateRaffle(updatedRaffle.value)
+            raffleStore.updateRaffle(updatedRaffle.value).catch(e => {
+                console.error(e)
+                showError("Не вдалося змінити розіграш!")
+            })
             props.closeModal()
         })
         .catch((e: ValidationError) => {
