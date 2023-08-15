@@ -25,10 +25,15 @@
             </div>
             <DonationsList/>
         </div>
-        <div v-else class="mt-2">
-            Не вибрано
+        <div v-else class="mt-2 text-gray-400">
+            Не вибрано приз
         </div>
     </div>
+
+    <PrizesUpdate v-if="selectedPrize" :prize="selectedPrize" :is-open="isOpenUpdate"
+                   :close-modal="() => isOpenUpdate = false"/>
+    <PrizesDelete v-if="selectedPrize" :prize="selectedPrize" :is-open="isOpenDelete"
+                  :close-modal="() => isOpenDelete = false"/>
 </template>
 
 <script setup lang="ts">

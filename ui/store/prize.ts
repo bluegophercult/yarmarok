@@ -50,6 +50,9 @@ export const usePrizeStore = defineStore({
             }
 
             this.prizes[this.prizes.findIndex(prize => prize.id == updatedPrize.id)] = updatedPrize
+            if (this.selectedPrize && this.selectedPrize.id === updatedPrize.id) {
+                this.selectedPrize = updatedPrize
+            }
         },
         async deletePrize(raffleId: string, id: string) {
             const { error } = await useApiFetch(
@@ -61,6 +64,7 @@ export const usePrizeStore = defineStore({
             }
 
             this.prizes = this.prizes.filter(prize => prize.id !== id)
+            this.selectLastPrize()
         },
         selectFirstPrize() {
             this.selectedPrize = this.prizes.length === 0 ? null : this.prizes[0]
