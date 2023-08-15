@@ -32,15 +32,18 @@ import { Ref } from "@vue/reactivity"
 import { ValidationError } from "yup"
 import { NewPrize, newPrizeSchema } from "~/types/prize"
 import { useRaffleStore } from "~/store/raffle"
+import { useNotificationStore } from "~/store/notification"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
 
+const { showError } = useNotificationStore()
+
 const prizeStore = usePrizeStore()
 const newPrize: Ref<NewPrize> = ref(<NewPrize>{
     name: "",
-    ticketCost: 10,
-    note: "",
+    ticketCost: 0,
+    description: "",
 })
 
 const isOpen = ref(false)
@@ -56,8 +59,8 @@ function closeModal() {
     setTimeout(() => {
         newPrize.value = <NewPrize>{
             name: "",
-            ticketCost: 10,
-            note: "",
+            ticketCost: 0,
+            description: "",
         }
     }, 200)
 }
@@ -65,7 +68,10 @@ function closeModal() {
 function addPrize() {
     newPrizeSchema.validate(newPrize.value)
         .then(() => {
-            prizeStore.addPrize(newPrize.value)
+            prizeStore.addPrize(selectedRaffle.value!.id, newPrize.value).catch(e => {
+                console.error(e)
+                showError("Не вдалося створити приз!")
+            })
             closeModal()
         })
         .catch((e: ValidationError) => {

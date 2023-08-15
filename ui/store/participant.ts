@@ -36,10 +36,11 @@ export const useParticipantStore = defineStore({
             })
         },
         async updateParticipant(raffleId: string, updatedParticipant: Participant) {
-            const { error } = await useApiFetch(`/api/raffles/${ raffleId }/participants/${ updatedParticipant.id }`, {
-                method: "PUT",
-                body: updatedParticipant,
-            })
+            const { error } = await useApiFetch(
+                `/api/raffles/${ raffleId }/participants/${ updatedParticipant.id }`, {
+                    method: "PUT",
+                    body: updatedParticipant,
+                })
             if (error.value) {
                 throw error.value
             }
@@ -47,9 +48,10 @@ export const useParticipantStore = defineStore({
             this.participants[this.participants.findIndex(participant => participant.id == updatedParticipant.id)] = updatedParticipant
         },
         async deleteParticipant(raffleId: string, id: string) {
-            const { error } = await useApiFetch(`/api/raffles/${ raffleId }/participants/${ id }`, {
-                method: "DELETE",
-            })
+            const { error } = await useApiFetch(
+                `/api/raffles/${ raffleId }/participants/${ id }`, {
+                    method: "DELETE",
+                })
             if (error.value) {
                 throw error.value
             }

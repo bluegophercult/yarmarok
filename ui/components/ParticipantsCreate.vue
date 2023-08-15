@@ -32,9 +32,12 @@ import { Ref } from "@vue/reactivity"
 import { ValidationError } from "yup"
 import { NewParticipant, newParticipantSchema } from "~/types/participant"
 import { useRaffleStore } from "~/store/raffle"
+import { useNotificationStore } from "~/store/notification"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
+
+const { showError } = useNotificationStore()
 
 const participantStore = useParticipantStore()
 const newParticipant: Ref<NewParticipant> = ref(<NewParticipant>{
@@ -65,7 +68,10 @@ function closeModal() {
 function addParticipant() {
     newParticipantSchema.validate(newParticipant.value)
         .then(() => {
-            participantStore.addParticipant(selectedRaffle.value!.id, newParticipant.value)
+            participantStore.addParticipant(selectedRaffle.value!.id, newParticipant.value).catch(e => {
+                console.error(e)
+                showError("Не вдалося створити учасника!")
+            })
             closeModal()
         })
         .catch((e: ValidationError) => {
