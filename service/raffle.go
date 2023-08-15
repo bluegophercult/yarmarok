@@ -8,13 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	// StatusSuccess is a success status sent by the service to the client.
-	StatusSuccess = "success"
-	// StatusError is an error status sent by the service to the client.
-	StatusError = "error"
-)
-
 // stringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
 var stringUUID = func() string {
@@ -172,16 +165,4 @@ type RaffleRequest struct {
 type RaffleExportResult struct {
 	FileName string `json:"fileName"`
 	Content  []byte `json:"content"`
-}
-
-// TODO: remove CreateResult & Result.
-
-// CreateResult is a generic result of entity creation.
-type CreateResult struct {
-	ID string `json:"id"`
-}
-
-// Result is a generic result with status.
-type Result struct {
-	Status string `json:"status"`
 }

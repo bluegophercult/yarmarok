@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//go:generate mockgen -destination=mock_organizer_storage_test.go -package=service github.com/kaznasho/yarmarok/service OrganizerStorage
 func TestInitOrganizer(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -43,5 +42,3 @@ func TestInitOrganizer(t *testing.T) {
 		})
 	})
 }
-
-var _ OrganizerService = &OrganizerManager{}
