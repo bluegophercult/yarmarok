@@ -116,7 +116,7 @@ func (rm *RaffleManager) Edit(id string, r *RaffleRequest) error {
 // Delete a raffle.
 func (rm *RaffleManager) Delete(id string) error {
 	if err := rm.raffleStorage.Delete(id); err != nil {
-		return fmt.Errorf("deleting participant: %w", err)
+		return fmt.Errorf("deleting raffle: %w", err)
 	}
 
 	return nil

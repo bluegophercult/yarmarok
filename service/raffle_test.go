@@ -87,13 +87,13 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("delete", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Delete(gomock.Any()).Return(nil)
+			rsMock.EXPECT().Delete(mockedID).Return(nil)
 			err := rm.Delete(mockedID)
 			require.NoError(t, err)
 		})
 
 		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Delete(gomock.Any()).Return(ErrNotFound)
+			rsMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
 			err := rm.Delete(mockedID)
 			require.ErrorIs(t, err, ErrNotFound)
 		})
