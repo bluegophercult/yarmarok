@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,6 +38,8 @@ type RaffleService interface {
 	Delete(id string) error
 	List() ([]Raffle, error)
 	Export(id string) (*RaffleExportResult, error)
+	PlayPrize(raffleID, prizeID string) (*PrizePlayResult, error)
+	PlayPrizeAgain(raffleID, prizeID string, previousResult *PrizePlayResult) (*PrizePlayResult, error)
 	ParticipantService(id string) ParticipantService
 	PrizeService(id string) PrizeService
 }
@@ -156,6 +159,121 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResult, error) {
 	return &resp, nil
 }
 
+// PlayPrize find winner of prize
+func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, error) {
+
+	participantList, err := rm.ParticipantService(raffleID).List()
+	if err != nil {
+		return nil, fmt.Errorf("get participant list: %w", err)
+	}
+
+	pzs := rm.PrizeService(raffleID)
+	prize, err := pzs.Get(prizeID)
+	if err != nil {
+		return nil, fmt.Errorf("get prize to play: %w", err)
+	}
+
+	ds := pzs.DonationService(prizeID)
+	donationsList, err := ds.List()
+	if err != nil {
+		return nil, fmt.Errorf("get donation list: %w", err)
+	}
+
+	ticketCost := prize.TicketCost
+	winnerDonationID := GetWinnerDonationID(donationsList, ticketCost)
+
+	winnerDonation, err := ds.Get(winnerDonationID)
+	if err != nil {
+		return nil, fmt.Errorf("get winner donation: %w", err)
+	}
+
+	prizePlayResult := new(PrizePlayResult)
+	for _, participant := range participantList {
+		tempPlayParticipant := PlayParticipant{
+			Participant: participant,
+		}
+
+		// add participant donations
+		totalDonation := 0
+		for _, donation := range donationsList {
+			totalDonation += donation.Amount
+			tempPlayParticipant.Donations = append(tempPlayParticipant.Donations, donation)
+		}
+
+		// calculate total donation and number of tickets
+		tempPlayParticipant.TotalDonation = totalDonation
+		tempPlayParticipant.NumberOfTickets = totalDonation / ticketCost
+
+		if participant.ID == winnerDonation.ParticipantID {
+			prizePlayResult.Winners = append(prizePlayResult.Winners, tempPlayParticipant)
+			continue
+		}
+
+		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, tempPlayParticipant)
+	}
+
+	return prizePlayResult, nil
+}
+
+func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult *PrizePlayResult) (*PrizePlayResult, error) {
+	prize, err := rm.PrizeService(raffleID).Get(prizeID)
+	if err != nil {
+		return nil, fmt.Errorf("get prize to play: %w", err)
+	}
+
+	ticketCost := prize.TicketCost
+	donations := make([]Donation, 0)
+	for _, participant := range previousResult.PlayParticipants {
+		donations = append(participant.Donations)
+	}
+
+	winnerDonationID := GetWinnerDonationID(donations, ticketCost)
+
+	prizePlayResult := new(PrizePlayResult)
+
+	// add previous winners
+	for _, prewiousWinners := range previousResult.Winners {
+		prizePlayResult.Winners = append(prizePlayResult.Winners, prewiousWinners)
+	}
+
+	skip := false
+	for _, participant := range previousResult.PlayParticipants {
+		// to skip adding winner to participants
+		if skip == false {
+			for _, donation := range participant.Donations {
+				// add new winner
+				if winnerDonationID == donation.ID {
+					prizePlayResult.Winners = append(prizePlayResult.Winners, participant)
+					skip = true
+					break
+				}
+			}
+			continue
+		}
+
+		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, participant)
+	}
+
+	return prizePlayResult, nil
+}
+
+// GetWinnerDonationID find donation that wins
+func GetWinnerDonationID(donationsList []Donation, ticketCost int) (id string) {
+	tickets := make([]string, 0)
+	for _, donation := range donationsList {
+		// calculate number of tickets in donation
+		numberOfTickets := donation.Amount / ticketCost
+		for i := 0; i < numberOfTickets; i++ {
+			tickets = append(tickets, donation.ID)
+		}
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	winnerDonationID := rand.Intn(len(tickets))
+
+	return tickets[winnerDonationID]
+}
+
 // ParticipantService is a service for participants.
 func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
 	return NewParticipantManager(rm.raffleStorage.ParticipantStorage(id))
@@ -176,4 +294,18 @@ type RaffleRequest struct {
 type RaffleExportResult struct {
 	FileName string `json:"fileName"`
 	Content  []byte `json:"content"`
+}
+
+// PrizePlayResult is a response for played prize
+type PrizePlayResult struct {
+	Winners          []PlayParticipant `json:"winners"`
+	PlayParticipants []PlayParticipant `json:"participants"`
+}
+
+// PlayParticipant representation of result response of participant
+type PlayParticipant struct {
+	Participant     Participant `json:"participant"`
+	TotalDonation   int         `json:"totalDonation"`
+	NumberOfTickets int         `json:"numberOfTickets"`
+	Donations       []Donation  `json:"donations"`
 }
