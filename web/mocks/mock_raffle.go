@@ -136,6 +136,36 @@ func (mr *MockRaffleServiceMockRecorder) ParticipantService(arg0 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParticipantService", reflect.TypeOf((*MockRaffleService)(nil).ParticipantService), arg0)
 }
 
+// PlayPrize mocks base method.
+func (m *MockRaffleService) PlayPrize(arg0, arg1 string) (*service.PrizePlayResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PlayPrize", arg0, arg1)
+	ret0, _ := ret[0].(*service.PrizePlayResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PlayPrize indicates an expected call of PlayPrize.
+func (mr *MockRaffleServiceMockRecorder) PlayPrize(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlayPrize", reflect.TypeOf((*MockRaffleService)(nil).PlayPrize), arg0, arg1)
+}
+
+// PlayPrizeAgain mocks base method.
+func (m *MockRaffleService) PlayPrizeAgain(arg0, arg1 string, arg2 *service.PrizePlayResult) (*service.PrizePlayResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PlayPrizeAgain", arg0, arg1, arg2)
+	ret0, _ := ret[0].(*service.PrizePlayResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PlayPrizeAgain indicates an expected call of PlayPrizeAgain.
+func (mr *MockRaffleServiceMockRecorder) PlayPrizeAgain(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlayPrizeAgain", reflect.TypeOf((*MockRaffleService)(nil).PlayPrizeAgain), arg0, arg1, arg2)
+}
+
 // PrizeService mocks base method.
 func (m *MockRaffleService) PrizeService(arg0 string) service.PrizeService {
 	m.ctrl.T.Helper()
