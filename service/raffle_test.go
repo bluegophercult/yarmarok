@@ -212,6 +212,48 @@ func (s *RaffleSuite) TestExportRaffle() {
 	s.Require().NotNil(res)
 	s.Require().Equal("yarmarok_"+s.mockUUID+".xlsx", res.FileName)
 	s.Require().NotEmpty(res.Content)
+	s.Run("PlayPrize", func() {
+		prts := []Participant{
+			{ID: "p1", Name: "Participant 1"},
+			{ID: "p2", Name: "Participant 2"},
+			{ID: "p3", Name: "Participant 3"},
+		}
+		przs := []Prize{
+			{ID: "pr1", Name: "Prize 1", TicketCost: 10},
+			{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+		}
+
+		dnt := []Donation{
+			{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn1", ParticipantID: "p2", Amount: 200},
+			{ID: "dn1", ParticipantID: "p2", Amount: 200},
+			{ID: "dn1", ParticipantID: "p3", Amount: 300},
+		}
+
+		mockedPrizeID := "pz1"
+		mockedDonation := "dn1"
+
+		psMock := NewMockParticipantStorage(s.ctrl)
+		s.storage.EXPECT().ParticipantStorage(s.mockUUID).Return(psMock)
+		psMock.EXPECT().GetAll().Return(prts, nil)
+
+		pzMock := NewMockPrizeStorage(s.ctrl)
+		s.storage.EXPECT().PrizeStorage(s.mockUUID).Return(pzMock)
+		pzMock.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
+
+		dnMock := NewMockDonationStorage(s.ctrl)
+		pzMock.EXPECT().DonationStorage(mockedPrizeID).Return(dnMock)
+		dnMock.EXPECT().GetAll().Return(dnt, nil)
+
+		dnMock.EXPECT().Get(mockedDonation).Return(&dnt[0], nil)
+
+		res, err := s.manager.PlayPrize(s.mockUUID, mockedPrizeID)
+		s.Require().NoError(err)
+		s.Require().NotNil(res)
+		s.Require().NotEmpty(res.Winners)
+		s.Require().NotEmpty(res.PlayParticipants)
+	})
 }
 
 func setUUIDMock(uuid string) {

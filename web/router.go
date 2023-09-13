@@ -1,11 +1,11 @@
 package web
 
 import (
+	"encoding/json"
 	"errors"
-	"net/http"
-
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
+	"net/http"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
@@ -17,6 +17,7 @@ const (
 	ParticipantsPath = "/participants"
 	PrizesPath       = "/prizes"
 	DonationsPath    = "/donations"
+	PlayPath         = "/play"
 )
 
 const (
@@ -109,6 +110,11 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 						r.Get("/", router.getPrize)
 						r.Put("/", router.editPrize)
 						r.Delete("/", router.deletePrize)
+
+						// "/api/raffles/{raffle_id}/prizes/{prize_id}/play"
+						r.Route(PlayPath, func(r chi.Router) {
+							r.Get("/", router.playPrize)
+						})
 
 						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
 						r.Route(DonationsPath, func(r chi.Router) {
@@ -288,6 +294,45 @@ func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 	}
 
 	newList(svc.List).Handle(w, req)
+}
+
+func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getRaffleService(req)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	raffleID, err := extractParam(req, raffleIDParam)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	prizeID, err := extractParam(req, prizeIDParam)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	res, err := svc.PlayPrize(raffleID, prizeID)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	b, err := json.Marshal(res)
+	if err != nil {
+		respondErr(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if _, err := w.Write(b); err != nil {
+		respondErr(w, err)
+		r.logger.WithError(err).Error("writing prize winner list")
+	}
 }
 
 func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
