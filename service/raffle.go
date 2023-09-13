@@ -179,8 +179,9 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 		return nil, fmt.Errorf("get donation list: %w", err)
 	}
 
+	seed := time.Now().UnixNano()
 	ticketCost := prize.TicketCost
-	winnerDonationID := GetWinnerDonationID(donationsList, ticketCost)
+	winnerDonationID := GetWinnerDonationID(donationsList, ticketCost, seed)
 
 	winnerDonation, err := ds.Get(winnerDonationID)
 	if err != nil {
@@ -196,13 +197,15 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 		// add participant donations
 		totalDonation := 0
 		for _, donation := range donationsList {
-			totalDonation += donation.Amount
-			tempPlayParticipant.Donations = append(tempPlayParticipant.Donations, donation)
+			if participant.ID == donation.ParticipantID {
+				totalDonation += donation.Amount
+				tempPlayParticipant.Donations = append(tempPlayParticipant.Donations, donation)
+			}
 		}
 
 		// calculate total donation and number of tickets
 		tempPlayParticipant.TotalDonation = totalDonation
-		tempPlayParticipant.NumberOfTickets = totalDonation / ticketCost
+		tempPlayParticipant.TotalTicketsNumber = totalDonation / ticketCost
 
 		if participant.ID == winnerDonation.ParticipantID {
 			prizePlayResult.Winners = append(prizePlayResult.Winners, tempPlayParticipant)
@@ -227,24 +230,24 @@ func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult
 		donations = append(participant.Donations)
 	}
 
-	winnerDonationID := GetWinnerDonationID(donations, ticketCost)
+	seed := time.Now().UnixNano()
+	winnerDonationID := GetWinnerDonationID(donations, ticketCost, seed)
 
 	prizePlayResult := new(PrizePlayResult)
-
 	// add previous winners
 	for _, prewiousWinners := range previousResult.Winners {
 		prizePlayResult.Winners = append(prizePlayResult.Winners, prewiousWinners)
 	}
 
-	skip := false
+	foundWinner := false
 	for _, participant := range previousResult.PlayParticipants {
 		// to skip adding winner to participants
-		if skip == false {
+		if !foundWinner {
 			for _, donation := range participant.Donations {
 				// add new winner
 				if winnerDonationID == donation.ID {
 					prizePlayResult.Winners = append(prizePlayResult.Winners, participant)
-					skip = true
+					foundWinner = true
 					break
 				}
 			}
@@ -258,7 +261,7 @@ func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult
 }
 
 // GetWinnerDonationID find donation that wins
-func GetWinnerDonationID(donationsList []Donation, ticketCost int) (id string) {
+func GetWinnerDonationID(donationsList []Donation, ticketCost int, seed int64) (id string) {
 	tickets := make([]string, 0)
 	for _, donation := range donationsList {
 		// calculate number of tickets in donation
@@ -268,8 +271,8 @@ func GetWinnerDonationID(donationsList []Donation, ticketCost int) (id string) {
 		}
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	winnerDonationID := rand.Intn(len(tickets))
+	rnd := rand.New(rand.NewSource(seed))
+	winnerDonationID := rnd.Intn(len(tickets))
 
 	return tickets[winnerDonationID]
 }
@@ -304,8 +307,8 @@ type PrizePlayResult struct {
 
 // PlayParticipant representation of result response of participant
 type PlayParticipant struct {
-	Participant     Participant `json:"participant"`
-	TotalDonation   int         `json:"totalDonation"`
-	NumberOfTickets int         `json:"numberOfTickets"`
-	Donations       []Donation  `json:"donations"`
+	Participant        Participant `json:"participant"`
+	TotalDonation      int         `json:"totalDonation"`
+	TotalTicketsNumber int         `json:"totalTicketsNumber"`
+	Donations          []Donation  `json:"donations"`
 }

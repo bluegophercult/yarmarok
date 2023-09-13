@@ -10,6 +10,8 @@ import (
 )
 
 func TestRaffle(t *testing.T) {
+	t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true") // To test in Windows remove before commit
+
 	ctrl := gomock.NewController(t)
 
 	rsMock := NewMockRaffleStorage(ctrl)
@@ -145,6 +147,49 @@ func TestRaffle(t *testing.T) {
 		require.NotNil(t, res)
 		require.Equal(t, "yarmarok_"+mockedID+".xlsx", res.FileName)
 		require.NotEmpty(t, res.Content)
+	})
+
+	t.Run("PlayPrize", func(t *testing.T) {
+		prts := []Participant{
+			{ID: "p1", Name: "Participant 1"},
+			{ID: "p2", Name: "Participant 2"},
+			{ID: "p3", Name: "Participant 3"},
+		}
+		przs := []Prize{
+			{ID: "pr1", Name: "Prize 1", TicketCost: 10},
+			{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+		}
+
+		dnt := []Donation{
+			{ID: "dn1", PrizeID: "pr1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn1", PrizeID: "pr1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn1", PrizeID: "pr1", ParticipantID: "p2", Amount: 200},
+			{ID: "dn1", PrizeID: "pr1", ParticipantID: "p2", Amount: 200},
+			{ID: "dn1", PrizeID: "pr1", ParticipantID: "p3", Amount: 300},
+		}
+
+		mockedPrizeID := "pz1"
+		mockedDonation := "dn1"
+
+		psMock := NewMockParticipantStorage(ctrl)
+		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
+		psMock.EXPECT().GetAll().Return(prts, nil)
+
+		pzMock := NewMockPrizeStorage(ctrl)
+		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
+		pzMock.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
+
+		dnMock := NewMockDonationStorage(ctrl)
+		pzMock.EXPECT().DonationStorage(mockedPrizeID).Return(dnMock)
+		dnMock.EXPECT().GetAll().Return(dnt, nil)
+
+		dnMock.EXPECT().Get(mockedDonation).Return(&dnt[0], nil)
+
+		res, err := rm.PlayPrize(mockedID, mockedPrizeID)
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.NotEmpty(t, res.Winners)
+		require.NotEmpty(t, res.PlayParticipants)
 	})
 }
 
