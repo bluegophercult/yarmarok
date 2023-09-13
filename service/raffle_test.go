@@ -22,12 +22,12 @@ func TestRaffle(t *testing.T) {
 		Note: "raffle_note_1",
 	}
 
-	mockedID := "raffle_id_1"
+	mockedRaffleID := "raffle_id_1"
 	mockedTime := time.Now().UTC()
 	mockedErr := assert.AnError
 
 	mockedRaffle := Raffle{
-		ID:        mockedID,
+		ID:        mockedRaffleID,
 		Name:      raf.Name,
 		Note:      raf.Note,
 		CreatedAt: mockedTime,
@@ -43,30 +43,30 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			setUUIDMock(mockedID)
+			setUUIDMock(mockedRaffleID)
 			setTimeNowMock(mockedTime)
 
 			rsMock.EXPECT().Create(&mockedRaffle).Return(nil)
 
 			resID, err := rm.Create(&raf)
 			require.NoError(t, err)
-			require.Equal(t, mockedID, resID)
+			require.Equal(t, mockedRaffleID, resID)
 		})
 	})
 
 	t.Run("get", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
+			rsMock.EXPECT().Get(mockedRaffleID).Return(nil, mockedErr)
 
-			res, err := rm.Get(mockedID)
+			res, err := rm.Get(mockedRaffleID)
 			require.ErrorIs(t, err, mockedErr)
 			require.Nil(t, res)
 		})
 
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
+			rsMock.EXPECT().Get(mockedRaffleID).Return(&mockedRaffle, nil)
 
-			raf, err := rm.Get(mockedID)
+			raf, err := rm.Get(mockedRaffleID)
 			require.NoError(t, err)
 			require.Equal(t, &mockedRaffle, raf)
 		})
@@ -74,29 +74,29 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("edit", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
+			rsMock.EXPECT().Get(mockedRaffleID).Return(&mockedRaffle, nil)
 			rsMock.EXPECT().Update(&mockedRaffle).Return(nil)
-			err := rm.Edit(mockedID, &raf)
+			err := rm.Edit(mockedRaffleID, &raf)
 			require.NoError(t, err)
 		})
 
 		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
-			err := rm.Edit(mockedID, &raf)
+			rsMock.EXPECT().Get(mockedRaffleID).Return(nil, ErrNotFound)
+			err := rm.Edit(mockedRaffleID, &raf)
 			require.ErrorIs(t, err, ErrNotFound)
 		})
 	})
 
 	t.Run("delete", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Delete(mockedID).Return(nil)
-			err := rm.Delete(mockedID)
+			rsMock.EXPECT().Delete(mockedRaffleID).Return(nil)
+			err := rm.Delete(mockedRaffleID)
 			require.NoError(t, err)
 		})
 
 		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
-			err := rm.Delete(mockedID)
+			rsMock.EXPECT().Delete(mockedRaffleID).Return(ErrNotFound)
+			err := rm.Delete(mockedRaffleID)
 			require.ErrorIs(t, err, ErrNotFound)
 		})
 	})
@@ -122,7 +122,7 @@ func TestRaffle(t *testing.T) {
 	})
 
 	t.Run("Export non-empty collection s", func(t *testing.T) {
-		raf := &Raffle{ID: mockedID, Name: "Raffle Test"}
+		raf := &Raffle{ID: mockedRaffleID, Name: "Raffle Test"}
 		prts := []Participant{
 			{ID: "p1", Name: "Participant 1"},
 			{ID: "p2", Name: "Participant 2"},
@@ -132,20 +132,20 @@ func TestRaffle(t *testing.T) {
 			{ID: "pr2", Name: "Prize 2"},
 		}
 
-		rsMock.EXPECT().Get(mockedID).Return(raf, nil)
+		rsMock.EXPECT().Get(mockedRaffleID).Return(raf, nil)
 
 		psMock := NewMockParticipantStorage(ctrl)
-		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
+		rsMock.EXPECT().ParticipantStorage(mockedRaffleID).Return(psMock)
 		psMock.EXPECT().GetAll().Return(prts, nil)
 
 		pzMock := NewMockPrizeStorage(ctrl)
-		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
+		rsMock.EXPECT().PrizeStorage(mockedRaffleID).Return(pzMock)
 		pzMock.EXPECT().GetAll().Return(przs, nil)
 
-		res, err := rm.Export(mockedID)
+		res, err := rm.Export(mockedRaffleID)
 		require.NoError(t, err)
 		require.NotNil(t, res)
-		require.Equal(t, "yarmarok_"+mockedID+".xlsx", res.FileName)
+		require.Equal(t, "yarmarok_"+mockedRaffleID+".xlsx", res.FileName)
 		require.NotEmpty(t, res.Content)
 	})
 
@@ -172,11 +172,11 @@ func TestRaffle(t *testing.T) {
 		mockedDonation := "dn1"
 
 		psMock := NewMockParticipantStorage(ctrl)
-		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
+		rsMock.EXPECT().ParticipantStorage(mockedRaffleID).Return(psMock)
 		psMock.EXPECT().GetAll().Return(prts, nil)
 
 		pzMock := NewMockPrizeStorage(ctrl)
-		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
+		rsMock.EXPECT().PrizeStorage(mockedRaffleID).Return(pzMock)
 		pzMock.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
 
 		dnMock := NewMockDonationStorage(ctrl)
@@ -185,7 +185,96 @@ func TestRaffle(t *testing.T) {
 
 		dnMock.EXPECT().Get(mockedDonation).Return(&dnt[0], nil)
 
-		res, err := rm.PlayPrize(mockedID, mockedPrizeID)
+		res, err := rm.PlayPrize(mockedRaffleID, mockedPrizeID)
+		require.NoError(t, err)
+		require.NotNil(t, res)
+		require.NotEmpty(t, res.Winners)
+		require.NotEmpty(t, res.PlayParticipants)
+	})
+
+	t.Run("PlayPrizeAgain", func(t *testing.T) {
+		przs := []Prize{
+			{ID: "pr1", Name: "Prize 1", TicketCost: 10},
+			{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+		}
+
+		mockedPreviousResult := &PrizePlayResult{
+			Winners: []PlayParticipant{
+				{
+					Participant: Participant{
+						ID:        "ID1",
+						Name:      "name1",
+						Phone:     "phone1",
+						Note:      "note1",
+						CreatedAt: mockedTime,
+					},
+					TotalDonation:      300,
+					TotalTicketsNumber: 10,
+					Donations: []Donation{
+						{
+							ID:            "dID1",
+							PrizeID:       "prID1",
+							ParticipantID: "id1",
+							Amount:        300,
+							TicketsNumber: 10,
+							CreatedAt:     time.Time{},
+						},
+					},
+				},
+			},
+			PlayParticipants: []PlayParticipant{
+				{
+					Participant: Participant{
+						ID:        "ID2",
+						Name:      "name2",
+						Phone:     "phone2",
+						Note:      "note2",
+						CreatedAt: mockedTime,
+					},
+					TotalDonation:      200,
+					TotalTicketsNumber: 5,
+					Donations: []Donation{
+						{
+							ID:            "dID2",
+							PrizeID:       "prID1",
+							ParticipantID: "ID2",
+							Amount:        200,
+							TicketsNumber: 5,
+							CreatedAt:     mockedTime,
+						},
+					},
+				},
+				{
+					Participant: Participant{
+						ID:        "ID3",
+						Name:      "name3",
+						Phone:     "phone3",
+						Note:      "note3",
+						CreatedAt: mockedTime,
+					},
+					TotalDonation:      100,
+					TotalTicketsNumber: 2,
+					Donations: []Donation{
+						{
+							ID:            "dID3",
+							PrizeID:       "prID1",
+							ParticipantID: "ID3",
+							Amount:        1000,
+							TicketsNumber: 2,
+							CreatedAt:     mockedTime,
+						},
+					},
+				},
+			},
+		}
+
+		mockedPrizeID := "pz1"
+
+		pzMock := NewMockPrizeStorage(ctrl)
+		rsMock.EXPECT().PrizeStorage(mockedRaffleID).Return(pzMock)
+		pzMock.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
+
+		res, err := rm.PlayPrizeAgain(mockedRaffleID, mockedPrizeID, mockedPreviousResult)
 		require.NoError(t, err)
 		require.NotNil(t, res)
 		require.NotEmpty(t, res.Winners)

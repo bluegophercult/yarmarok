@@ -2,11 +2,16 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrAllWinnersFound = errors.New("all winners already found")
 )
 
 // stringUUID is a plumbing function for generating UUIDs.
@@ -219,6 +224,11 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 }
 
 func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult *PrizePlayResult) (*PrizePlayResult, error) {
+	// check if participants left to play
+	if len(previousResult.PlayParticipants) == 0 {
+		return nil, ErrAllWinnersFound
+	}
+
 	prize, err := rm.PrizeService(raffleID).Get(prizeID)
 	if err != nil {
 		return nil, fmt.Errorf("get prize to play: %w", err)
@@ -227,7 +237,7 @@ func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult
 	ticketCost := prize.TicketCost
 	donations := make([]Donation, 0)
 	for _, participant := range previousResult.PlayParticipants {
-		donations = append(participant.Donations)
+		donations = append(donations, participant.Donations...)
 	}
 
 	seed := time.Now().UnixNano()
@@ -235,26 +245,26 @@ func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult
 
 	prizePlayResult := new(PrizePlayResult)
 	// add previous winners
-	for _, prewiousWinners := range previousResult.Winners {
-		prizePlayResult.Winners = append(prizePlayResult.Winners, prewiousWinners)
+	for _, previousWinners := range previousResult.Winners {
+		prizePlayResult.Winners = append(prizePlayResult.Winners, previousWinners)
 	}
 
-	foundWinner := false
+	// add new winner
+	var winnerID string
 	for _, participant := range previousResult.PlayParticipants {
-		// to skip adding winner to participants
-		if !foundWinner {
-			for _, donation := range participant.Donations {
-				// add new winner
-				if winnerDonationID == donation.ID {
-					prizePlayResult.Winners = append(prizePlayResult.Winners, participant)
-					foundWinner = true
-					break
-				}
+		for _, donation := range participant.Donations {
+			if winnerDonationID == donation.ID {
+				winnerID = participant.Participant.ID
+				prizePlayResult.Winners = append(prizePlayResult.Winners, participant)
 			}
-			continue
 		}
+	}
 
-		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, participant)
+	// add previous participants
+	for _, participant := range previousResult.PlayParticipants {
+		if participant.Participant.ID != winnerID {
+			prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, participant)
+		}
 	}
 
 	return prizePlayResult, nil

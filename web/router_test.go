@@ -336,7 +336,7 @@ func TestRaffle(t *testing.T) {
 			mockedTime := time.Now().UTC()
 			mockedResponse := &service.PrizePlayResult{
 				Winners: []service.PlayParticipant{
-					service.PlayParticipant{
+					{
 						Participant: service.Participant{
 							ID:        "ID1",
 							Name:      "name1",
@@ -347,7 +347,7 @@ func TestRaffle(t *testing.T) {
 						TotalDonation:      300,
 						TotalTicketsNumber: 10,
 						Donations: []service.Donation{
-							service.Donation{
+							{
 								ID:            "dID1",
 								PrizeID:       "prID1",
 								ParticipantID: "id1",
@@ -359,7 +359,7 @@ func TestRaffle(t *testing.T) {
 					},
 				},
 				PlayParticipants: []service.PlayParticipant{
-					service.PlayParticipant{
+					{
 						Participant: service.Participant{
 							ID:        "ID2",
 							Name:      "name2",
@@ -370,7 +370,7 @@ func TestRaffle(t *testing.T) {
 						TotalDonation:      200,
 						TotalTicketsNumber: 5,
 						Donations: []service.Donation{
-							service.Donation{
+							{
 								ID:            "dID2",
 								PrizeID:       "prID1",
 								ParticipantID: "ID2",
@@ -380,12 +380,12 @@ func TestRaffle(t *testing.T) {
 							},
 						},
 					},
-					service.PlayParticipant{
+					{
 						Participant: service.Participant{
-							ID:        "ID1",
-							Name:      "name1",
-							Phone:     "phone1",
-							Note:      "note1",
+							ID:        "ID3",
+							Name:      "name3",
+							Phone:     "phone3",
+							Note:      "note3",
 							CreatedAt: mockedTime,
 						},
 						TotalDonation:      100,
