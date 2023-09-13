@@ -391,7 +391,7 @@ func TestRaffle(t *testing.T) {
 						TotalDonation:      100,
 						TotalTicketsNumber: 2,
 						Donations: []service.Donation{
-							service.Donation{
+							{
 								ID:            "dID3",
 								PrizeID:       "prID1",
 								ParticipantID: "ID3",
