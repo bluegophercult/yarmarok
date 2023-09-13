@@ -254,6 +254,89 @@ func (s *RaffleSuite) TestExportRaffle() {
 		s.Require().NotEmpty(res.Winners)
 		s.Require().NotEmpty(res.PlayParticipants)
 	})
+
+	s.Run("PlayPrizeAgain", func() {
+		przs := []Prize{
+			{ID: "pr1", Name: "Prize 1", TicketCost: 10},
+			{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+		}
+
+		mockedPreviousResult := &PrizePlayResult{
+			Winners: []PlayParticipant{
+				{
+					Participant: Participant{
+						ID:        "ID1",
+						Name:      "name1",
+						Phone:     "phone1",
+						Note:      "note1",
+						CreatedAt: s.mockTime,
+					},
+					TotalDonation:      300,
+					TotalTicketsNumber: 10,
+					Donations: []Donation{
+						{
+							ID:            "dID1",
+							ParticipantID: "id1",
+							Amount:        300,
+							CreatedAt:     time.Time{},
+						},
+					},
+				},
+			},
+			PlayParticipants: []PlayParticipant{
+				{
+					Participant: Participant{
+						ID:        "ID2",
+						Name:      "name2",
+						Phone:     "phone2",
+						Note:      "note2",
+						CreatedAt: s.mockTime,
+					},
+					TotalDonation:      200,
+					TotalTicketsNumber: 5,
+					Donations: []Donation{
+						{
+							ID:            "dID2",
+							ParticipantID: "ID2",
+							Amount:        200,
+							CreatedAt:     s.mockTime,
+						},
+					},
+				},
+				{
+					Participant: Participant{
+						ID:        "ID3",
+						Name:      "name3",
+						Phone:     "phone3",
+						Note:      "note3",
+						CreatedAt: s.mockTime,
+					},
+					TotalDonation:      100,
+					TotalTicketsNumber: 2,
+					Donations: []Donation{
+						{
+							ID:            "dID3",
+							ParticipantID: "ID3",
+							Amount:        1000,
+							CreatedAt:     s.mockTime,
+						},
+					},
+				},
+			},
+		}
+
+		mockedPrizeID := "pz1"
+
+		pzMock := NewMockPrizeStorage(s.ctrl)
+		s.storage.EXPECT().PrizeStorage(s.mockUUID).Return(pzMock)
+		pzMock.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
+
+		res, err := s.manager.PlayPrizeAgain(s.mockUUID, mockedPrizeID, mockedPreviousResult)
+		s.Require().NoError(err)
+		s.Require().NotNil(res)
+		s.Require().NotEmpty(res.Winners)
+		s.Require().NotEmpty(res.PlayParticipants)
+	})
 }
 
 func setUUIDMock(uuid string) {
