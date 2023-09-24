@@ -9,7 +9,7 @@
         </div>
         <hr class="mt-2">
         <div v-if="selectedPrize" class="flex flex-col gap-2 mt-2">
-            <div class="flex justify-between">
+            <div class="flex justify-between items-center">
                 <div class="text-xl">{{ selectedPrize.name }}</div>
                 <div>Ціна купону: {{ selectedPrize.ticketCost }}</div>
             </div>

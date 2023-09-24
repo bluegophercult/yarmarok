@@ -143,7 +143,12 @@ function addDonation() {
     }
     newDonationSchema.validate(newDonation.value)
         .then(() => {
-            donationStore.addDonation(selectedRaffle.value!.id, selectedPrize.value!.id, newDonation.value).catch(e => {
+            donationStore.addDonation(
+                selectedRaffle.value!.id,
+                selectedPrize.value!.id,
+                newDonation.value,
+                selectedPrize.value!.ticketCost,
+            ).catch(e => {
                 console.error(e)
                 showError("Не вдалося створити внесок!")
             })

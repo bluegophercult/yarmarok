@@ -21,7 +21,7 @@ export const useDonationStore = defineStore({
         clearDonations() {
             this.donations = []
         },
-        async addDonation(raffleId: string, prizeId: string, newDonation: NewDonation) {
+        async addDonation(raffleId: string, prizeId: string, newDonation: NewDonation, ticketCost: number) {
             const { data, error } = await useApiFetch<{
                 id: string,
             }>(`/api/raffles/${ raffleId }/prizes/${ prizeId }/donations`, {
@@ -34,6 +34,7 @@ export const useDonationStore = defineStore({
 
             this.donations.push(<Donation>{
                 id: data.value!.id,
+                ticketsNumber: Math.floor(newDonation.amount / ticketCost),
                 ...newDonation,
             })
             this.selectLastDonation()
