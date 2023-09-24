@@ -2,7 +2,7 @@
     <div v-if="donations.length === 0" class="text-gray-400">
         Немає внесків
     </div>
-    <div class="overflow-auto max-h-[50vh] overflow-y-auto">
+    <div v-else class="overflow-auto max-h-[50vh] overflow-y-auto">
         <table class="table-auto w-full">
             <thead class="sticky top-0 bg-white">
             <tr>
@@ -20,10 +20,10 @@
                 <td class="border-y px-2">{{ donation.ticketsNumber }}</td>
                 <td class="border-y px-2">{{ donation.amount }} грн</td>
                 <td class="border-y w-7 text-center">
-                    <Icon name="heroicons:pencil"/>
+                    <Icon name="heroicons:pencil" class="hover:text-teal-500 hover:cursor-pointer"/>
                 </td>
                 <td class="border-y w-7 text-center">
-                    <Icon name="heroicons:trash"/>
+                    <Icon name="heroicons:trash" class="hover:text-red-500 hover:cursor-pointer"/>
                 </td>
                 <td></td>
             </tr>
