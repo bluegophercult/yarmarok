@@ -5,9 +5,11 @@ export const useRaffleStore = defineStore({
     state: () => ({
         raffles: <Raffles>[],
         selectedRaffle: <Raffle | null>null,
+        rafflesLoaded: false,
     }),
     actions: {
         async getRaffles() {
+            this.rafflesLoaded = false
             const { data, error } = await useApiFetch<{
                 items: Raffles
             }>("/api/raffles")
@@ -21,6 +23,7 @@ export const useRaffleStore = defineStore({
 
             this.raffles = data.value!.items || <Raffles>[]
             this.selectFirstRaffle()
+            this.rafflesLoaded = true
         },
         async addRaffle(newRaffle: NewRaffle) {
             const { data, error } = await useApiFetch<{
@@ -51,9 +54,16 @@ export const useRaffleStore = defineStore({
             this.raffles[this.raffles.findIndex(raffle => raffle.id == updatedRaffle.id)] = updatedRaffle
             this.selectedRaffle = updatedRaffle
         },
-        deleteRaffle(id: string) {
-            // TODO: API call
+        async deleteRaffle(id: string) {
+            const { error } = await useApiFetch(`/api/raffles/${ id }`, {
+                method: "DELETE",
+            })
+            if (error.value) {
+                throw error.value
+            }
+
             this.raffles = this.raffles.filter(raffle => raffle.id !== id)
+            this.selectFirstRaffle()
         },
         selectFirstRaffle() {
             this.selectedRaffle = this.raffles.length === 0 ? null : this.raffles[0]

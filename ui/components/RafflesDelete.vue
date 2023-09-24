@@ -28,8 +28,10 @@ const raffleStore = useRaffleStore()
 function deleteRaffle() {
     props.closeModal()
     setTimeout(() => {
-        raffleStore.deleteRaffle(props.raffle.id)
-        raffleStore.selectFirstRaffle()
+        raffleStore.deleteRaffle(props.raffle.id).catch(e => {
+            console.error(e)
+            showError("Не вдалося видалити розіграш!")
+        })
     }, 200)
 }
 </script>
