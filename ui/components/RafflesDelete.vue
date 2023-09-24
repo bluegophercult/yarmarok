@@ -16,12 +16,15 @@
 <script setup lang="ts">
 import { useRaffleStore } from "~/store/raffle"
 import { Raffle } from "~/types/raffle"
+import { useNotificationStore } from "~/store/notification"
 
 const props = defineProps<{
     raffle: Raffle
     isOpen: boolean,
     closeModal: () => void,
 }>()
+
+const { showError } = useNotificationStore()
 
 const raffleStore = useRaffleStore()
 
