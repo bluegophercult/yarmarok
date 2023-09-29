@@ -19,7 +19,7 @@
                 <td class="border-y px-2">{{ participant.name }}</td>
                 <td class="border-y px-2">{{ donation.ticketsNumber }}</td>
                 <td class="border-y px-2">{{ donation.amount }} грн</td>
-                <td class="border-y w-7 text-center">
+                <td class="border-y w-7 text-center" @click="selectedDonation = donation; isOpenUpdate = true">
                     <Icon name="heroicons:pencil" class="hover:text-teal-500 hover:cursor-pointer"/>
                 </td>
                 <td class="border-y w-7 text-center" @click="selectedDonation = donation; isOpenDelete = true">
@@ -32,6 +32,9 @@
 
         <DonationsDelete v-if="selectedDonation" :donation="selectedDonation" :is-open="isOpenDelete"
                          :close-modal="() => isOpenDelete = false"/>
+        <DonationsUpdate v-if="selectedDonation" :donation="selectedDonation" :is-open="isOpenUpdate"
+                         :close-modal="() => isOpenUpdate = false"/>
+
     </div>
 </template>
 
@@ -64,5 +67,6 @@ watch([ selectedRaffle, selectedPrize ], () => {
 }, { immediate: true })
 
 const isOpenDelete = ref(false)
+const isOpenUpdate = ref(false)
 const selectedDonation: Ref<Donation | undefined> = ref(undefined)
 </script>

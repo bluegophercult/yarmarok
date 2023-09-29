@@ -39,7 +39,7 @@ export const useDonationStore = defineStore({
             })
             this.selectLastDonation()
         },
-        async updateDonation(raffleId: string, prizeId: string, updatedDonation: Donation) {
+        async updateDonation(raffleId: string, prizeId: string, updatedDonation: Donation, ticketCost: number) {
             const { error } = await useApiFetch(
                 `/api/raffles/${ raffleId }/prizes/${ prizeId }/donations/${ updatedDonation.id }`, {
                     method: "PUT",
@@ -49,6 +49,7 @@ export const useDonationStore = defineStore({
                 throw error.value
             }
 
+            updatedDonation.ticketsNumber = Math.floor(updatedDonation.amount / ticketCost)
             this.donations[this.donations.findIndex(donation => donation.id == updatedDonation.id)] = updatedDonation
             if (this.selectedDonation && this.selectedDonation.id === updatedDonation.id) {
                 this.selectedDonation = updatedDonation
