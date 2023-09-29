@@ -22,13 +22,16 @@
                 <td class="border-y w-7 text-center">
                     <Icon name="heroicons:pencil" class="hover:text-teal-500 hover:cursor-pointer"/>
                 </td>
-                <td class="border-y w-7 text-center">
+                <td class="border-y w-7 text-center" @click="selectedDonation = donation; isOpenDelete = true">
                     <Icon name="heroicons:trash" class="hover:text-red-500 hover:cursor-pointer"/>
                 </td>
                 <td></td>
             </tr>
             </tbody>
         </table>
+
+        <DonationsDelete v-if="selectedDonation" :donation="selectedDonation" :is-open="isOpenDelete"
+                         :close-modal="() => isOpenDelete = false"/>
     </div>
 </template>
 
@@ -37,6 +40,8 @@ import { useRaffleStore } from "~/store/raffle"
 import { usePrizeStore } from "~/store/prize"
 import { useDonationStore } from "~/store/donation"
 import { useParticipantStore } from "~/store/participant"
+import { Ref } from "@vue/reactivity"
+import { Donation } from "~/types/donation"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
@@ -57,4 +62,7 @@ watch([ selectedRaffle, selectedPrize ], () => {
         donationStore.clearDonations()
     }
 }, { immediate: true })
+
+const isOpenDelete = ref(false)
+const selectedDonation: Ref<Donation | undefined> = ref(undefined)
 </script>
