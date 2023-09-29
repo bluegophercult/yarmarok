@@ -1,5 +1,7 @@
 <template>
-    <TheButton @click="openModal" :disabled="!selectedRaffle || !selectedPrize" full-width>Додати внесок</TheButton>
+    <TheButton @click="openModal" :disabled="!selectedRaffle || !selectedPrize || participants.length === 0" full-width>
+        Додати внесок
+    </TheButton>
 
     <TheModal :is-open="isOpen" :close-modal="closeModal">
         <template #title>Додати новий внесок</template>
@@ -12,28 +14,31 @@
                     <span>Учасник <span class="text-sm text-red-400">*</span></span>
                     <HeadlessCombobox v-model="selectedParticipant">
                         <div class="relative mt-1">
-                            <div class="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
+                            <div class="relative w-full">
                                 <HeadlessComboboxInput
-                                        class="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
+                                        class="w-full border-0 py-2 pl-3 pr-10 rounded-md ring-1 ring-black ring-opacity-30 transition duration-100 focus:outline-none focus:ring-1 focus:ring-teal-400"
                                         :displayValue="participant => participant ? participant.name : ''"
                                         @change="query = $event.target.value"
                                 />
                                 <HeadlessComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
                                     <Icon name="heroicons:chevron-up-down"
-                                          class="h-5 w-5 text-gray-600 transition duration-200 group-hover:text-teal-400"/>
+                                          class="h-5 w-5 text-gray-600 transition duration-200 hover:text-teal-400"/>
                                 </HeadlessComboboxButton>
                             </div>
 
                             <HeadlessTransitionRoot
-                                    leave="transition ease-in duration-100"
-                                    leaveFrom="opacity-100"
-                                    leaveTo="opacity-0"
+                                    enter="transition ease-out duration-200"
+                                    enter-from="opacity-0"
+                                    enter-to="opacity-100"
+                                    leave="transition ease-in duration-200"
+                                    leave-from="opacity-100"
+                                    leave-to="opacity-0"
                                     @after-leave="query = ''"
                             >
                                 <HeadlessComboboxOptions
-                                        class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                        class="mt-2 max-h-36 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div v-if="filteredParticipants.length === 0 && query !== ''"
-                                         class="relative cursor-default select-none py-2 px-4 text-gray-700">
+                                         class="select-none py-2 px-4 text-gray-700">
                                         Нікого не знайдено
                                     </div>
 
@@ -45,17 +50,16 @@
                                             v-slot="{ selected, active }"
                                     >
                                         <li class="relative cursor-default select-none py-2 pl-10 pr-4"
-                                            :class="{ 'bg-teal-600 text-white': active, 'text-gray-900': !active }">
-                                        <span class="block truncate"
-                                              :class="{ 'font-medium': selected, 'font-normal': !selected }">
-                                          {{ participant.name }}
-                                        </span>
+                                            :class="{ 'bg-teal-100 text-teal-950': active, 'text-gray-900': !active }">
+                                            <span class="block truncate"
+                                                  :class="{ 'font-medium': selected, 'font-normal': !selected }">
+                                              {{ participant.name }}
+                                            </span>
                                             <span v-if="selected"
                                                   class="absolute inset-y-0 left-0 flex items-center pl-3"
-                                                  :class="{ 'text-white': active, 'text-teal-600': !active }"
-                                            >
-                                            <Icon name="heroicons:chevron-right" class="h-5 w-5 text-teal-400"/>
-                                        </span>
+                                                  :class="{ 'text-white': active, 'text-teal-600': !active }">
+                                                <Icon name="heroicons:chevron-right" class="h-5 w-5 text-teal-400"/>
+                                            </span>
                                         </li>
                                     </HeadlessComboboxOption>
                                 </HeadlessComboboxOptions>
