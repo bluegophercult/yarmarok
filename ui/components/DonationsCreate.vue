@@ -10,15 +10,15 @@
             <div class="flex flex-col gap-2">
                 <TheInput v-model="newDonation.amount" label="Сума" :min="1" number required/>
 
-                <label class="flex flex-col gap-1">
-                    <span>Учасник <span class="text-sm text-red-400">*</span></span>
+                <div class="flex flex-col gap-1">
+                    <label for="donation-create-participant">Учасник <span class="text-sm text-red-400">*</span></label>
                     <HeadlessCombobox v-model="selectedParticipant">
                         <div class="relative mt-1">
                             <div class="relative w-full">
                                 <HeadlessComboboxInput
                                         class="w-full border-0 py-2 pl-3 pr-10 rounded-md ring-1 ring-black ring-opacity-30 transition duration-100 focus:outline-none focus:ring-1 focus:ring-teal-400"
                                         :displayValue="participant => participant ? participant.name : ''"
-                                        @change="query = $event.target.value"
+                                        @change="query = $event.target.value" id="donation-create-participant"
                                 />
                                 <HeadlessComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
                                     <Icon name="heroicons:chevron-up-down"
@@ -66,7 +66,7 @@
                             </HeadlessTransitionRoot>
                         </div>
                     </HeadlessCombobox>
-                </label>
+                </div>
             </div>
 
             <transition name="m-fade">
