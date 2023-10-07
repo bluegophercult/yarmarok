@@ -1,11 +1,11 @@
 package application
 
 object GoApplication {
-    fun getHost(): String{
+    fun getHost(): String {
         return "localhost"
     }
 
-    fun getPort(): Int{
+    fun getPort(): Int {
         return 8081
     }
 }

@@ -1,4 +1,4 @@
-package controller.api
+package api
 
 import application.GoApplication
 import io.restassured.builder.RequestSpecBuilder
