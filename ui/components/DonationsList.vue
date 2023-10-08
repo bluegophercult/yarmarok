@@ -2,9 +2,9 @@
     <div v-if="donations.length === 0" class="text-gray-400">
         Немає внесків
     </div>
-    <div v-else class="overflow-auto max-h-[50vh] overflow-y-auto">
+    <div v-else class="overflow-auto max-h-[50vh] overflow-y-auto border rounded-md">
         <table class="table-auto w-full">
-            <thead class="sticky top-0 bg-white">
+            <thead class="sticky top-0 bg-white text-left">
             <tr>
                 <th class="px-2">Учасник</th>
                 <th class="px-2">Купони</th>
@@ -12,20 +12,23 @@
                 <th class="px-2" colspan="2">Дії</th>
                 <th class="w-2"></th>
             </tr>
+            <tr>
+                <th class="h-[1px] p-0 bg-gray-200" colspan="6"></th>
+            </tr>
             </thead>
             <tbody>
-            <tr v-for="(donation, i) in donations" :key="donation.id" :class="i % 2 === 1 ? 'bg-gray-100' : ''"
+            <tr v-for="(donation, i) in donations" :key="donation.id" :class="i % 2 === 0 ? 'bg-gray-100' : ''"
                 :set="participant = participantById(donation.participantId)">
-                <td class="border-y px-2">{{ participant.name }}</td>
-                <td class="border-y px-2">{{ donation.ticketsNumber }}</td>
-                <td class="border-y px-2">{{ donation.amount }} грн</td>
-                <td class="border-y w-7 text-center" @click="selectedDonation = donation; isOpenUpdate = true">
+                <td class="border-t px-2">{{ participant.name }}</td>
+                <td class="border-t px-2">{{ donation.ticketsNumber }}</td>
+                <td class="border-t px-2">{{ donation.amount }} грн</td>
+                <td class="border-t w-7 text-center" @click="selectedDonation = donation; isOpenUpdate = true">
                     <Icon name="heroicons:pencil" class="hover:text-teal-500 hover:cursor-pointer"/>
                 </td>
-                <td class="border-y w-7 text-center" @click="selectedDonation = donation; isOpenDelete = true">
+                <td class="border-t w-7 text-center" @click="selectedDonation = donation; isOpenDelete = true">
                     <Icon name="heroicons:trash" class="hover:text-red-500 hover:cursor-pointer"/>
                 </td>
-                <td></td>
+                <td class="border-t"></td>
             </tr>
             </tbody>
         </table>
@@ -60,7 +63,7 @@ const { donations } = storeToRefs(donationStore)
 
 watch([ selectedRaffle, selectedPrize ], () => {
     if (selectedRaffle.value && selectedPrize.value) {
-        donationStore.getDonations(selectedRaffle.value.id, selectedPrize.value.id)
+        donationStore.getDonations(selectedRaffle.value.id, selectedPrize.value.id, selectedPrize.value.ticketCost)
     } else {
         donationStore.clearDonations()
     }
