@@ -30,11 +30,11 @@ func customValidation(fl validator.FieldLevel) bool {
 	return true
 }
 
-func validateRaffle(raf *RaffleRequest) error {
+func validateStruct(s interface{}) error {
 	validate := validator.New()
 	validate.RegisterValidation("allowedChars", customValidation)
 
-	if err := validate.Struct(raf); err != nil {
+	if err := validate.Struct(s); err != nil {
 		var validationErrs []string
 		for _, err := range err.(validator.ValidationErrors) {
 			validationErrs = append(validationErrs, fmt.Sprintf("Validation error in field %s: %s", err.Field(), err.Tag()))
@@ -43,33 +43,19 @@ func validateRaffle(raf *RaffleRequest) error {
 	}
 
 	return nil
+}
+
+func validateRaffle(raf *RaffleRequest) error {
+	return validateStruct(raf)
 }
 
 func validatePrize(p *PrizeRequest) error {
-	validate := validator.New()
-	validate.RegisterValidation("allowedChars", customValidation)
-
-	if err := validate.Struct(p); err != nil {
-		var validationErrs []string
-		for _, err := range err.(validator.ValidationErrors) {
-			validationErrs = append(validationErrs, fmt.Sprintf("Validation error in field %s: %s", err.Field(), err.Tag()))
-		}
-		return errors.New(strings.Join(validationErrs, "\n"))
-	}
-
-	return nil
+	return validateStruct(p)
 }
 
 func validateParticipant(p *ParticipantRequest) error {
-	validate := validator.New()
-	validate.RegisterValidation("allowedChars", customValidation)
-
-	if err := validate.Struct(p); err != nil {
-		var validationErrs []string
-		for _, err := range err.(validator.ValidationErrors) {
-			validationErrs = append(validationErrs, fmt.Sprintf("Validation error in field %s: %s", err.Field(), err.Tag()))
-		}
-		return errors.New(strings.Join(validationErrs, "\n"))
+	if err := validateStruct(p); err != nil {
+		return err
 	}
 
 	p.Phone = strings.ReplaceAll(p.Phone, " ", "")
