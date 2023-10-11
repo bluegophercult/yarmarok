@@ -70,6 +70,10 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 
 // Create initializes a raffle.
 func (rm *RaffleManager) Create(raf *RaffleRequest) (string, error) {
+	if err := validateRaffle(raf); err != nil {
+		return "", err
+	}
+
 	raffle := Raffle{
 		ID:        stringUUID(),
 		Name:      raf.Name,
@@ -168,8 +172,8 @@ func (rm *RaffleManager) PrizeService(id string) PrizeService {
 
 // RaffleRequest is a request for initializing a raffle.
 type RaffleRequest struct {
-	Name string `json:"name"`
-	Note string `json:"note"`
+	Name string `json:"name" validate:"required,min=3,max=50,alphanumunicode,allowedChars"`
+	Note string `json:"note" validate:"lte=1000"`
 }
 
 // RaffleExportResult is a response for exporting a raffle sub-collections.

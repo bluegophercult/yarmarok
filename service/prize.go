@@ -16,9 +16,9 @@ type Prize struct {
 
 // PrizeRequest is a request for creating a new prize.
 type PrizeRequest struct {
-	Name        string `json:"name"`
-	TicketCost  int    `json:"ticketCost"`
-	Description string `json:"description"`
+	Name        string `json:"name" validate:"required,min=3,max=50,alphanumunicode,allowedChars"`
+	TicketCost  int    `json:"ticketCost" validate:"gte=0,lte=5000"`
+	Description string `json:"description" validate:"lte=1000"`
 }
 
 // PrizeService is a service for prizes.
@@ -55,6 +55,10 @@ func NewPrizeManager(ps PrizeStorage) *PrizeManager {
 
 // Create creates a new prize
 func (pm *PrizeManager) Create(p *PrizeRequest) (string, error) {
+	if err := validatePrize(p); err != nil {
+		return "", err
+	}
+
 	prize := toPrize(p)
 	if err := pm.prizeStorage.Create(prize); err != nil {
 		return "", fmt.Errorf("create prize: %w", err)
