@@ -1,5 +1,5 @@
 <template>
-    <ul class="max-h-80 overflow-auto py-2">
+    <ul class="max-h-[50vh] overflow-auto py-2">
         <li v-for="participant in participants" :key="participant.id" @click="openParticipantView(participant)"
             class="flex h-8 items-center justify-between gap-2 rounded-md px-2 hover:text-teal-950 hover:cursor-pointer hover:bg-teal-100">
             <span class="block flex-grow truncate">{{ participant.name }}</span>

@@ -4,7 +4,11 @@
             <div class="relative">
                 <HeadlessListboxButton
                         class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md ring-1 ring-black ring-opacity-5 group hover:cursor-pointer">
-                    <span class="block truncate">{{ selectedRaffle ? selectedRaffle.name : "Немає розіграшів" }}</span>
+                    <span class="block truncate">
+                        {{
+                            rafflesLoaded ?  selectedRaffle ? selectedRaffle.name : "Немає розіграшів" : "Завантаження ..."
+                        }}
+                    </span>
                     <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                         <Icon name="heroicons:chevron-up-down"
                               class="h-5 w-5 text-gray-600 transition duration-200 group-hover:text-teal-400"/>
@@ -48,5 +52,5 @@
 import { useRaffleStore } from "~/store/raffle"
 
 const raffleStore = useRaffleStore()
-const { raffles, selectedRaffle } = storeToRefs(raffleStore)
+const { raffles, selectedRaffle, rafflesLoaded } = storeToRefs(raffleStore)
 </script>

@@ -16,6 +16,7 @@
 <script setup lang="ts">
 import { useRaffleStore } from "~/store/raffle"
 import { Raffle } from "~/types/raffle"
+import { useNotificationStore } from "~/store/notification"
 
 const props = defineProps<{
     raffle: Raffle
@@ -23,13 +24,17 @@ const props = defineProps<{
     closeModal: () => void,
 }>()
 
+const { showError } = useNotificationStore()
+
 const raffleStore = useRaffleStore()
 
 function deleteRaffle() {
     props.closeModal()
     setTimeout(() => {
-        raffleStore.deleteRaffle(props.raffle.id)
-        raffleStore.selectFirstRaffle()
+        raffleStore.deleteRaffle(props.raffle.id).catch(e => {
+            console.error(e)
+            showError("Не вдалося видалити розіграш!")
+        })
     }, 200)
 }
 </script>

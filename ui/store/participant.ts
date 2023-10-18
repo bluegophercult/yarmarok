@@ -58,5 +58,8 @@ export const useParticipantStore = defineStore({
 
             this.participants = this.participants.filter(participant => participant.id !== id)
         },
+        participantById(id: string): Participant | undefined {
+            return this.participants.find(p => p.id == id)
+        },
     },
 })

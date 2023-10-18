@@ -9,7 +9,7 @@
         </div>
         <hr class="mt-2">
         <div v-if="selectedPrize" class="flex flex-col gap-2 mt-2">
-            <div class="flex justify-between">
+            <div class="flex justify-between items-center">
                 <div class="text-xl">{{ selectedPrize.name }}</div>
                 <div>Ціна купону: {{ selectedPrize.ticketCost }}</div>
             </div>
@@ -20,7 +20,7 @@
                     <div class="text-xl">Внески</div>
                 </div>
                 <div>
-                    <TheButton :click="() => { isOpenCreateDonation = true} ">Додати внесок</TheButton>
+                    <DonationsCreate/>
                 </div>
             </div>
             <DonationsList/>
@@ -31,7 +31,7 @@
     </div>
 
     <PrizesUpdate v-if="selectedPrize" :prize="selectedPrize" :is-open="isOpenUpdate"
-                   :close-modal="() => isOpenUpdate = false"/>
+                  :close-modal="() => isOpenUpdate = false"/>
     <PrizesDelete v-if="selectedPrize" :prize="selectedPrize" :is-open="isOpenDelete"
                   :close-modal="() => isOpenDelete = false"/>
 </template>
@@ -44,5 +44,4 @@ const { selectedPrize } = storeToRefs(prizeStore)
 
 const isOpenDelete = ref(false)
 const isOpenUpdate = ref(false)
-const isOpenCreateDonation = ref(false)
 </script>
