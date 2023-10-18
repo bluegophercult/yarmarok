@@ -42,4 +42,4 @@ tasks:
   local-run:
     desc: Run service locally
     cmds:
-      - go test -tags local -timeout 0 -count=1 -v ./testinfra/local/run_test.go
+      - go run -tags local ./testinfra/local/run.go

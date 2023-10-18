@@ -5,10 +5,8 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 	"path"
-	"testing"
 
 	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
@@ -27,10 +25,8 @@ var dockerfile string
 // Instance represents a firestore emulator instance
 // and controls its lifecycle.
 type Instance struct {
-	t         *testing.T
-	container testcontainers.Container
-	ip        string
 	client    *firestore.Client
+	container testcontainers.Container
 }
 
 // Client returns a firestore client connected to the emulator.
@@ -38,15 +34,28 @@ func (i *Instance) Client() *firestore.Client {
 	return i.client
 }
 
+// Container returns a firestore container connected to the emulator.
+func (i *Instance) Container() testcontainers.Container {
+	return i.container
+}
+
 // ProjectID returns the project id of the emulator.
 func (i *Instance) ProjectID() string {
 	return defaultProjectID
 }
 
+type TestEnv interface {
+	TempDir() string
+	Cleanup(f func())
+	Fatalf(format string, args ...any)
+	Log(args ...any)
+	Setenv(key, value string)
+}
+
 // RunInstance runs a firestore emulator instance in a docker container.
 // The container is automatically cleaned up after the test.
 // Use only one instance per host, as the emulator does not support multiple instances.
-func RunInstance(t *testing.T) (*Instance, error) {
+func RunInstance(t TestEnv) (*Instance, error) {
 	tempDir := t.TempDir()
 	dockerDir := path.Join(tempDir, uuid.New().String())
 
@@ -81,11 +90,6 @@ func RunInstance(t *testing.T) (*Instance, error) {
 		return nil, fmt.Errorf("create container: %w", err)
 	}
 
-	ip, err := container.ContainerIP(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("get container host: %w", err)
-	}
-
 	t.Setenv("FIRESTORE_EMULATOR_HOST", fmt.Sprintf("%s:%s", "localhost", defaultPort))
 	client, err := firestore.NewClient(context.Background(), defaultProjectID)
 	if err != nil {
@@ -94,15 +98,14 @@ func RunInstance(t *testing.T) (*Instance, error) {
 
 	instance := &Instance{
 		container: container,
-		ip:        ip,
-		t:         t,
 		client:    client,
 	}
 
 	t.Cleanup(func() {
-		if err := instance.container.Terminate(ctx); err != nil {
-			log.Fatalf("failed to terminate container: %s", err)
+		if err = instance.container.Terminate(ctx); err != nil {
+			t.Fatalf("Failed to terminate firestore container: %s", err)
 		}
+		t.Log("Stopped firestore container")
 	})
 
 	return instance, err
