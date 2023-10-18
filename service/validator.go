@@ -3,72 +3,111 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator"
-	"strconv"
+	"regexp"
+
 	"strings"
+
+	"github.com/go-playground/validator"
 )
 
 const (
 	minParticipantPhoneLength = 10
 	maxParticipantPhoneLength = 12
-	allowedChars              = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_{}[]:;<>,.?~абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"
 )
 
 var (
 	errParticipantPhoneOnlyDigits = errors.New("phone should contain only digits")
+	errNameTooShort               = errors.New("name is too short")
 )
 
-func customValidation(fl validator.FieldLevel) bool {
+// Acceptable characters are the English alphabet, numbers,
+// symbols from the symbols variable, the Ukrainian alphabet
+func charsValidation(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 
-	for _, char := range value {
-		if !strings.ContainsRune(allowedChars, char) {
-			return false
-		}
-	}
-
-	return true
+	regex := regexp.MustCompile("^[a-zA-Z0-9 !@#$%^&*()_{}\\[\\]:;<>,.?~абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ]*$")
+	return regex.MatchString(value)
 }
 
 func validateStruct(s interface{}) error {
 	validate := validator.New()
-	validate.RegisterValidation("allowedChars", customValidation)
 
 	if err := validate.Struct(s); err != nil {
-		var validationErrs []string
-		for _, err := range err.(validator.ValidationErrors) {
-			validationErrs = append(validationErrs, fmt.Sprintf("Validation error in field %s: %s", err.Field(), err.Tag()))
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			return errors.New(fmt.Sprintf("Validation error in field %s: %s", validationErrors[0].Field(), validationErrors[0].Tag()))
 		}
-		return errors.New(strings.Join(validationErrs, "\n"))
+		return err
 	}
 
 	return nil
 }
 
 func validateRaffle(raf *RaffleRequest) error {
-	return validateStruct(raf)
+	if err := validateStruct(raf); err != nil {
+		return err
+	}
+
+	validate := validator.New()
+	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
+		return err
+	}
+
+	if err := validate.Var(raf.Name, "charsValidation"); err != nil {
+		return errors.New("name contains invalid characters")
+	}
+
+	if err := validate.Var(raf.Note, "charsValidation"); err != nil {
+		return errors.New("note contains invalid characters")
+	}
+
+	return nil
 }
 
 func validatePrize(p *PrizeRequest) error {
-	return validateStruct(p)
-}
-
-func validateParticipant(p *ParticipantRequest) error {
 	if err := validateStruct(p); err != nil {
 		return err
 	}
 
-	p.Phone = strings.ReplaceAll(p.Phone, " ", "")
-	p.Phone = strings.ReplaceAll(p.Phone, "+", "")
-	runePhone := []rune(p.Phone)
-
-	_, err := strconv.Atoi(p.Phone)
-	if err != nil {
-		return errParticipantPhoneOnlyDigits
+	validate := validator.New()
+	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
+		return err
 	}
 
-	if len(runePhone) < minParticipantPhoneLength || len(runePhone) > maxParticipantPhoneLength {
-		return fmt.Errorf("phone should be between %d and %d digits long", minParticipantPhoneLength, maxParticipantPhoneLength)
+	if err := validate.Var(p.Name, "charsValidation"); err != nil {
+		return errors.New("name contains invalid characters")
+	}
+
+	if err := validate.Var(p.Description, "charsValidation"); err != nil {
+		return errors.New("note contains invalid characters")
+	}
+
+	return nil
+}
+
+func validateParticipant(p *ParticipantRequest) error {
+	phoneRegex := regexp.MustCompile(`^[0-9]{10,12}$`)
+
+	validate := validator.New()
+	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
+		return err
+	}
+
+	if err := validate.Var(p.Name, "required,min=2,max=50,charsValidation"); err != nil {
+		if strings.Contains(err.Error(), "min") {
+			return errNameTooShort
+		}
+		return err
+	}
+
+	if err := validate.Var(p.Note, "charsValidation,lte=1000"); err != nil {
+		return errors.New("note contains invalid characters")
+	}
+
+	p.Phone = strings.ReplaceAll(p.Phone, " ", "")
+	p.Phone = strings.ReplaceAll(p.Phone, "+", "")
+
+	if !phoneRegex.MatchString(p.Phone) {
+		return fmt.Errorf("phone should be between %d and %d digits long: %w", minParticipantPhoneLength, maxParticipantPhoneLength, errParticipantPhoneOnlyDigits)
 	}
 
 	return nil

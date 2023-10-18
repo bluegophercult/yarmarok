@@ -172,7 +172,7 @@ func (rm *RaffleManager) PrizeService(id string) PrizeService {
 
 // RaffleRequest is a request for initializing a raffle.
 type RaffleRequest struct {
-	Name string `json:"name" validate:"required,min=3,max=50,alphanumunicode,allowedChars"`
+	Name string `json:"name" validate:"required,min=3,max=50"`
 	Note string `json:"note" validate:"lte=1000"`
 }
 
