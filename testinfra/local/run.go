@@ -3,7 +3,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -75,7 +74,6 @@ func (t *testEnv) runCleanup() {
 
 func main() {
 	t := &testEnv{}
-	defer t.runCleanup()
 
 	firestoreInstance, err := firestore.RunInstance(t)
 	if err != nil {
@@ -101,10 +99,5 @@ func main() {
 	}()
 
 	<-sigs
-
-	timeout := time.Second * 2
-	err = firestoreInstance.Container().Stop(context.Background(), &timeout)
-	if err != nil {
-		log.Println("Stop container:", err)
-	}
+	t.runCleanup()
 }

@@ -34,11 +34,6 @@ func (i *Instance) Client() *firestore.Client {
 	return i.client
 }
 
-// Container returns a firestore container connected to the emulator.
-func (i *Instance) Container() testcontainers.Container {
-	return i.container
-}
-
 // ProjectID returns the project id of the emulator.
 func (i *Instance) ProjectID() string {
 	return defaultProjectID
