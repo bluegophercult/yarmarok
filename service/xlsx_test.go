@@ -37,7 +37,7 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 		"slice of structs": {
 			collections: []interface{}{
 				&Raffle{"raffle_id", "organizer_id", "Raffle", "Wow wow wow", time.Now()},
-				Prize{"prize_id", "Super prize", 42, "cat in the bag", time.Now()},
+				Prize{"prize_id", "Super prize", 42, "cat in the bag", time.Now(), []PrizePlayResult{}},
 				[]Participant{
 					{"participant_id_1", "Bob George", "323421341", "nope", time.Now()},
 					{"participant_id_2", "Mr Kitty", "123455", "mew mew", time.Now()},

@@ -7,11 +7,12 @@ import (
 
 // Prize represents a prize of the application.
 type Prize struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	TicketCost  int       `json:"ticketCost"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"createdAt"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	TicketCost  int               `json:"ticketCost"`
+	Description string            `json:"description"`
+	CreatedAt   time.Time         `json:"createdAt"`
+	PlayResults []PrizePlayResult `json:"playResults"`
 }
 
 // PrizeRequest is a request for creating a new prize.
@@ -29,6 +30,7 @@ type PrizeService interface {
 	Delete(id string) error
 	List() ([]Prize, error)
 	DonationService(id string) DonationService
+	Storage() PrizeStorage
 }
 
 // PrizeStorage is a storage for prizes.
@@ -51,6 +53,11 @@ type PrizeManager struct {
 // NewPrizeManager creates a new PrizeManager.
 func NewPrizeManager(ps PrizeStorage) *PrizeManager {
 	return &PrizeManager{prizeStorage: ps}
+}
+
+// Storage returns a PrizeStorage.
+func (pm *PrizeManager) Storage() PrizeStorage {
+	return pm.prizeStorage
 }
 
 // Create creates a new prize

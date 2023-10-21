@@ -220,6 +220,12 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, tempPlayParticipant)
 	}
 
+	prize.PlayResults = append(prize.PlayResults, *prizePlayResult)
+
+	if err := pzs.Storage().Update(prize); err != nil {
+		return nil, fmt.Errorf("update prize: %w", err)
+	}
+
 	return prizePlayResult, nil
 }
 
