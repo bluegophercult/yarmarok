@@ -23,6 +23,13 @@
                     <DonationsCreate/>
                 </div>
             </div>
+            <div>
+                <TheButton class="mb-2" :click="playPrize" :disabled="selectedPrize.playResults != null">Розіграти
+                    приз
+                </TheButton>
+                <p>|{{ selectedPrize.playResults }}|</p>
+                <p>Загальна кількість купонів: {{ totalTickets }}</p>
+            </div>
             <DonationsList/>
         </div>
         <div v-else class="mt-2 text-gray-400">
@@ -38,9 +45,26 @@
 
 <script setup lang="ts">
 import { usePrizeStore } from "~/store/prize"
+import { useDonationStore } from "~/store/donation"
+import { useRaffleStore } from "~/store/raffle"
+
+const raffleStore = useRaffleStore()
+const { selectedRaffle } = storeToRefs(raffleStore)
 
 const prizeStore = usePrizeStore()
 const { selectedPrize } = storeToRefs(prizeStore)
+
+const donationStore = useDonationStore()
+const { donations } = storeToRefs(donationStore)
+
+const totalTickets = computed(() => donations.value.reduce((acc, d) => {
+    return acc + d.ticketsNumber
+}, 0))
+
+async function playPrize() {
+    await prizeStore.playPrize(selectedRaffle.value!.id, selectedPrize.value!.id)
+    await prizeStore.getPrizes(selectedRaffle.value!.id)
+}
 
 const isOpenDelete = ref(false)
 const isOpenUpdate = ref(false)

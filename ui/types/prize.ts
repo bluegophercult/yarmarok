@@ -1,10 +1,27 @@
 import { object, string, number, InferType } from "yup"
+import { Participant } from "~/types/participant"
+import { Donation } from "~/types/donation"
 
 export type Prize = {
     id: string,
     name: string,
     ticketCost: number,
     description: string,
+    playResults: PlayResults | null,
+}
+
+export type PlayResult = {
+    winners: PlayParticipant[]
+    participants: PlayParticipant[]
+}
+
+export type PlayResults = PlayResult[]
+
+export type PlayParticipant = {
+    participant: Participant
+    totalDonation: number
+    totalTicketsNumber: number
+    donations: Donation
 }
 
 export type Prizes = Prize[]

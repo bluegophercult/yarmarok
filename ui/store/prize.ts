@@ -66,6 +66,17 @@ export const usePrizeStore = defineStore({
             this.prizes = this.prizes.filter(prize => prize.id !== id)
             this.selectLastPrize()
         },
+        async playPrize(raffleId: string, id: string) {
+            const { error } = await useApiFetch<{
+                isPlayed: boolean
+            }>(
+                `/api/raffles/${ raffleId }/prizes/${ id }/play`, {
+                    method: "GET",
+                })
+            if (error.value) {
+                throw error.value
+            }
+        },
         selectFirstPrize() {
             this.selectedPrize = this.prizes.length === 0 ? null : this.prizes[0]
         },
