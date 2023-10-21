@@ -11,7 +11,7 @@
         <div v-if="selectedPrize" class="flex flex-col gap-2 mt-2">
             <div class="flex justify-between items-center">
                 <div class="text-xl">{{ selectedPrize.name }}</div>
-                <div>Ціна купону: {{ selectedPrize.ticketCost }}</div>
+                <div>Ціна купону: {{ selectedPrize.ticketCost }} грн</div>
             </div>
             <div v-if="selectedPrize.description" class="whitespace-pre">{{ selectedPrize.description }}</div>
             <hr>
@@ -24,10 +24,24 @@
                 </div>
             </div>
             <div>
-                <TheButton class="mb-2" :click="playPrize" :disabled="selectedPrize.playResults != null">Розіграти
-                    приз
+                <TheButton class="mb-2" :click="playPrize">
+                    {{ selectedPrize.playResults != null ? "Розіграти знову" : "Розіграти приз" }}
                 </TheButton>
-                <p>|{{ selectedPrize.playResults }}|</p>
+
+                <div v-if="selectedPrize.playResults != null">
+                    Розіграші:
+                    <div class="divide-y">
+                        <div v-for="(result, resultIdx) in selectedPrize.playResults" :key="resultIdx">
+                            <ul>
+                                <li v-for="(winner, winnerIdx) in result.winners" :key="winnerIdx">
+                                    {{ winner.participant.name }}
+                                    <span v-if="winner.participant.phone">({{ winner.participant.phone }})</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <p>Загальна кількість купонів: {{ totalTickets }}</p>
             </div>
             <DonationsList/>
