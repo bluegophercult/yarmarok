@@ -23,6 +23,9 @@
                     <DonationsCreate/>
                 </div>
             </div>
+            <div>
+                Загальна кількість купонів: {{ totalTickets }}
+            </div>
             <DonationsList/>
         </div>
         <div v-else class="mt-2 text-gray-400">
@@ -38,9 +41,17 @@
 
 <script setup lang="ts">
 import { usePrizeStore } from "~/store/prize"
+import { useDonationStore } from "~/store/donation"
 
 const prizeStore = usePrizeStore()
 const { selectedPrize } = storeToRefs(prizeStore)
+
+const donationStore = useDonationStore()
+const { donations } = storeToRefs(donationStore)
+
+const totalTickets = computed(() => donations.value.reduce((acc, d) => {
+    return acc + d.ticketsNumber;
+}, 0))
 
 const isOpenDelete = ref(false)
 const isOpenUpdate = ref(false)
