@@ -2,7 +2,7 @@
     <TheModal :is-open="isOpen" :close-modal="closeModal">
         <template #title>{{ participant.name }}</template>
 
-        <div class="mb-2">
+        <div  v-if="participant.phone !== ''" class="mb-2">
             <div class="mb-1">Телефон</div>
             <div class="rounded-md bg-gray-100 p-2 shadow ring-1 ring-gray-600 ring-opacity-5">
                 {{ participant.phone }}

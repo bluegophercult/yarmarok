@@ -5,7 +5,7 @@
         <form @submit.prevent="updateParticipant">
             <div class="flex flex-col gap-2">
                 <TheInput v-model="updatedParticipant.name" :placeholder="participant.name" label="Ім'я" required/>
-                <TheInput v-model="updatedParticipant.phone" :placeholder="participant.phone" label="Номер телефону" required/>
+                <TheInput v-model="updatedParticipant.phone" :placeholder="participant.phone" label="Номер телефону"/>
                 <TheTextArea v-model="updatedParticipant.note" :placeholder="participant.note" label="Нотатка"/>
             </div>
 
