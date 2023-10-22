@@ -1,5 +1,5 @@
 import { NewPrize, Prize, Prizes } from "~/types/prize"
-import { Participants } from "~/types/participant"
+import { useStateStore } from "~/store/state"
 
 export const usePrizeStore = defineStore({
     id: "prize-store",
@@ -17,7 +17,18 @@ export const usePrizeStore = defineStore({
             }
 
             this.prizes = data.value!.items || <Prizes>[]
-            this.selectFirstPrize()
+
+            const stateStore = useStateStore()
+            if (stateStore.selectedRaffle) {
+                const selected = this.prizes.find(p => p.id == stateStore.selectedPrize)
+                if (selected) {
+                    this.selectedPrize = selected
+                } else {
+                    this.selectFirstPrize()
+                }
+            } else {
+                this.selectFirstPrize()
+            }
         },
         clearPrizes() {
             this.prizes = []
