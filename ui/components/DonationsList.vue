@@ -17,9 +17,11 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(donation, i) in donations" :key="donation.id" :class="i % 2 === 0 ? 'bg-gray-100' : ''"
-                :set="participant = participantById(donation.participantId)">
-                <td class="border-t px-2">{{ participant.name }}</td>
+            <tr v-for="(donation, i) in donations" :key="donation.id" :class="i % 2 === 0 ? 'bg-gray-100' : ''">
+                <td class="border-t px-2 cursor-pointer"
+                    @click="openParticipantView(participantById(donation.participantId)!)">
+                    {{ participantById(donation.participantId).name }}
+                </td>
                 <td class="border-t px-2">{{ donation.ticketsNumber }}</td>
                 <td class="border-t px-2">{{ donation.amount }} грн</td>
                 <td class="border-t w-7 text-center" @click="selectedDonation = donation; isOpenUpdate = true">
@@ -38,6 +40,8 @@
         <DonationsUpdate v-if="selectedDonation" :donation="selectedDonation" :is-open="isOpenUpdate"
                          :close-modal="() => isOpenUpdate = false"/>
 
+        <ParticipantsView v-if="selectedParticipant" :participant="selectedParticipant" :is-open="isOpenParticipantView"
+                          :close-modal="() => isOpenParticipantView = false" hide-controls/>
     </div>
 </template>
 
@@ -48,6 +52,7 @@ import { useDonationStore } from "~/store/donation"
 import { useParticipantStore } from "~/store/participant"
 import { Ref } from "@vue/reactivity"
 import { Donation } from "~/types/donation"
+import { Participant } from "~/types/participant"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
@@ -72,4 +77,12 @@ watch([ selectedRaffle, selectedPrize ], () => {
 const isOpenDelete = ref(false)
 const isOpenUpdate = ref(false)
 const selectedDonation: Ref<Donation | undefined> = ref(undefined)
+
+const isOpenParticipantView = ref(false)
+const selectedParticipant: Ref<Participant | undefined> = ref(undefined)
+
+function openParticipantView(participant: Participant) {
+    selectedParticipant.value = participant
+    isOpenParticipantView.value = true
+}
 </script>

@@ -118,6 +118,7 @@ const updatedDonation = ref(<Donation>{ ...props.donation })
 onBeforeUpdate(() => {
     setTimeout(() => {
         updatedDonation.value = { ...props.donation }
+        selectedParticipant.value = participantById(updatedDonation.value.participantId)!
         errorMsg.value = ""
     }, 200)
 })
