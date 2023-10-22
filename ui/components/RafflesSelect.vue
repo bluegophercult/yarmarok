@@ -6,7 +6,7 @@
                         class="relative w-full cursor-default rounded-lg bg-white py-2 pr-10 pl-3 text-left shadow-md ring-1 ring-black ring-opacity-5 group hover:cursor-pointer">
                     <span class="block truncate">
                         {{
-                            rafflesLoaded ?  selectedRaffle ? selectedRaffle.name : "Немає розіграшів" : "Завантаження ..."
+                            rafflesLoaded ? selectedRaffle ? selectedRaffle.name : "Немає розіграшів" : "Завантаження ..."
                         }}
                     </span>
                     <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -50,7 +50,17 @@
 
 <script setup lang="ts">
 import { useRaffleStore } from "~/store/raffle"
+import { useStateStore } from "~/store/state"
 
 const raffleStore = useRaffleStore()
 const { raffles, selectedRaffle, rafflesLoaded } = storeToRefs(raffleStore)
+
+const stateStore = useStateStore()
+
+watch(selectedRaffle, () => {
+    if (selectedRaffle.value) {
+        stateStore.selectedRaffle = selectedRaffle.value.id
+        stateStore.update()
+    }
+}, { immediate: true })
 </script>

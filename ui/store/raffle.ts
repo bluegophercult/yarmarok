@@ -1,4 +1,5 @@
 import { NewRaffle, Raffle, Raffles } from "~/types/raffle"
+import { useStateStore } from "~/store/state"
 
 export const useRaffleStore = defineStore({
     id: "raffle-store",
@@ -22,7 +23,19 @@ export const useRaffleStore = defineStore({
             }
 
             this.raffles = data.value!.items || <Raffles>[]
-            this.selectFirstRaffle()
+
+            const stateStore = useStateStore()
+            if (stateStore.selectedRaffle) {
+                const selected = this.raffles.find(r => r.id == stateStore.selectedRaffle)
+                if (selected) {
+                    this.selectedRaffle = selected
+                } else {
+                    this.selectFirstRaffle()
+                }
+            } else {
+                this.selectFirstRaffle()
+            }
+
             this.rafflesLoaded = true
         },
         async addRaffle(newRaffle: NewRaffle) {

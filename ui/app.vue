@@ -22,6 +22,8 @@
 </template>
 
 <script setup lang="ts">
+import { useStateStore } from "~/store/state"
+
 const appConfig = useAppConfig()
 useHead({
     title: appConfig.title,
@@ -32,4 +34,7 @@ useHead({
         { rel: "manifest", href: "/site.webmanifest" },
     ],
 })
+
+const stateStore = useStateStore()
+stateStore.init()
 </script>

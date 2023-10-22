@@ -17,7 +17,17 @@
 
 <script setup lang="ts">
 import { usePrizeStore } from "~/store/prize"
+import { useStateStore } from "~/store/state"
 
 const prizeStore = usePrizeStore()
 const { prizes, selectedPrize } = storeToRefs(prizeStore)
+
+const stateStore = useStateStore()
+
+watch(selectedPrize, () => {
+    if (selectedPrize.value) {
+        stateStore.selectedPrize = selectedPrize.value.id
+        stateStore.update()
+    }
+}, { immediate: true })
 </script>
