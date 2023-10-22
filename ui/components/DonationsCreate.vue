@@ -145,6 +145,10 @@ function addDonation() {
     if (selectedParticipant.value) {
         newDonation.value.participantId = selectedParticipant.value.id
     }
+    if (newDonation.value.amount < selectedPrize.value!.ticketCost) {
+        errorMsg.value = "Сума внеску повинна бути більшою ніж ціна купона"
+        return
+    }
     newDonationSchema.validate(newDonation.value)
         .then(() => {
             donationStore.addDonation(

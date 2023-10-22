@@ -6,7 +6,7 @@
             <div class="flex flex-col gap-2">
                 <TheInput v-model="updatedPrize.name" :placeholder="prize.name" label="Назва" required/>
                 <TheInput v-model="updatedPrize.ticketCost" :placeholder="prize.ticketCost" number :min="1"
-                          label="Ціна купону" required/>
+                          label="Ціна купону" required :disabled="donations.length > 0"/>
                 <TheTextArea v-model="updatedPrize.description" :placeholder="prize.description" label="Опис"/>
             </div>
 
@@ -31,9 +31,13 @@ import { newPrizeSchema, Prize } from "~/types/prize"
 import { ValidationError } from "yup"
 import { useRaffleStore } from "~/store/raffle"
 import { useNotificationStore } from "~/store/notification"
+import { useDonationStore } from "~/store/donation"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
+
+const donationStore = useDonationStore()
+const { donations } = storeToRefs(donationStore)
 
 const { showError } = useNotificationStore()
 
