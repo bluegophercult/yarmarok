@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div>
-                <TheButton class="mb-2" :click="playPrize">
+                <TheButton class="mb-2" :click="playPrize" :disabled="donations.length == 0">
                     {{ selectedPrize.playResults != null ? "Розіграти знову" : "Розіграти приз" }}
                 </TheButton>
 
