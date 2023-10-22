@@ -24,23 +24,21 @@
                 </div>
             </div>
             <div>
-                <TheButton class="mb-2" :click="playPrize" :disabled="donations.length == 0">
+                <div v-if="selectedPrize.playResults != null" class="mb-2">
+                    <span class="mr-2">Переможці:</span>
+                    <span v-for="(result, resultIdx) in selectedPrize.playResults" :key="resultIdx">
+                        <span v-for="(winner, winnerIdx) in result.winners" :key="winnerIdx"
+                              @click="openParticipantView(winner.participant)"
+                              class="rounded-md bg-gray-100 px-1 shadow ring-1 ring-gray-600 ring-opacity-5 mr-2 cursor-pointer">
+                            {{ winner.participant.name }}
+                        </span>
+                        <span v-if="selectedPrize.playResults!.length - 1 != resultIdx" class="mr-2">|</span>
+                    </span>
+                </div>
+
+                <TheButton class="mb-1" :click="playPrize" :disabled="donations.length == 0">
                     {{ selectedPrize.playResults != null ? "Розіграти знову" : "Розіграти приз" }}
                 </TheButton>
-
-                <div v-if="selectedPrize.playResults != null">
-                    Розіграші:
-                    <div class="divide-y">
-                        <div v-for="(result, resultIdx) in selectedPrize.playResults" :key="resultIdx">
-                            <ul>
-                                <li v-for="(winner, winnerIdx) in result.winners" :key="winnerIdx">
-                                    {{ winner.participant.name }}
-                                    <span v-if="winner.participant.phone">({{ winner.participant.phone }})</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
 
                 <p>Загальна кількість купонів: {{ totalTickets }}</p>
             </div>
@@ -55,12 +53,17 @@
                   :close-modal="() => isOpenUpdate = false"/>
     <PrizesDelete v-if="selectedPrize" :prize="selectedPrize" :is-open="isOpenDelete"
                   :close-modal="() => isOpenDelete = false"/>
+
+    <ParticipantsView v-if="selectedParticipant" :participant="selectedParticipant" :is-open="isOpenParticipantView"
+                      :close-modal="() => isOpenParticipantView = false" hide-controls/>
 </template>
 
 <script setup lang="ts">
 import { usePrizeStore } from "~/store/prize"
 import { useDonationStore } from "~/store/donation"
 import { useRaffleStore } from "~/store/raffle"
+import { Ref } from "@vue/reactivity"
+import { Participant } from "~/types/participant"
 
 const raffleStore = useRaffleStore()
 const { selectedRaffle } = storeToRefs(raffleStore)
@@ -82,4 +85,12 @@ async function playPrize() {
 
 const isOpenDelete = ref(false)
 const isOpenUpdate = ref(false)
+
+const isOpenParticipantView = ref(false)
+const selectedParticipant: Ref<Participant | undefined> = ref(undefined)
+
+function openParticipantView(participant: Participant) {
+    selectedParticipant.value = participant
+    isOpenParticipantView.value = true
+}
 </script>
