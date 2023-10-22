@@ -32,7 +32,7 @@
                               class="rounded-md bg-gray-100 px-1 shadow ring-1 ring-gray-600 ring-opacity-5 mr-2 cursor-pointer">
                             {{ winner.participant.name }}
                         </span>
-                        <span v-if="selectedPrize.playResults!.length - 1 != resultIdx" class="mr-2">|</span>
+                        <span v-if="selectedPrize.playResults!.length - 1 != resultIdx" class="mr-1">| </span>
                     </span>
                 </div>
 
