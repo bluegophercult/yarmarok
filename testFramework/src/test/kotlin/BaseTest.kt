@@ -2,11 +2,11 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import java.io.File
 import org.assertj.core.api.Assertions.assertThat
+import utils.Utils
 
 
 abstract class BaseTest {
-    // TODO try to rewrite killing process and uncomment code
-//    companion object {
+    //    companion object {
 //        private lateinit var connection: Process
 //
 //        @JvmStatic
@@ -41,4 +41,13 @@ abstract class BaseTest {
 //
 //        }
 //    }
+    companion object {
+        // TODO try to rewrite killing process and uncomment code
+        @JvmStatic
+        @BeforeAll
+        fun before() {
+            assertThat(Utils.isPortInUse(8080)).isTrue()
+            assertThat(Utils.isPortInUse(8081)).isTrue()
+        }
+    }
 }

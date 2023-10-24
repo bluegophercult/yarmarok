@@ -1,6 +1,6 @@
 package dto.raffle
 
-data class RaffleGetDto(
+data class Raffle(
     val id: String,
     val organizerId: String,
     val name: String,
