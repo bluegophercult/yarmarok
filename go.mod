@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.10.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
 	github.com/go-chi/chi v1.5.4
+	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/rs/cors v1.9.0
@@ -36,7 +37,6 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
@@ -85,5 +85,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20230526203410-71b5a4ffd15e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
