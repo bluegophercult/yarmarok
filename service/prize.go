@@ -17,7 +17,7 @@ type Prize struct {
 // PrizeRequest is a request for creating a new prize.
 type PrizeRequest struct {
 	Name        string `json:"name" validate:"required,min=3,max=50"`
-	TicketCost  int    `json:"ticketCost" validate:"gte=0,lte=5000"`
+	TicketCost  int    `json:"ticketCost" validate:"gte=1,lte=5000"`
 	Description string `json:"description" validate:"lte=1000"`
 }
 

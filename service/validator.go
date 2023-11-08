@@ -85,7 +85,7 @@ func validatePrize(p *PrizeRequest) error {
 }
 
 func validateParticipant(p *ParticipantRequest) error {
-	phoneRegex := regexp.MustCompile(`^[0-9]{10,12}$`)
+	phoneRegex := regexp.MustCompile(`^\+380\d{9,10}$`)
 
 	validate := validator.New()
 	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
@@ -102,9 +102,6 @@ func validateParticipant(p *ParticipantRequest) error {
 	if err := validate.Var(p.Note, "charsValidation,lte=1000"); err != nil {
 		return errors.New("note contains invalid characters")
 	}
-
-	p.Phone = strings.ReplaceAll(p.Phone, " ", "")
-	p.Phone = strings.ReplaceAll(p.Phone, "+", "")
 
 	if !phoneRegex.MatchString(p.Phone) {
 		return fmt.Errorf("phone should be between %d and %d digits long: %w", minParticipantPhoneLength, maxParticipantPhoneLength, errParticipantPhoneOnlyDigits)
