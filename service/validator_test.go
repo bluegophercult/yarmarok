@@ -123,7 +123,7 @@ func Test_validateParticipant(t *testing.T) {
 			args: args{
 				p: &ParticipantRequest{
 					Name:  "John DoeЇ",
-					Phone: "+1234567890",
+					Phone: "+380123456789",
 					Note:  "Example",
 				},
 			},
@@ -144,7 +144,7 @@ func Test_validateParticipant(t *testing.T) {
 			args: args{
 				p: &ParticipantRequest{
 					Name:  "J",
-					Phone: "+1234567890",
+					Phone: "+380123456789",
 					Note:  "Example",
 				},
 			},
@@ -154,7 +154,7 @@ func Test_validateParticipant(t *testing.T) {
 			args: args{
 				p: &ParticipantRequest{
 					Name:  "John DoeЇ世",
-					Phone: "+1234567890",
+					Phone: "+380123456789",
 					Note:  "Example世",
 				},
 			},
