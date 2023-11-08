@@ -16,7 +16,7 @@ func TestParticipant(t *testing.T) {
 	id := "participant_id"
 	p := &ParticipantRequest{
 		Name:  "John Doe",
-		Phone: "1234567890",
+		Phone: "+380123456789",
 		Note:  "Test participant",
 	}
 
