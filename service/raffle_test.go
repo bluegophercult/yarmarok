@@ -78,11 +78,12 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			storageMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
+			mockedRaffle := dummyRaffle()
+			storageMock.EXPECT().Get(mockedID).Return(mockedRaffle, nil)
 
 			raf, err := rm.Get(mockedID)
 			require.NoError(t, err)
-			require.Equal(t, &mockedRaffle, raf)
+			require.Equal(t, mockedRaffle, raf)
 		})
 	})
 
@@ -180,5 +181,14 @@ func dummyRafflerequest() *RaffleRequest {
 	return &RaffleRequest{
 		Name: "raffle_name",
 		Note: "raffle_note",
+	}
+}
+
+func dummyRaffle() *Raffle {
+	return &Raffle{
+		ID:        "raffle_id",
+		Name:      "raffle_name",
+		Note:      "raffle_note",
+		CreatedAt: timeNow(),
 	}
 }
