@@ -82,7 +82,7 @@ func (rm *RaffleManager) Create(raf *RaffleRequest) (string, error) {
 	}
 
 	if err := rm.raffleStorage.Create(&raffle); err != nil {
-		return "", err
+		return "", fmt.Errorf("create raffle: %w", err)
 	}
 
 	return raffle.ID, nil

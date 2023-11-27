@@ -12,10 +12,10 @@ import (
 func TestRaffle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	rsMock := NewMockRaffleStorage(ctrl)
-	rm := NewRaffleManager(rsMock)
+	storageMock := NewMockRaffleStorage(ctrl)
+	rm := NewRaffleManager(storageMock)
 
-	raf := RaffleRequest{
+	raffleRequest := RaffleRequest{
 		Name: "raffle_name_1",
 		Note: "raffle_note_1",
 	}
@@ -26,35 +26,51 @@ func TestRaffle(t *testing.T) {
 
 	mockedRaffle := Raffle{
 		ID:        mockedID,
-		Name:      raf.Name,
-		Note:      raf.Note,
+		Name:      raffleRequest.Name,
+		Note:      raffleRequest.Note,
 		CreatedAt: mockedTime,
 	}
 
+	setTimeNowMock(mockedTime)
+	setUUIDMock(mockedID)
+
 	t.Run("create", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Create(gomock.Any()).Return(mockedErr)
+			request := dummyRafflerequest()
+			expectedRaffle := &Raffle{
+				ID:        mockedID,
+				Name:      request.Name,
+				Note:      request.Note,
+				CreatedAt: mockedTime,
+			}
 
-			res, err := rm.Create(&raf)
-			require.ErrorIs(t, err, mockedErr)
-			require.Empty(t, res)
+			storageMock.EXPECT().Create(expectedRaffle).Return(mockedErr)
+
+			response, err := rm.Create(request)
+			assert.ErrorIs(t, err, mockedErr)
+			assert.Equal(t, "", response)
 		})
 
 		t.Run("success", func(t *testing.T) {
-			setUUIDMock(mockedID)
-			setTimeNowMock(mockedTime)
+			request := dummyRafflerequest()
+			expectedRaffle := &Raffle{
+				ID:        mockedID,
+				Name:      request.Name,
+				Note:      request.Note,
+				CreatedAt: mockedTime,
+			}
 
-			rsMock.EXPECT().Create(&mockedRaffle).Return(nil)
+			storageMock.EXPECT().Create(expectedRaffle).Return(nil)
 
-			resID, err := rm.Create(&raf)
-			require.NoError(t, err)
-			require.Equal(t, mockedID, resID)
+			resID, err := rm.Create(request)
+			assert.NoError(t, err)
+			assert.Equal(t, expectedRaffle.ID, resID)
 		})
 	})
 
 	t.Run("get", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
+			storageMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
 
 			res, err := rm.Get(mockedID)
 			require.ErrorIs(t, err, mockedErr)
@@ -62,7 +78,7 @@ func TestRaffle(t *testing.T) {
 		})
 
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
+			storageMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
 
 			raf, err := rm.Get(mockedID)
 			require.NoError(t, err)
@@ -72,28 +88,28 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("edit", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
-			rsMock.EXPECT().Update(&mockedRaffle).Return(nil)
-			err := rm.Edit(mockedID, &raf)
+			storageMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
+			storageMock.EXPECT().Update(&mockedRaffle).Return(nil)
+			err := rm.Edit(mockedID, &raffleRequest)
 			require.NoError(t, err)
 		})
 
 		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
-			err := rm.Edit(mockedID, &raf)
+			storageMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
+			err := rm.Edit(mockedID, &raffleRequest)
 			require.ErrorIs(t, err, ErrNotFound)
 		})
 	})
 
 	t.Run("delete", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Delete(mockedID).Return(nil)
+			storageMock.EXPECT().Delete(mockedID).Return(nil)
 			err := rm.Delete(mockedID)
 			require.NoError(t, err)
 		})
 
 		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
+			storageMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
 			err := rm.Delete(mockedID)
 			require.ErrorIs(t, err, ErrNotFound)
 		})
@@ -101,7 +117,7 @@ func TestRaffle(t *testing.T) {
 
 	t.Run("list", func(t *testing.T) {
 		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().GetAll().Return(nil, mockedErr)
+			storageMock.EXPECT().GetAll().Return(nil, mockedErr)
 
 			res, err := rm.List()
 			require.ErrorIs(t, err, mockedErr)
@@ -111,7 +127,7 @@ func TestRaffle(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			raffles := []Raffle{mockedRaffle, mockedRaffle, mockedRaffle}
 
-			rsMock.EXPECT().GetAll().Return(raffles, nil)
+			storageMock.EXPECT().GetAll().Return(raffles, nil)
 
 			res, err := rm.List()
 			require.NoError(t, err)
@@ -130,14 +146,14 @@ func TestRaffle(t *testing.T) {
 			{ID: "pr2", Name: "Prize 2"},
 		}
 
-		rsMock.EXPECT().Get(mockedID).Return(raf, nil)
+		storageMock.EXPECT().Get(mockedID).Return(raf, nil)
 
 		psMock := NewMockParticipantStorage(ctrl)
-		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
+		storageMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
 		psMock.EXPECT().GetAll().Return(prts, nil)
 
 		pzMock := NewMockPrizeStorage(ctrl)
-		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
+		storageMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
 		pzMock.EXPECT().GetAll().Return(przs, nil)
 
 		res, err := rm.Export(mockedID)
@@ -157,5 +173,12 @@ func setUUIDMock(uuid string) {
 func setTimeNowMock(t time.Time) {
 	timeNow = func() time.Time {
 		return t
+	}
+}
+
+func dummyRafflerequest() *RaffleRequest {
+	return &RaffleRequest{
+		Name: "raffle_name",
+		Note: "raffle_note",
 	}
 }
