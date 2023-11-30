@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -13,9 +14,11 @@ import (
 type RaffleSuite struct {
 	suite.Suite
 
-	ctrl    *gomock.Controller
-	storage *MockRaffleStorage
-	manager *RaffleManager
+	ctrl     *gomock.Controller
+	storage  *MockRaffleStorage
+	manager  *RaffleManager
+	mockTime time.Time
+	mockUUID string
 }
 
 func TestRaffle(t *testing.T) {
@@ -23,8 +26,10 @@ func TestRaffle(t *testing.T) {
 }
 
 func (s *RaffleSuite) SetupTest() {
-	setTimeNowMock(time.Now().UTC())
-	setUUIDMock("raffle_id_1")
+	s.mockTime = time.Now().UTC()
+	s.mockUUID = uuid.New().String()
+	setTimeNowMock(s.mockTime)
+	setUUIDMock(s.mockUUID)
 
 	s.ctrl = gomock.NewController(s.T())
 	s.storage = NewMockRaffleStorage(s.ctrl)
@@ -32,16 +37,13 @@ func (s *RaffleSuite) SetupTest() {
 }
 
 func (s *RaffleSuite) TestCreateRaffle() {
-	raffleRequest := &RaffleRequest{
-		Name: "Example",
-		Note: "eeee",
-	}
+	raffleRequest := dummyRaffleRequest()
 
 	mockedRaffle := Raffle{
-		ID:        "raffle_id_1",
+		ID:        s.mockUUID,
 		Name:      raffleRequest.Name,
 		Note:      raffleRequest.Note,
-		CreatedAt: timeNow(),
+		CreatedAt: s.mockTime,
 	}
 
 	s.storage.EXPECT().Create(&mockedRaffle).Return(nil)
@@ -49,6 +51,42 @@ func (s *RaffleSuite) TestCreateRaffle() {
 	resID, err := s.manager.Create(raffleRequest)
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), mockedRaffle.ID, resID)
+
+	s.Run("error", func() {
+		request := dummyRaffleRequest()
+		expectedRaffle := &Raffle{
+			ID:        s.mockUUID,
+			Name:      request.Name,
+			Note:      request.Note,
+			CreatedAt: s.mockTime,
+		}
+
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Create(expectedRaffle).Return(mockedErr)
+
+		response, err := s.manager.Create(request)
+		s.ErrorIs(err, mockedErr)
+		s.Equal("", response)
+	})
+
+	s.Run("invalid_name", func() {
+		request := dummyRaffleRequest()
+		request.Name = ""
+
+		response, err := s.manager.Create(request)
+		s.ErrorIs(err, ErrInvalidRequest)
+		s.Equal("", response)
+	})
+
+	s.Run("invalid_note", func() {
+		request := dummyRaffleRequest()
+		request.Note = "<>////"
+
+		response, err := s.manager.Create(request)
+		s.ErrorIs(err, ErrInvalidRequest)
+		s.Equal("", response)
+	})
+
 }
 
 func TestRafflex(t *testing.T) {
@@ -77,55 +115,7 @@ func TestRafflex(t *testing.T) {
 	setUUIDMock(mockedID)
 
 	t.Run("create", func(t *testing.T) {
-		t.Run("error", func(t *testing.T) {
-			request := dummyRaffleRequest()
-			expectedRaffle := &Raffle{
-				ID:        mockedID,
-				Name:      request.Name,
-				Note:      request.Note,
-				CreatedAt: mockedTime,
-			}
 
-			storageMock.EXPECT().Create(expectedRaffle).Return(mockedErr)
-
-			response, err := rm.Create(request)
-			assert.ErrorIs(t, err, mockedErr)
-			assert.Equal(t, "", response)
-		})
-
-		t.Run("success", func(t *testing.T) {
-			request := dummyRaffleRequest()
-			expectedRaffle := &Raffle{
-				ID:        mockedID,
-				Name:      request.Name,
-				Note:      request.Note,
-				CreatedAt: mockedTime,
-			}
-
-			storageMock.EXPECT().Create(expectedRaffle).Return(nil)
-
-			resID, err := rm.Create(request)
-			assert.NoError(t, err)
-			assert.Equal(t, expectedRaffle.ID, resID)
-		})
-
-		t.Run("invalid_name", func(t *testing.T) {
-			request := dummyRaffleRequest()
-			request.Name = ""
-
-			response, err := rm.Create(request)
-			assert.ErrorIs(t, err, ErrInvalidRequest)
-			assert.Equal(t, "", response)
-		})
-
-		t.Run("invalid_note", func(t *testing.T) {
-			request := dummyRaffleRequest()
-			request.Note = "<>////"
-
-			response, err := rm.Create(request)
-			assert.ErrorIs(t, err, ErrInvalidRequest)
-			assert.Equal(t, "", response)
-		})
 	})
 
 	t.Run("get", func(t *testing.T) {
