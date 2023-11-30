@@ -19,8 +19,6 @@ var (
 	ErrParticipantPhoneOnlyDigits = errors.New("phone should contain only digits")
 	ErrNameTooShort               = errors.New("name is too short")
 	ErrInvalidRequest             = errors.New("invalid request")
-	ErrInvalidName                = errors.New("name contains invalid characters")
-	ErrInvalidNote                = errors.New("note contains invalid characters")
 )
 
 // Acceptable characters are the English alphabet, numbers,
@@ -32,35 +30,14 @@ func charsValidation(fl validator.FieldLevel) bool {
 	return regex.MatchString(value)
 }
 
-func validateStruct(s interface{}) error {
+func defaultValidator() *validator.Validate {
 	validate := validator.New()
 
-	if err := validate.Struct(s); err != nil {
-		return fmt.Errorf("validate struct: %w", err)
-	}
-
-	return nil
-}
-
-func validatePrize(p *PrizeRequest) error {
-	if err := validateStruct(p); err != nil {
-		return err
-	}
-
-	validate := validator.New()
 	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
-		return err
+		panic(err)
 	}
 
-	if err := validate.Var(p.Name, "charsValidation"); err != nil {
-		return errors.New("name contains invalid characters")
-	}
-
-	if err := validate.Var(p.Description, "charsValidation"); err != nil {
-		return errors.New("note contains invalid characters")
-	}
-
-	return nil
+	return validate
 }
 
 func validateParticipant(p *ParticipantRequest) error {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 )
 
@@ -179,17 +178,7 @@ type RaffleRequest struct {
 }
 
 func (r *RaffleRequest) Validate() error {
-	validate := validator.New()
-
-	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
-		return err
-	}
-
-	if err := validate.Struct(r); err != nil {
-		return fmt.Errorf("validate struct: %w", err)
-	}
-
-	return nil
+	return defaultValidator().Struct(r)
 }
 
 // RaffleExportResult is a response for exporting a raffle sub-collections.
