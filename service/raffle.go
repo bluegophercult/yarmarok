@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 )
 
@@ -71,7 +72,7 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 
 // Create initializes a raffle.
 func (rm *RaffleManager) Create(request *RaffleRequest) (string, error) {
-	if err := validateRaffle(request); err != nil {
+	if err := request.Validate(); err != nil {
 		return "", errors.Join(err, ErrInvalidRequest)
 	}
 
@@ -175,6 +176,28 @@ func (rm *RaffleManager) PrizeService(id string) PrizeService {
 type RaffleRequest struct {
 	Name string `json:"name" validate:"required,min=3,max=50"`
 	Note string `json:"note" validate:"lte=1000"`
+}
+
+func (r *RaffleRequest) Validate() error {
+	validate := validator.New()
+
+	if err := validate.Struct(r); err != nil {
+		return fmt.Errorf("validate struct: %w", err)
+	}
+
+	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
+		return err
+	}
+
+	if err := validate.Var(r.Name, "charsValidation"); err != nil {
+		return errors.New("name contains invalid characters")
+	}
+
+	if err := validate.Var(r.Note, "charsValidation"); err != nil {
+		return errors.New("note contains invalid characters")
+	}
+
+	return nil
 }
 
 // RaffleExportResult is a response for exporting a raffle sub-collections.

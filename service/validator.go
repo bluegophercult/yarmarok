@@ -42,28 +42,6 @@ func validateStruct(s interface{}) error {
 	return nil
 }
 
-func validateRaffle(raf *RaffleRequest) error {
-	validate := validator.New()
-
-	if err := validate.Struct(raf); err != nil {
-		return fmt.Errorf("validate struct: %w", err)
-	}
-
-	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
-		return err
-	}
-
-	if err := validate.Var(raf.Name, "charsValidation"); err != nil {
-		return errors.New("name contains invalid characters")
-	}
-
-	if err := validate.Var(raf.Note, "charsValidation"); err != nil {
-		return errors.New("note contains invalid characters")
-	}
-
-	return nil
-}
-
 func validatePrize(p *PrizeRequest) error {
 	if err := validateStruct(p); err != nil {
 		return err
