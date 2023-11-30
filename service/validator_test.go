@@ -167,7 +167,7 @@ func Test_validateParticipant(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateParticipant(tt.args.p)
+			err := tt.args.p.Validate()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("validateParticipant() error = %v, wantErr %v", err, tt.wantErr)
 			}
