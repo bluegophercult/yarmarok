@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"time"
 
@@ -69,15 +70,15 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 }
 
 // Create initializes a raffle.
-func (rm *RaffleManager) Create(raf *RaffleRequest) (string, error) {
-	if err := validateRaffle(raf); err != nil {
-		return "", err
+func (rm *RaffleManager) Create(request *RaffleRequest) (string, error) {
+	if err := validateRaffle(request); err != nil {
+		return "", errors.Join(err, ErrInvalidRequest)
 	}
 
 	raffle := Raffle{
 		ID:        stringUUID(),
-		Name:      raf.Name,
-		Note:      raf.Note,
+		Name:      request.Name,
+		Note:      request.Note,
 		CreatedAt: timeNow(),
 	}
 

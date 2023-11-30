@@ -16,8 +16,11 @@ const (
 )
 
 var (
-	errParticipantPhoneOnlyDigits = errors.New("phone should contain only digits")
-	errNameTooShort               = errors.New("name is too short")
+	ErrParticipantPhoneOnlyDigits = errors.New("phone should contain only digits")
+	ErrNameTooShort               = errors.New("name is too short")
+	ErrInvalidRequest             = errors.New("invalid request")
+	ErrInvalidName                = errors.New("name contains invalid characters")
+	ErrInvalidNote                = errors.New("note contains invalid characters")
 )
 
 // Acceptable characters are the English alphabet, numbers,
@@ -25,7 +28,7 @@ var (
 func charsValidation(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 
-	regex := regexp.MustCompile("^[a-zA-Z0-9 !@#$%^&*()_{}\\[\\]:;<>,.?~абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ]*$")
+	regex := regexp.MustCompile(`^[a-zA-Z0-9 !@#$%^&*()_{}\[\]:;<>,.?~абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ]*$`)
 	return regex.MatchString(value)
 }
 
@@ -33,21 +36,19 @@ func validateStruct(s interface{}) error {
 	validate := validator.New()
 
 	if err := validate.Struct(s); err != nil {
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			return errors.New(fmt.Sprintf("Validation error in field %s: %s", validationErrors[0].Field(), validationErrors[0].Tag()))
-		}
-		return err
+		return fmt.Errorf("validate struct: %w", err)
 	}
 
 	return nil
 }
 
 func validateRaffle(raf *RaffleRequest) error {
-	if err := validateStruct(raf); err != nil {
-		return err
+	validate := validator.New()
+
+	if err := validate.Struct(raf); err != nil {
+		return fmt.Errorf("validate struct: %w", err)
 	}
 
-	validate := validator.New()
 	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
 		return err
 	}
@@ -94,7 +95,7 @@ func validateParticipant(p *ParticipantRequest) error {
 
 	if err := validate.Var(p.Name, "required,min=2,max=50,charsValidation"); err != nil {
 		if strings.Contains(err.Error(), "min") {
-			return errNameTooShort
+			return ErrNameTooShort
 		}
 		return err
 	}
@@ -104,7 +105,7 @@ func validateParticipant(p *ParticipantRequest) error {
 	}
 
 	if !phoneRegex.MatchString(p.Phone) {
-		return fmt.Errorf("phone should be between %d and %d digits long: %w", minParticipantPhoneLength, maxParticipantPhoneLength, errParticipantPhoneOnlyDigits)
+		return fmt.Errorf("phone should be between %d and %d digits long: %w", minParticipantPhoneLength, maxParticipantPhoneLength, ErrParticipantPhoneOnlyDigits)
 	}
 
 	return nil

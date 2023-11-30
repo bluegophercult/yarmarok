@@ -1,6 +1,8 @@
 package service
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_validateRaffle(t *testing.T) {
 	type args struct {
@@ -20,7 +22,8 @@ func Test_validateRaffle(t *testing.T) {
 				},
 			},
 			wantErr: false,
-		}, {
+		},
+		{
 			name: "Invalid RaffleRequest (Name too short)",
 			args: args{
 				raf: &RaffleRequest{
@@ -29,7 +32,8 @@ func Test_validateRaffle(t *testing.T) {
 				},
 			},
 			wantErr: true,
-		}, {
+		},
+		{
 			name: "Invalid RaffleRequest (Invalid symbols)",
 			args: args{
 				raf: &RaffleRequest{
