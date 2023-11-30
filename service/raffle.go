@@ -174,27 +174,19 @@ func (rm *RaffleManager) PrizeService(id string) PrizeService {
 
 // RaffleRequest is a request for initializing a raffle.
 type RaffleRequest struct {
-	Name string `json:"name" validate:"required,min=3,max=50"`
-	Note string `json:"note" validate:"lte=1000"`
+	Name string `json:"name" validate:"required,min=3,max=50,charsValidation"`
+	Note string `json:"note" validate:"lte=1000,charsValidation"`
 }
 
 func (r *RaffleRequest) Validate() error {
 	validate := validator.New()
 
-	if err := validate.Struct(r); err != nil {
-		return fmt.Errorf("validate struct: %w", err)
-	}
-
 	if err := validate.RegisterValidation("charsValidation", charsValidation); err != nil {
 		return err
 	}
 
-	if err := validate.Var(r.Name, "charsValidation"); err != nil {
-		return errors.New("name contains invalid characters")
-	}
-
-	if err := validate.Var(r.Note, "charsValidation"); err != nil {
-		return errors.New("note contains invalid characters")
+	if err := validate.Struct(r); err != nil {
+		return fmt.Errorf("validate struct: %w", err)
 	}
 
 	return nil
