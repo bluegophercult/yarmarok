@@ -150,115 +150,68 @@ func (s *RaffleSuite) TestEditRaffle() {
 	})
 }
 
-func TestRafflex(t *testing.T) {
-	ctrl := gomock.NewController(t)
+func (s *RaffleSuite) TestDeleteRaffle() {
+	mockedRaffle := dummyRaffle()
 
-	storageMock := NewMockRaffleStorage(ctrl)
-	rm := NewRaffleManager(storageMock)
+	s.storage.EXPECT().Delete(mockedRaffle.ID).Return(nil)
 
-	raffleRequest := RaffleRequest{
-		Name: "raffle_name_1",
-		Note: "raffle_note_1",
+	err := s.manager.Delete(mockedRaffle.ID)
+	require.NoError(s.T(), err)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Delete(mockedRaffle.ID).Return(mockedErr)
+
+		err := s.manager.Delete(mockedRaffle.ID)
+		s.ErrorIs(err, mockedErr)
+	})
+}
+
+func (s *RaffleSuite) TestListRaffles() {
+	mockedRaffles := []Raffle{*dummyRaffle(), *dummyRaffle()}
+
+	s.storage.EXPECT().GetAll().Return(mockedRaffles, nil)
+
+	res, err := s.manager.List()
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), mockedRaffles, res)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().GetAll().Return(nil, mockedErr)
+
+		res, err := s.manager.List()
+		s.ErrorIs(err, mockedErr)
+		s.Nil(res)
+	})
+}
+
+func (s *RaffleSuite) TestExportRaffle() {
+	raffle := &Raffle{ID: s.mockUUID, Name: "Raffle Test"}
+	prts := []Participant{
+		{ID: "p1", Name: "Participant 1"},
+		{ID: "p2", Name: "Participant 2"},
+	}
+	przs := []Prize{
+		{ID: "pr1", Name: "Prize 1"},
+		{ID: "pr2", Name: "Prize 2"},
 	}
 
-	mockedID := "raffle_id_1"
-	mockedTime := time.Now().UTC()
-	mockedErr := assert.AnError
+	s.storage.EXPECT().Get(s.mockUUID).Return(raffle, nil)
 
-	mockedRaffle := Raffle{
-		ID:        mockedID,
-		Name:      raffleRequest.Name,
-		Note:      raffleRequest.Note,
-		CreatedAt: mockedTime,
-	}
+	psMock := NewMockParticipantStorage(s.ctrl)
+	s.storage.EXPECT().ParticipantStorage(s.mockUUID).Return(psMock)
+	psMock.EXPECT().GetAll().Return(prts, nil)
 
-	setTimeNowMock(mockedTime)
-	setUUIDMock(mockedID)
+	pzMock := NewMockPrizeStorage(s.ctrl)
+	s.storage.EXPECT().PrizeStorage(s.mockUUID).Return(pzMock)
+	pzMock.EXPECT().GetAll().Return(przs, nil)
 
-	t.Run("edit", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			raffleRequest := dummyRaffleRequest()
-			mockedRaffle := Raffle{
-				ID:        "raffle_id_1",
-				Name:      raffleRequest.Name,
-				Note:      raffleRequest.Note,
-				CreatedAt: mockedTime,
-			}
-
-			storageMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
-			storageMock.EXPECT().Update(&mockedRaffle).Return(nil)
-			err := rm.Edit(mockedID, raffleRequest)
-			require.NoError(t, err)
-		})
-
-		t.Run("not_found", func(t *testing.T) {
-			storageMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
-			err := rm.Edit(mockedID, &raffleRequest)
-			require.ErrorIs(t, err, ErrNotFound)
-		})
-	})
-
-	t.Run("delete", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			storageMock.EXPECT().Delete(mockedID).Return(nil)
-			err := rm.Delete(mockedID)
-			require.NoError(t, err)
-		})
-
-		t.Run("not_found", func(t *testing.T) {
-			storageMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
-			err := rm.Delete(mockedID)
-			require.ErrorIs(t, err, ErrNotFound)
-		})
-	})
-
-	t.Run("list", func(t *testing.T) {
-		t.Run("error", func(t *testing.T) {
-			storageMock.EXPECT().GetAll().Return(nil, mockedErr)
-
-			res, err := rm.List()
-			require.ErrorIs(t, err, mockedErr)
-			require.Nil(t, res)
-		})
-
-		t.Run("success", func(t *testing.T) {
-			raffles := []Raffle{mockedRaffle, mockedRaffle, mockedRaffle}
-
-			storageMock.EXPECT().GetAll().Return(raffles, nil)
-
-			res, err := rm.List()
-			require.NoError(t, err)
-			require.Equal(t, raffles, res)
-		})
-	})
-
-	t.Run("Export non-empty collections", func(t *testing.T) {
-		raf := &Raffle{ID: mockedID, Name: "Raffle Test"}
-		prts := []Participant{
-			{ID: "p1", Name: "Participant 1"},
-			{ID: "p2", Name: "Participant 2"},
-		}
-		przs := []Prize{
-			{ID: "pr1", Name: "Prize 1"},
-			{ID: "pr2", Name: "Prize 2"},
-		}
-
-		storageMock.EXPECT().Get(mockedID).Return(raf, nil)
-
-		psMock := NewMockParticipantStorage(ctrl)
-		storageMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
-		psMock.EXPECT().GetAll().Return(prts, nil)
-
-		pzMock := NewMockPrizeStorage(ctrl)
-		storageMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
-		pzMock.EXPECT().GetAll().Return(przs, nil)
-
-		res, err := rm.Export(mockedID)
-		require.NoError(t, err)
-		require.NotNil(t, res)
-		require.Equal(t, "yarmarok_"+mockedID+".xlsx", res.FileName)
-		require.NotEmpty(t, res.Content)
-	})
+	res, err := s.manager.Export(s.mockUUID)
+	s.Require().NoError(err)
+	s.Require().NotNil(res)
+	s.Require().Equal("yarmarok_"+s.mockUUID+".xlsx", res.FileName)
+	s.Require().NotEmpty(res.Content)
 }
 
 func setUUIDMock(uuid string) {
