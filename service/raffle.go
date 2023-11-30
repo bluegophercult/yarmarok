@@ -96,6 +96,10 @@ func (rm *RaffleManager) Get(id string) (*Raffle, error) {
 
 // Edit edits a raffle.
 func (rm *RaffleManager) Edit(id string, r *RaffleRequest) error {
+	if err := r.Validate(); err != nil {
+		return errors.Join(err, ErrInvalidRequest)
+	}
+
 	raffle, err := rm.Get(id)
 	if err != nil {
 		return fmt.Errorf("get raffle: %w", err)

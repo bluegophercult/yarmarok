@@ -86,7 +86,68 @@ func (s *RaffleSuite) TestCreateRaffle() {
 		s.ErrorIs(err, ErrInvalidRequest)
 		s.Equal("", response)
 	})
+}
 
+func (s *RaffleSuite) TestGetRaffle() {
+	mockedRaffle := dummyRaffle()
+
+	s.storage.EXPECT().Get(mockedRaffle.ID).Return(mockedRaffle, nil)
+
+	res, err := s.manager.Get(mockedRaffle.ID)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), mockedRaffle, res)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Get(mockedRaffle.ID).Return(nil, mockedErr)
+
+		res, err := s.manager.Get(mockedRaffle.ID)
+		s.ErrorIs(err, mockedErr)
+		s.Nil(res)
+	})
+}
+
+func (s *RaffleSuite) TestEditRaffle() {
+	mockedRaffle := dummyRaffle()
+
+	s.storage.EXPECT().Get(mockedRaffle.ID).Return(mockedRaffle, nil)
+	s.storage.EXPECT().Update(mockedRaffle).Return(nil)
+
+	err := s.manager.Edit(mockedRaffle.ID, dummyRaffleRequest())
+	require.NoError(s.T(), err)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Get(mockedRaffle.ID).Return(nil, mockedErr)
+
+		err := s.manager.Edit(mockedRaffle.ID, dummyRaffleRequest())
+		s.ErrorIs(err, mockedErr)
+	})
+
+	s.Run("error_in_update", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Get(mockedRaffle.ID).Return(mockedRaffle, nil)
+		s.storage.EXPECT().Update(mockedRaffle).Return(mockedErr)
+
+		err := s.manager.Edit(mockedRaffle.ID, dummyRaffleRequest())
+		s.ErrorIs(err, mockedErr)
+	})
+
+	s.Run("invalid_name", func() {
+		request := dummyRaffleRequest()
+		request.Name = ""
+
+		err := s.manager.Edit(mockedRaffle.ID, request)
+		s.ErrorIs(err, ErrInvalidRequest)
+	})
+
+	s.Run("invalid_note", func() {
+		request := dummyRaffleRequest()
+		request.Note = "<>////"
+
+		err := s.manager.Edit(mockedRaffle.ID, request)
+		s.ErrorIs(err, ErrInvalidRequest)
+	})
 }
 
 func TestRafflex(t *testing.T) {
@@ -113,29 +174,6 @@ func TestRafflex(t *testing.T) {
 
 	setTimeNowMock(mockedTime)
 	setUUIDMock(mockedID)
-
-	t.Run("create", func(t *testing.T) {
-
-	})
-
-	t.Run("get", func(t *testing.T) {
-		t.Run("error", func(t *testing.T) {
-			storageMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
-
-			res, err := rm.Get(mockedID)
-			require.ErrorIs(t, err, mockedErr)
-			require.Nil(t, res)
-		})
-
-		t.Run("success", func(t *testing.T) {
-			mockedRaffle := dummyRaffle()
-			storageMock.EXPECT().Get(mockedID).Return(mockedRaffle, nil)
-
-			raf, err := rm.Get(mockedID)
-			require.NoError(t, err)
-			require.Equal(t, mockedRaffle, raf)
-		})
-	})
 
 	t.Run("edit", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
