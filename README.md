@@ -110,7 +110,6 @@ erDiagram
 
     Donation {
         string ID
-        string PrizeID
         string ContributorID
         int Amount
         time CreatedAt
