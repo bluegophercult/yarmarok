@@ -39,7 +39,7 @@ func (s *PrizeSuite) SetupTest() {
 func (s *PrizeSuite) TestCreatePrize() {
 	prizeRequest := dummyPrizeRequest()
 
-	mockedPrize := Prize{
+	mockedPrize := &Prize{
 		ID:          s.mockUUID,
 		Name:        prizeRequest.Name,
 		TicketCost:  prizeRequest.TicketCost,
@@ -47,25 +47,16 @@ func (s *PrizeSuite) TestCreatePrize() {
 		CreatedAt:   s.mockTime,
 	}
 
-	s.storage.EXPECT().Create(&mockedPrize).Return(nil)
+	s.storage.EXPECT().Create(mockedPrize).Return(nil)
 
 	resID, err := s.manager.Create(prizeRequest)
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), mockedPrize.ID, resID)
 
 	s.Run("error", func() {
-		request := dummyPrizeRequest()
-		expectedPrize := &Prize{
-			ID:          s.mockUUID,
-			Name:        request.Name,
-			TicketCost:  request.TicketCost,
-			Description: request.Description,
-			CreatedAt:   s.mockTime,
-		}
+		s.storage.EXPECT().Create(mockedPrize).Return(assert.AnError)
 
-		s.storage.EXPECT().Create(expectedPrize).Return(assert.AnError)
-
-		resID, err := s.manager.Create(request)
+		resID, err := s.manager.Create(prizeRequest)
 		require.ErrorIs(s.T(), err, assert.AnError)
 		require.Empty(s.T(), resID)
 	})
@@ -117,8 +108,14 @@ func (s *PrizeSuite) TestGetPrize() {
 }
 
 func (s *PrizeSuite) TestEditPrize() {
-	mockedPrize := dummyPrize()
 	prizeRequest := dummyPrizeRequest()
+	mockedPrize := &Prize{
+		ID:          s.mockUUID,
+		Name:        prizeRequest.Name,
+		TicketCost:  prizeRequest.TicketCost,
+		Description: prizeRequest.Description,
+		CreatedAt:   s.mockTime,
+	}
 
 	s.storage.EXPECT().Get(mockedPrize.ID).Return(mockedPrize, nil)
 	s.storage.EXPECT().Update(mockedPrize).Return(nil)
