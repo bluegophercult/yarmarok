@@ -69,6 +69,33 @@ func (s *PrizeSuite) TestCreatePrize() {
 		require.ErrorIs(s.T(), err, assert.AnError)
 		require.Empty(s.T(), resID)
 	})
+
+	s.Run("invalid name", func() {
+		request := dummyPrizeRequest()
+		request.Name = "Ra"
+
+		resID, err := s.manager.Create(request)
+		require.Error(s.T(), err)
+		require.Empty(s.T(), resID)
+	})
+
+	s.Run("invalid description", func() {
+		request := dummyPrizeRequest()
+		request.Description = "///"
+
+		resID, err := s.manager.Create(request)
+		require.Error(s.T(), err)
+		require.Empty(s.T(), resID)
+	})
+
+	s.Run("invalid ticket cost", func() {
+		request := dummyPrizeRequest()
+		request.TicketCost = 0
+
+		resID, err := s.manager.Create(request)
+		require.Error(s.T(), err)
+		require.Empty(s.T(), resID)
+	})
 }
 
 func (s *PrizeSuite) TestGetPrize() {
@@ -104,6 +131,38 @@ func (s *PrizeSuite) TestEditPrize() {
 
 		err := s.manager.Edit(mockedPrize.ID, prizeRequest)
 		require.ErrorIs(s.T(), err, assert.AnError)
+	})
+
+	s.Run("error_in_update", func() {
+		s.storage.EXPECT().Get(mockedPrize.ID).Return(mockedPrize, nil)
+		s.storage.EXPECT().Update(mockedPrize).Return(assert.AnError)
+
+		err := s.manager.Edit(mockedPrize.ID, prizeRequest)
+		require.ErrorIs(s.T(), err, assert.AnError)
+	})
+
+	s.Run("invalid name", func() {
+		request := dummyPrizeRequest()
+		request.Name = "Ra"
+
+		err := s.manager.Edit(mockedPrize.ID, request)
+		require.Error(s.T(), err)
+	})
+
+	s.Run("invalid description", func() {
+		request := dummyPrizeRequest()
+		request.Description = "///"
+
+		err := s.manager.Edit(mockedPrize.ID, request)
+		require.Error(s.T(), err)
+	})
+
+	s.Run("invalid ticket cost", func() {
+		request := dummyPrizeRequest()
+		request.TicketCost = 0
+
+		err := s.manager.Edit(mockedPrize.ID, request)
+		require.Error(s.T(), err)
 	})
 }
 

@@ -83,6 +83,10 @@ func (pm *PrizeManager) Get(id string) (*Prize, error) {
 
 // Edit updates a Prize.
 func (pm *PrizeManager) Edit(id string, p *PrizeRequest) error {
+	if err := p.Validate(); err != nil {
+		return fmt.Errorf("validate prize: %w", err)
+	}
+
 	prize, err := pm.prizeStorage.Get(id)
 	if err != nil {
 		return fmt.Errorf("get prize: %w", err)
