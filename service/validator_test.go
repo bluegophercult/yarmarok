@@ -1,6 +1,8 @@
 package service
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_validateRaffle(t *testing.T) {
 	type args struct {
@@ -20,7 +22,8 @@ func Test_validateRaffle(t *testing.T) {
 				},
 			},
 			wantErr: false,
-		}, {
+		},
+		{
 			name: "Invalid RaffleRequest (Name too short)",
 			args: args{
 				raf: &RaffleRequest{
@@ -29,7 +32,8 @@ func Test_validateRaffle(t *testing.T) {
 				},
 			},
 			wantErr: true,
-		}, {
+		},
+		{
 			name: "Invalid RaffleRequest (Invalid symbols)",
 			args: args{
 				raf: &RaffleRequest{
@@ -42,7 +46,7 @@ func Test_validateRaffle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validateRaffle(tt.args.raf); (err != nil) != tt.wantErr {
+			if err := tt.args.raf.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("validateRaffle() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -102,7 +106,7 @@ func Test_validatePrize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validatePrize(tt.args.p); (err != nil) != tt.wantErr {
+			if err := tt.args.p.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("validatePrize() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -163,7 +167,7 @@ func Test_validateParticipant(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validateParticipant(tt.args.p)
+			err := tt.args.p.Validate()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("validateParticipant() error = %v, wantErr %v", err, tt.wantErr)
 			}

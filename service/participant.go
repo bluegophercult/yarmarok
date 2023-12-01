@@ -16,9 +16,13 @@ type Participant struct {
 
 // ParticipantRequest is a request for creating a new/updated participant.
 type ParticipantRequest struct {
-	Name  string `json:"name"`
-	Phone string `json:"phone"`
-	Note  string `json:"note"`
+	Name  string `json:"name" validate:"required,min=2,max=50,charsValidation"`
+	Phone string `json:"phone" validate:"required,phoneValidation"`
+	Note  string `json:"note" validate:"lte=1000,charsValidation"`
+}
+
+func (p *ParticipantRequest) Validate() error {
+	return defaultValidator().Struct(p)
 }
 
 // ParticipantService is a service for participants.
@@ -52,7 +56,7 @@ func NewParticipantManager(ps ParticipantStorage) *ParticipantManager {
 
 // Create creates a new participant.
 func (pm *ParticipantManager) Create(p *ParticipantRequest) (string, error) {
-	if err := validateParticipant(p); err != nil {
+	if err := p.Validate(); err != nil {
 		return "", err
 	}
 
@@ -66,6 +70,10 @@ func (pm *ParticipantManager) Create(p *ParticipantRequest) (string, error) {
 
 // Edit updates a participant.
 func (pm *ParticipantManager) Edit(id string, p *ParticipantRequest) error {
+	if err := p.Validate(); err != nil {
+		return err
+	}
+
 	prt, err := pm.participantStorage.Get(id)
 	if err != nil {
 		return fmt.Errorf("getting participant: %w", err)

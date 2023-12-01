@@ -5,147 +5,213 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
+type RaffleSuite struct {
+	suite.Suite
+
+	ctrl     *gomock.Controller
+	storage  *MockRaffleStorage
+	manager  *RaffleManager
+	mockTime time.Time
+	mockUUID string
+}
+
 func TestRaffle(t *testing.T) {
-	ctrl := gomock.NewController(t)
+	suite.Run(t, &RaffleSuite{})
+}
 
-	rsMock := NewMockRaffleStorage(ctrl)
-	rm := NewRaffleManager(rsMock)
+func (s *RaffleSuite) SetupTest() {
+	s.mockTime = time.Now().UTC()
+	s.mockUUID = uuid.New().String()
+	setTimeNowMock(s.mockTime)
+	setUUIDMock(s.mockUUID)
 
-	raf := RaffleRequest{
-		Name: "raffle_name_1",
-		Note: "raffle_note_1",
-	}
+	s.ctrl = gomock.NewController(s.T())
+	s.storage = NewMockRaffleStorage(s.ctrl)
+	s.manager = NewRaffleManager(s.storage)
+}
 
-	mockedID := "raffle_id_1"
-	mockedTime := time.Now().UTC()
-	mockedErr := assert.AnError
+func (s *RaffleSuite) TestCreateRaffle() {
+	raffleRequest := dummyRaffleRequest()
 
 	mockedRaffle := Raffle{
-		ID:        mockedID,
-		Name:      raf.Name,
-		Note:      raf.Note,
-		CreatedAt: mockedTime,
+		ID:        s.mockUUID,
+		Name:      raffleRequest.Name,
+		Note:      raffleRequest.Note,
+		CreatedAt: s.mockTime,
 	}
 
-	t.Run("create", func(t *testing.T) {
-		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Create(gomock.Any()).Return(mockedErr)
+	s.storage.EXPECT().Create(&mockedRaffle).Return(nil)
 
-			res, err := rm.Create(&raf)
-			require.ErrorIs(t, err, mockedErr)
-			require.Empty(t, res)
-		})
+	resID, err := s.manager.Create(raffleRequest)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), mockedRaffle.ID, resID)
 
-		t.Run("success", func(t *testing.T) {
-			setUUIDMock(mockedID)
-			setTimeNowMock(mockedTime)
-
-			rsMock.EXPECT().Create(&mockedRaffle).Return(nil)
-
-			resID, err := rm.Create(&raf)
-			require.NoError(t, err)
-			require.Equal(t, mockedID, resID)
-		})
-	})
-
-	t.Run("get", func(t *testing.T) {
-		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, mockedErr)
-
-			res, err := rm.Get(mockedID)
-			require.ErrorIs(t, err, mockedErr)
-			require.Nil(t, res)
-		})
-
-		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
-
-			raf, err := rm.Get(mockedID)
-			require.NoError(t, err)
-			require.Equal(t, &mockedRaffle, raf)
-		})
-	})
-
-	t.Run("edit", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(&mockedRaffle, nil)
-			rsMock.EXPECT().Update(&mockedRaffle).Return(nil)
-			err := rm.Edit(mockedID, &raf)
-			require.NoError(t, err)
-		})
-
-		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Get(mockedID).Return(nil, ErrNotFound)
-			err := rm.Edit(mockedID, &raf)
-			require.ErrorIs(t, err, ErrNotFound)
-		})
-	})
-
-	t.Run("delete", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			rsMock.EXPECT().Delete(mockedID).Return(nil)
-			err := rm.Delete(mockedID)
-			require.NoError(t, err)
-		})
-
-		t.Run("not_found", func(t *testing.T) {
-			rsMock.EXPECT().Delete(mockedID).Return(ErrNotFound)
-			err := rm.Delete(mockedID)
-			require.ErrorIs(t, err, ErrNotFound)
-		})
-	})
-
-	t.Run("list", func(t *testing.T) {
-		t.Run("error", func(t *testing.T) {
-			rsMock.EXPECT().GetAll().Return(nil, mockedErr)
-
-			res, err := rm.List()
-			require.ErrorIs(t, err, mockedErr)
-			require.Nil(t, res)
-		})
-
-		t.Run("success", func(t *testing.T) {
-			raffles := []Raffle{mockedRaffle, mockedRaffle, mockedRaffle}
-
-			rsMock.EXPECT().GetAll().Return(raffles, nil)
-
-			res, err := rm.List()
-			require.NoError(t, err)
-			require.Equal(t, raffles, res)
-		})
-	})
-
-	t.Run("Export non-empty collection s", func(t *testing.T) {
-		raf := &Raffle{ID: mockedID, Name: "Raffle Test"}
-		prts := []Participant{
-			{ID: "p1", Name: "Participant 1"},
-			{ID: "p2", Name: "Participant 2"},
-		}
-		przs := []Prize{
-			{ID: "pr1", Name: "Prize 1"},
-			{ID: "pr2", Name: "Prize 2"},
+	s.Run("error", func() {
+		request := dummyRaffleRequest()
+		expectedRaffle := &Raffle{
+			ID:        s.mockUUID,
+			Name:      request.Name,
+			Note:      request.Note,
+			CreatedAt: s.mockTime,
 		}
 
-		rsMock.EXPECT().Get(mockedID).Return(raf, nil)
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Create(expectedRaffle).Return(mockedErr)
 
-		psMock := NewMockParticipantStorage(ctrl)
-		rsMock.EXPECT().ParticipantStorage(mockedID).Return(psMock)
-		psMock.EXPECT().GetAll().Return(prts, nil)
-
-		pzMock := NewMockPrizeStorage(ctrl)
-		rsMock.EXPECT().PrizeStorage(mockedID).Return(pzMock)
-		pzMock.EXPECT().GetAll().Return(przs, nil)
-
-		res, err := rm.Export(mockedID)
-		require.NoError(t, err)
-		require.NotNil(t, res)
-		require.Equal(t, "yarmarok_"+mockedID+".xlsx", res.FileName)
-		require.NotEmpty(t, res.Content)
+		response, err := s.manager.Create(request)
+		s.ErrorIs(err, mockedErr)
+		s.Equal("", response)
 	})
+
+	s.Run("invalid_name", func() {
+		request := dummyRaffleRequest()
+		request.Name = ""
+
+		response, err := s.manager.Create(request)
+		s.ErrorIs(err, ErrInvalidRequest)
+		s.Equal("", response)
+	})
+
+	s.Run("invalid_note", func() {
+		request := dummyRaffleRequest()
+		request.Note = "<>////"
+
+		response, err := s.manager.Create(request)
+		s.ErrorIs(err, ErrInvalidRequest)
+		s.Equal("", response)
+	})
+}
+
+func (s *RaffleSuite) TestGetRaffle() {
+	mockedRaffle := dummyRaffle()
+
+	s.storage.EXPECT().Get(mockedRaffle.ID).Return(mockedRaffle, nil)
+
+	res, err := s.manager.Get(mockedRaffle.ID)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), mockedRaffle, res)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Get(mockedRaffle.ID).Return(nil, mockedErr)
+
+		res, err := s.manager.Get(mockedRaffle.ID)
+		s.ErrorIs(err, mockedErr)
+		s.Nil(res)
+	})
+}
+
+func (s *RaffleSuite) TestEditRaffle() {
+	mockedRaffle := dummyRaffle()
+
+	s.storage.EXPECT().Get(mockedRaffle.ID).Return(mockedRaffle, nil)
+	s.storage.EXPECT().Update(mockedRaffle).Return(nil)
+
+	err := s.manager.Edit(mockedRaffle.ID, dummyRaffleRequest())
+	require.NoError(s.T(), err)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Get(mockedRaffle.ID).Return(nil, mockedErr)
+
+		err := s.manager.Edit(mockedRaffle.ID, dummyRaffleRequest())
+		s.ErrorIs(err, mockedErr)
+	})
+
+	s.Run("error_in_update", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Get(mockedRaffle.ID).Return(mockedRaffle, nil)
+		s.storage.EXPECT().Update(mockedRaffle).Return(mockedErr)
+
+		err := s.manager.Edit(mockedRaffle.ID, dummyRaffleRequest())
+		s.ErrorIs(err, mockedErr)
+	})
+
+	s.Run("invalid_name", func() {
+		request := dummyRaffleRequest()
+		request.Name = ""
+
+		err := s.manager.Edit(mockedRaffle.ID, request)
+		s.ErrorIs(err, ErrInvalidRequest)
+	})
+
+	s.Run("invalid_note", func() {
+		request := dummyRaffleRequest()
+		request.Note = "<>////"
+
+		err := s.manager.Edit(mockedRaffle.ID, request)
+		s.ErrorIs(err, ErrInvalidRequest)
+	})
+}
+
+func (s *RaffleSuite) TestDeleteRaffle() {
+	mockedRaffle := dummyRaffle()
+
+	s.storage.EXPECT().Delete(mockedRaffle.ID).Return(nil)
+
+	err := s.manager.Delete(mockedRaffle.ID)
+	require.NoError(s.T(), err)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().Delete(mockedRaffle.ID).Return(mockedErr)
+
+		err := s.manager.Delete(mockedRaffle.ID)
+		s.ErrorIs(err, mockedErr)
+	})
+}
+
+func (s *RaffleSuite) TestListRaffles() {
+	mockedRaffles := []Raffle{*dummyRaffle(), *dummyRaffle()}
+
+	s.storage.EXPECT().GetAll().Return(mockedRaffles, nil)
+
+	res, err := s.manager.List()
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), mockedRaffles, res)
+
+	s.Run("error", func() {
+		mockedErr := assert.AnError
+		s.storage.EXPECT().GetAll().Return(nil, mockedErr)
+
+		res, err := s.manager.List()
+		s.ErrorIs(err, mockedErr)
+		s.Nil(res)
+	})
+}
+
+func (s *RaffleSuite) TestExportRaffle() {
+	raffle := &Raffle{ID: s.mockUUID, Name: "Raffle Test"}
+	prts := []Participant{
+		{ID: "p1", Name: "Participant 1"},
+		{ID: "p2", Name: "Participant 2"},
+	}
+	przs := []Prize{
+		{ID: "pr1", Name: "Prize 1"},
+		{ID: "pr2", Name: "Prize 2"},
+	}
+
+	s.storage.EXPECT().Get(s.mockUUID).Return(raffle, nil)
+
+	psMock := NewMockParticipantStorage(s.ctrl)
+	s.storage.EXPECT().ParticipantStorage(s.mockUUID).Return(psMock)
+	psMock.EXPECT().GetAll().Return(prts, nil)
+
+	pzMock := NewMockPrizeStorage(s.ctrl)
+	s.storage.EXPECT().PrizeStorage(s.mockUUID).Return(pzMock)
+	pzMock.EXPECT().GetAll().Return(przs, nil)
+
+	res, err := s.manager.Export(s.mockUUID)
+	s.Require().NoError(err)
+	s.Require().NotNil(res)
+	s.Require().Equal("yarmarok_"+s.mockUUID+".xlsx", res.FileName)
+	s.Require().NotEmpty(res.Content)
 }
 
 func setUUIDMock(uuid string) {
@@ -157,5 +223,21 @@ func setUUIDMock(uuid string) {
 func setTimeNowMock(t time.Time) {
 	timeNow = func() time.Time {
 		return t
+	}
+}
+
+func dummyRaffleRequest() *RaffleRequest {
+	return &RaffleRequest{
+		Name: "Note name",
+		Note: "Note test",
+	}
+}
+
+func dummyRaffle() *Raffle {
+	return &Raffle{
+		ID:        "raffle_id",
+		Name:      "raffleName",
+		Note:      "raffle note",
+		CreatedAt: timeNow(),
 	}
 }
