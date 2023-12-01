@@ -197,6 +197,72 @@ func (s *PrizeSuite) TestListPrize() {
 	})
 }
 
+func (s *PrizeSuite) TestValidate() {
+	type args struct {
+		p *PrizeRequest
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Valid PrizeRequest",
+			args: args{
+				p: &PrizeRequest{
+					Name:        "Example PrizeЇ",
+					TicketCost:  100,
+					Description: "Example",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Invalid PrizeRequest (Negative Value)",
+			args: args{
+				p: &PrizeRequest{
+					Name:        "Invalid Prize",
+					TicketCost:  -50,
+					Description: "Example",
+				},
+			},
+			wantErr: true,
+		}, {
+			name: "Invalid PrizeRequest (Name too short)",
+			args: args{
+				p: &PrizeRequest{
+					Name:        "Ra",
+					TicketCost:  100,
+					Description: "Example",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid PrizeRequest (Invalid symbols)",
+			args: args{
+				p: &PrizeRequest{
+					Name:        "Example PrizeЇ世",
+					TicketCost:  100,
+					Description: "Example",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			err := tt.args.p.Validate()
+
+			if tt.wantErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func dummyPrizeRequest() *PrizeRequest {
 	return &PrizeRequest{
 		Name:        "prize_name_1",

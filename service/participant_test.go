@@ -174,6 +174,83 @@ func (s *ParticipantSuite) TestListParticipant() {
 	})
 }
 
+func (s *ParticipantSuite) TestValidate() {
+	type args struct {
+		p *ParticipantRequest
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Valid ParticipantRequest",
+			args: args{
+				p: &ParticipantRequest{
+					Name:  "John DoeЇ",
+					Phone: "+380123456789",
+					Note:  "Example",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Invalid ParticipantRequest (Invalid Phone)",
+			args: args{
+				p: &ParticipantRequest{
+					Name:  "John Doe",
+					Phone: "invalidphone",
+					Note:  "Example",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid ParticipantRequest (Phone too long)",
+			args: args{
+				p: &ParticipantRequest{
+					Name:  "John Doe",
+					Phone: "12345898765432876543",
+					Note:  "Example",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid ParticipantRequest (Name too short)",
+			args: args{
+				p: &ParticipantRequest{
+					Name:  "J",
+					Phone: "+380123456789",
+					Note:  "Example",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid ParticipantRequest (Invalid symbols)",
+			args: args{
+				p: &ParticipantRequest{
+					Name:  "John DoeЇ世",
+					Phone: "+380123456789",
+					Note:  "Example世",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			err := tt.args.p.Validate()
+			if tt.wantErr {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+			}
+		})
+	}
+}
+
 func dummyParticipantRequest() *ParticipantRequest {
 	return &ParticipantRequest{
 		Name:  "John Doe",
