@@ -20,8 +20,6 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 
 	type notAStruct int
 
-	type customString string
-
 	var tests = map[string]struct {
 		collections []interface{}
 		sheetIdx    int
