@@ -70,6 +70,10 @@ func (pm *ParticipantManager) Create(p *ParticipantRequest) (string, error) {
 
 // Edit updates a participant.
 func (pm *ParticipantManager) Edit(id string, p *ParticipantRequest) error {
+	if err := p.Validate(); err != nil {
+		return err
+	}
+
 	prt, err := pm.participantStorage.Get(id)
 	if err != nil {
 		return fmt.Errorf("getting participant: %w", err)
