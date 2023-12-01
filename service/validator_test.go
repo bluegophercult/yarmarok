@@ -143,7 +143,19 @@ func Test_validateParticipant(t *testing.T) {
 				},
 			},
 			wantErr: true,
-		}, {
+		},
+		{
+			name: "Invalid ParticipantRequest (Phone too long)",
+			args: args{
+				p: &ParticipantRequest{
+					Name:  "John Doe",
+					Phone: "12345898765432876543",
+					Note:  "Example",
+				},
+			},
+			wantErr: true,
+		},
+		{
 			name: "Invalid ParticipantRequest (Name too short)",
 			args: args{
 				p: &ParticipantRequest{
@@ -153,7 +165,8 @@ func Test_validateParticipant(t *testing.T) {
 				},
 			},
 			wantErr: true,
-		}, {
+		},
+		{
 			name: "Invalid ParticipantRequest (Invalid symbols)",
 			args: args{
 				p: &ParticipantRequest{

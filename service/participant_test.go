@@ -69,7 +69,7 @@ func (s *ParticipantSuite) TestCreateParticipant() {
 
 	s.Run("invalid phone", func() {
 		participantRequest := dummyParticipantRequest()
-		participantRequest.Phone = "123"
+		participantRequest.Phone = "qwert"
 
 		_, err := s.manager.Create(participantRequest)
 		require.Error(s.T(), err)
@@ -125,7 +125,7 @@ func (s *ParticipantSuite) TestEditParticipant() {
 
 	s.Run("invalid phone", func() {
 		participantRequest := dummyParticipantRequest()
-		participantRequest.Phone = "123"
+		participantRequest.Phone = "qwerty"
 
 		err := s.manager.Edit(participant.ID, participantRequest)
 		require.Error(s.T(), err)
