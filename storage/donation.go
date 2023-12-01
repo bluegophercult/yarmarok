@@ -27,16 +27,3 @@ func NewFirestoreDonationStorage(client *firestore.CollectionRef, prizeStorage s
 		StorageBase:  NewStorageBase(client, donationIDExtractor),
 	}
 }
-
-// Create creates a new donation in the underlying storage.
-func (ds *FirestoreDonationStorage) Create(d *service.Donation) error {
-	prize, err := ds.prizeStorage.Get(ds.prizeID)
-	if err != nil {
-		return err
-	}
-
-	d.PrizeID = prize.ID
-	d.TicketsNumber = d.Amount / prize.TicketCost
-
-	return ds.StorageBase.Create(d)
-}

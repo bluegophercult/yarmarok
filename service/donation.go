@@ -28,10 +28,8 @@ type DonationStorage interface {
 // Donation represents a donation of the application.
 type Donation struct {
 	ID            string    `json:"id"`
-	PrizeID       string    `json:"prizeId"`
 	ParticipantID string    `json:"participantId"`
 	Amount        int       `json:"amount"`
-	TicketsNumber int       `json:"ticketsNumber"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
