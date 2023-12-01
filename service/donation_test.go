@@ -69,8 +69,8 @@ func TestDonationManagerListDonations(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		date := time.Now()
 		donations := []Donation{
-			{ID: "1", PrizeID: "1", ParticipantID: "1", Amount: 10, TicketsNumber: 1, CreatedAt: date},
-			{ID: "2", PrizeID: "1", ParticipantID: "2", Amount: 20, TicketsNumber: 2, CreatedAt: date.Add(time.Second)},
+			{ID: "1", ParticipantID: "1", Amount: 10, CreatedAt: date},
+			{ID: "2", ParticipantID: "2", Amount: 20, CreatedAt: date.Add(time.Second)},
 		}
 		storageMock.EXPECT().GetAll().Return(donations, nil)
 
@@ -95,7 +95,7 @@ func TestDonationManagerGetDonations(t *testing.T) {
 	manager := NewDonationManager(storageMock, prizeStorageMock)
 
 	t.Run("Success", func(t *testing.T) {
-		donation := &Donation{ID: "1", PrizeID: "1", ParticipantID: "1", Amount: 10, TicketsNumber: 1, CreatedAt: time.Now()}
+		donation := &Donation{ID: "1", ParticipantID: "1", Amount: 10, CreatedAt: time.Now()}
 		storageMock.EXPECT().Get(donation.ID).Return(donation, nil)
 
 		res, err := manager.Get(donation.ID)

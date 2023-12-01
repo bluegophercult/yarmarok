@@ -44,10 +44,8 @@ func TestDonationStorage(t *testing.T) {
 		for i := 1; i <= 5; i++ {
 			d := &service.Donation{
 				ID:            fmt.Sprintf("donation_id_%d", i),
-				PrizeID:       prize.ID,
 				ParticipantID: fmt.Sprintf("participant_%d", i),
 				Amount:        100 + i,
-				TicketsNumber: (100 + i) / prize.TicketCost,
 				CreatedAt:     time.Now().UTC().Truncate(time.Millisecond),
 			}
 
