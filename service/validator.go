@@ -25,7 +25,7 @@ func charsValidation(fl validator.FieldLevel) bool {
 func phoneValidation(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 
-	regex := regexp.MustCompile(`^\+380\d{9,10}$`)
+	regex := regexp.MustCompile(`^[\+\d\-]{0,16}$`)
 	return regex.MatchString(value)
 }
 

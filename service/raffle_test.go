@@ -214,6 +214,58 @@ func (s *RaffleSuite) TestExportRaffle() {
 	s.Require().NotEmpty(res.Content)
 }
 
+func (s *RaffleSuite) TestValidate() {
+	type args struct {
+		raf *RaffleRequest
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Valid RaffleRequest",
+			args: args{
+				raf: &RaffleRequest{
+					Name: "Example Raffle123Ї",
+					Note: "ExampleЇ",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Invalid RaffleRequest (Name too short)",
+			args: args{
+				raf: &RaffleRequest{
+					Name: "Ra",
+					Note: "Example",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Invalid RaffleRequest (Invalid symbols)",
+			args: args{
+				raf: &RaffleRequest{
+					Name: "Example RaffleЇ世",
+					Note: "Example世",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			err := tt.args.raf.Validate()
+			if tt.wantErr {
+				s.Error(err)
+			} else {
+				s.NoError(tt.args.raf.Validate())
+			}
+		})
+	}
+}
+
 func setUUIDMock(uuid string) {
 	stringUUID = func() string {
 		return uuid

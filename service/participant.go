@@ -17,7 +17,7 @@ type Participant struct {
 // ParticipantRequest is a request for creating a new/updated participant.
 type ParticipantRequest struct {
 	Name  string `json:"name" validate:"required,min=2,max=50,charsValidation"`
-	Phone string `json:"phone" validate:"required,phoneValidation"`
+	Phone string `json:"phone" validate:"phoneValidation"`
 	Note  string `json:"note" validate:"lte=1000,charsValidation"`
 }
 
