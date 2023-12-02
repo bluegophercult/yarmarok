@@ -174,7 +174,6 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResult, error) {
 
 // PlayPrize find winner of prize
 func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, error) {
-
 	participantList, err := rm.ParticipantService(raffleID).List()
 	if err != nil {
 		return nil, fmt.Errorf("get participant list: %w", err)
@@ -252,10 +251,8 @@ func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult
 	winnerDonationID := GetWinnerDonationID(donations, ticketCost, seed)
 
 	prizePlayResult := new(PrizePlayResult)
-	// add previous winners
-	for _, previousWinners := range previousResult.Winners {
-		prizePlayResult.Winners = append(prizePlayResult.Winners, previousWinners)
-	}
+
+	prizePlayResult.Winners = append(prizePlayResult.Winners, previousResult.Winners...)
 
 	// add new winner
 	var winnerID string
@@ -319,18 +316,4 @@ func (r *RaffleRequest) Validate() error {
 type RaffleExportResult struct {
 	FileName string `json:"fileName"`
 	Content  []byte `json:"content"`
-}
-
-// PrizePlayResult is a response for played prize
-type PrizePlayResult struct {
-	Winners          []PlayParticipant `json:"winners"`
-	PlayParticipants []PlayParticipant `json:"participants"`
-}
-
-// PlayParticipant representation of result response of participant
-type PlayParticipant struct {
-	Participant        Participant `json:"participant"`
-	TotalDonation      int         `json:"totalDonation"`
-	TotalTicketsNumber int         `json:"totalTicketsNumber"`
-	Donations          []Donation  `json:"donations"`
 }

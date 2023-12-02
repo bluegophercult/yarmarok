@@ -7,11 +7,26 @@ import (
 
 // Prize represents a prize of the application.
 type Prize struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	TicketCost  int       `json:"ticketCost"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"createdAt"`
+	ID          string           `json:"id"`
+	Name        string           `json:"name"`
+	TicketCost  int              `json:"ticketCost"`
+	Description string           `json:"description"`
+	CreatedAt   time.Time        `json:"createdAt"`
+	PlayResult  *PrizePlayResult `json:"playResult"`
+}
+
+// PrizePlayResult is a response for played prize
+type PrizePlayResult struct {
+	Winners          []PlayParticipant `json:"winners"`
+	PlayParticipants []PlayParticipant `json:"participants"`
+}
+
+// PlayParticipant representation of result response of participant
+type PlayParticipant struct {
+	Participant        Participant `json:"participant"`
+	TotalDonation      int         `json:"totalDonation"`
+	TotalTicketsNumber int         `json:"totalTicketsNumber"`
+	Donations          []Donation  `json:"donations"`
 }
 
 // PrizeRequest is a request for creating a new prize.
