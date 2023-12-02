@@ -214,7 +214,7 @@ func (s *RaffleSuite) TestExportRaffle() {
 	s.Require().NotEmpty(res.Content)
 }
 
-type PlayPRizeSuite struct {
+type PlayPrizeSuite struct {
 	RaffleSuite
 
 	mockedPrizeID      string
@@ -223,7 +223,7 @@ type PlayPRizeSuite struct {
 	donationStorage    *MockDonationStorage
 }
 
-func (s *PlayPRizeSuite) SetupTest() {
+func (s *PlayPrizeSuite) SetupTest() {
 	s.RaffleSuite.SetupTest()
 
 	s.mockedPrizeID = uuid.New().String()
@@ -237,7 +237,7 @@ func (s *PlayPRizeSuite) SetupTest() {
 	s.prizeStorage.EXPECT().DonationStorage(s.mockedPrizeID).Return(s.donationStorage)
 }
 
-func (s *PlayPRizeSuite) TestPlayPrize() {
+func (s *PlayPrizeSuite) TestPlayPrize() {
 	prts := []Participant{
 		{ID: "p1", Name: "Participant 1"},
 		{ID: "p2", Name: "Participant 2"},
@@ -271,7 +271,7 @@ func (s *PlayPRizeSuite) TestPlayPrize() {
 	s.Require().NotEmpty(res.PlayParticipants)
 }
 
-func (s *RaffleSuite) TestPlayPrizeAgain() {
+func (s *PlayPrizeSuite) TestPlayPrizeAgain() {
 	przs := []Prize{
 		{ID: "pr1", Name: "Prize 1", TicketCost: 10},
 		{ID: "pr2", Name: "Prize 2", TicketCost: 20},
@@ -299,6 +299,7 @@ func (s *RaffleSuite) TestPlayPrizeAgain() {
 				},
 			},
 		},
+
 		PlayParticipants: []PlayParticipant{
 			{
 				Participant: Participant{
@@ -343,9 +344,7 @@ func (s *RaffleSuite) TestPlayPrizeAgain() {
 
 	mockedPrizeID := "pz1"
 
-	pzMock := NewMockPrizeStorage(s.ctrl)
-	s.storage.EXPECT().PrizeStorage(s.mockUUID).Return(pzMock)
-	pzMock.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
+	s.prizeStorage.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
 
 	res, err := s.manager.PlayPrizeAgain(s.mockUUID, mockedPrizeID, mockedPreviousResult)
 	s.Require().NoError(err)
