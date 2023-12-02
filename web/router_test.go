@@ -349,10 +349,8 @@ func TestRaffle(t *testing.T) {
 						Donations: []service.Donation{
 							{
 								ID:            "dID1",
-								PrizeID:       "prID1",
 								ParticipantID: "id1",
 								Amount:        300,
-								TicketsNumber: 10,
 								CreatedAt:     time.Time{},
 							},
 						},
@@ -372,10 +370,8 @@ func TestRaffle(t *testing.T) {
 						Donations: []service.Donation{
 							{
 								ID:            "dID2",
-								PrizeID:       "prID1",
 								ParticipantID: "ID2",
 								Amount:        200,
-								TicketsNumber: 5,
 								CreatedAt:     mockedTime,
 							},
 						},
@@ -393,10 +389,8 @@ func TestRaffle(t *testing.T) {
 						Donations: []service.Donation{
 							{
 								ID:            "dID3",
-								PrizeID:       "prID1",
 								ParticipantID: "ID3",
 								Amount:        100,
-								TicketsNumber: 2,
 								CreatedAt:     mockedTime,
 							},
 						},
