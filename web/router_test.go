@@ -899,7 +899,6 @@ func TestPrize(t *testing.T) {
 			pzMock := mocks.NewMockPrizeService(ctrl)
 			rsMock.EXPECT().PrizeService(raffleID).Return(pzMock)
 
-
 			mockedTime := time.Now().UTC()
 			mockedResponse := &service.PrizePlayResult{
 				Winners: []service.PlayParticipant{
@@ -965,7 +964,7 @@ func TestPrize(t *testing.T) {
 				},
 			}
 
-			pzMock.EXPECT().PlayPrize(prizeID).Return(mockedResponse, nil)
+			pzMock.EXPECT().Play(prizeID).Return(mockedResponse, nil)
 
 			writer := httptest.NewRecorder()
 			router.ServeHTTP(writer, req)
@@ -987,7 +986,7 @@ func TestPrize(t *testing.T) {
 			rsMock.EXPECT().PrizeService(raffleID).Return(pzMock)
 
 			mockedErr := assert.AnError
-			pzMock.EXPECT().PlayPrize(prizeID).Return(nil, mockedErr)
+			pzMock.EXPECT().Play(prizeID).Return(nil, mockedErr)
 
 			writer := httptest.NewRecorder()
 			router.ServeHTTP(writer, req)

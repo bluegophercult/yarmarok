@@ -125,17 +125,17 @@ func (mr *MockPrizeServiceMockRecorder) List() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockPrizeService)(nil).List))
 }
 
-// PlayPrize mocks base method.
-func (m *MockPrizeService) PlayPrize(arg0 string) (*service.PrizePlayResult, error) {
+// Play mocks base method.
+func (m *MockPrizeService) Play(arg0 string) (*service.PrizePlayResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PlayPrize", arg0)
+	ret := m.ctrl.Call(m, "Play", arg0)
 	ret0, _ := ret[0].(*service.PrizePlayResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// PlayPrize indicates an expected call of PlayPrize.
-func (mr *MockPrizeServiceMockRecorder) PlayPrize(arg0 any) *gomock.Call {
+// Play indicates an expected call of Play.
+func (mr *MockPrizeServiceMockRecorder) Play(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlayPrize", reflect.TypeOf((*MockPrizeService)(nil).PlayPrize), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Play", reflect.TypeOf((*MockPrizeService)(nil).Play), arg0)
 }

@@ -39,6 +39,7 @@ type PrizeRequest struct {
 	Description string `json:"description" validate:"lte=1000,charsValidation"`
 }
 
+// Validate validates PrizeRequest.
 func (p *PrizeRequest) Validate() error {
 	return defaultValidator().Struct(p)
 }
@@ -51,7 +52,7 @@ type PrizeService interface {
 	Delete(id string) error
 	List() ([]Prize, error)
 	DonationService(id string) DonationService
-	PlayPrize(prizeID string) (*PrizePlayResult, error)
+	Play(prizeID string) (*PrizePlayResult, error)
 }
 
 // PrizeStorage is a storage for prizes.
@@ -151,8 +152,8 @@ func (pm *PrizeManager) List() ([]Prize, error) {
 	return prizes, nil
 }
 
-// PlayPrize plays a prize.
-func (pm *PrizeManager) PlayPrize(prizeID string) (*PrizePlayResult, error) {
+// Play plays a prize.
+func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 	participantList, err := pm.participantStorage.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get participant list: %w", err)

@@ -338,7 +338,7 @@ func (s *PlayPrizeSuite) TestPlayPrize() {
 
 	s.storage.EXPECT().Update(s.mockedPrize).Return(nil)
 
-	res, err := s.manager.PlayPrize(s.prizeID)
+	res, err := s.manager.Play(s.prizeID)
 	s.Require().NoError(err)
 	s.Require().NotNil(res)
 	s.Require().Len(res.Winners, 1)

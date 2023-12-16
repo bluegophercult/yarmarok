@@ -3,9 +3,10 @@ package web
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
-	"net/http"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
@@ -309,7 +310,7 @@ func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := svc.PlayPrize(prizeID)
+	res, err := svc.Play(prizeID)
 	if err != nil {
 		respondErr(w, err)
 		return
