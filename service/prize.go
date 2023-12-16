@@ -215,6 +215,45 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 	return prizePlayResult, nil
 }
 
+func countDonations(donations []Donation, participants []Participant, ticketCost int) []PlayParticipant {
+	donationsMap := make(map[string][]Donation)
+
+	for _, d := range donations {
+		donationsMap[d.ParticipantID] = append(donationsMap[d.ParticipantID], d)
+	}
+
+	result := make([]PlayParticipant, 0, len(donationsMap))
+
+	for _, participant := range participants {
+		donations := donationsMap[participant.ID]
+		totalDonation := countTotalDonation(donations)
+
+		ticketsNumber := totalDonation / ticketCost
+		if ticketsNumber == 0 {
+			continue
+		}
+
+		result = append(result, PlayParticipant{
+			Participant:        participant,
+			TotalDonation:      totalDonation,
+			TotalTicketsNumber: ticketsNumber,
+			Donations:          donations,
+		})
+	}
+
+	return result
+}
+
+func countTotalDonation(donations []Donation) int {
+	total := 0
+
+	for _, d := range donations {
+		total += d.Amount
+	}
+
+	return total
+}
+
 // DonationService is a service for donations.
 func (pm *PrizeManager) DonationService(prizeID string) DonationService {
 	return NewDonationManager(pm.prizeStorage.DonationStorage(prizeID), pm.prizeStorage)

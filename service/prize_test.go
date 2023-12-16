@@ -503,6 +503,126 @@ func (s *PlayPrizeSuite) TestGenerateDonationIDsList() {
 	})
 }
 
+func (s *PlayPrizeSuite) TestCalculateParicipants() {
+	type testCase struct {
+		donations []Donation
+		expected  []PlayParticipant
+	}
+
+	testCases := map[string]testCase{
+		"no_donations": {
+			donations: []Donation{},
+			expected:  []PlayParticipant{},
+		},
+		"one_donation": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			},
+			expected: []PlayParticipant{
+				{
+					Participant:        Participant{ID: "p1"},
+					TotalDonation:      100,
+					TotalTicketsNumber: 1,
+					Donations: []Donation{
+						{ID: "dn1", ParticipantID: "p1", Amount: 100},
+					},
+				},
+			},
+		},
+		"many_donations": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 100},
+				{ID: "dn2", ParticipantID: "p1", Amount: 100},
+				{ID: "dn3", ParticipantID: "p2", Amount: 200},
+				{ID: "dn4", ParticipantID: "p2", Amount: 200},
+				{ID: "dn5", ParticipantID: "p3", Amount: 300},
+			},
+			expected: []PlayParticipant{
+				{
+					Participant:        Participant{ID: "p1"},
+					TotalDonation:      200,
+					TotalTicketsNumber: 2,
+					Donations: []Donation{
+						{ID: "dn1", ParticipantID: "p1", Amount: 100},
+						{ID: "dn2", ParticipantID: "p1", Amount: 100},
+					},
+				},
+				{
+					Participant:        Participant{ID: "p2"},
+					TotalDonation:      400,
+					TotalTicketsNumber: 4,
+					Donations: []Donation{
+						{ID: "dn3", ParticipantID: "p2", Amount: 200},
+						{ID: "dn4", ParticipantID: "p2", Amount: 200},
+					},
+				},
+				{
+					Participant:        Participant{ID: "p3"},
+					TotalDonation:      300,
+					TotalTicketsNumber: 3,
+					Donations: []Donation{
+						{ID: "dn5", ParticipantID: "p3", Amount: 300},
+					},
+				},
+			},
+		},
+		"separately_2_together_3": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 155},
+				{ID: "dn1", ParticipantID: "p1", Amount: 155},
+			},
+			expected: []PlayParticipant{
+				{
+					Participant:        Participant{ID: "p1"},
+					TotalDonation:      310,
+					TotalTicketsNumber: 3,
+					Donations: []Donation{
+						{ID: "dn1", ParticipantID: "p1", Amount: 155},
+						{ID: "dn1", ParticipantID: "p1", Amount: 155},
+					},
+				},
+			},
+		},
+		"not_enough_money": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 50},
+			},
+			expected: []PlayParticipant{},
+		},
+		"almost_enough_money": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 99},
+				{ID: "dn2", ParticipantID: "p1", Amount: 199},
+			},
+			expected: []PlayParticipant{
+				{
+					Participant:        Participant{ID: "p1"},
+					TotalDonation:      298,
+					TotalTicketsNumber: 2,
+					Donations: []Donation{
+						{ID: "dn1", ParticipantID: "p1", Amount: 99},
+						{ID: "dn2", ParticipantID: "p1", Amount: 199},
+					},
+				},
+			},
+		},
+	}
+
+	participants := []Participant{
+		{ID: "p1"},
+		{ID: "p2"},
+		{ID: "p3"},
+		{ID: "p4"},
+	}
+
+	for name, tc := range testCases {
+		s.Run(name, func() {
+			result := countDonations(tc.donations, participants, 100)
+			s.Equal(tc.expected, result)
+		})
+	}
+}
+
 func MatcherAnyDonationID(donations ...Donation) gomock.Matcher {
 	return gomock.Cond(func(donationID interface{}) bool {
 		id := donationID.(string)
