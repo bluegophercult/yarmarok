@@ -531,9 +531,21 @@ func (s *PlayPrizeSuite) TestCountDonations() {
 		{ID: "p4"},
 	}
 
+	prize := &Prize{
+		ID:         "prize_id_1",
+		Name:       "Prize 1",
+		TicketCost: 100,
+	}
+
 	for name, tc := range testCases {
 		s.Run(name, func() {
-			result := countDonations(tc.donations, participants, 100)
+			prizePlayer := NewPrizePlayer(
+				s.manager.randomizer,
+				tc.donations,
+				participants,
+				prize,
+			)
+			result := prizePlayer.countDonations()
 			s.Equal(tc.expected, result)
 		})
 	}
