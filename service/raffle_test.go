@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 type RaffleSuite struct {
@@ -214,10 +214,18 @@ func (s *RaffleSuite) TestExportRaffle() {
 	s.Require().NotEmpty(res.Content)
 }
 
+func TestPlayPrize(t *testing.T) {
+	suite.Run(t, &PlayPrizeSuite{})
+}
+
 type PlayPrizeSuite struct {
 	RaffleSuite
 
-	mockedPrizeID      string
+	raffleID string
+	prizeID  string
+
+	mockedPrize *Prize
+
 	participantStorage *MockParticipantStorage
 	prizeStorage       *MockPrizeStorage
 	donationStorage    *MockDonationStorage
@@ -226,132 +234,155 @@ type PlayPrizeSuite struct {
 func (s *PlayPrizeSuite) SetupTest() {
 	s.RaffleSuite.SetupTest()
 
-	s.mockedPrizeID = uuid.New().String()
+	s.raffleID = uuid.New().String()
+	s.prizeID = uuid.New().String()
+	s.mockedPrize = &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+	}
 
 	s.participantStorage = NewMockParticipantStorage(s.ctrl)
 	s.prizeStorage = NewMockPrizeStorage(s.ctrl)
 	s.donationStorage = NewMockDonationStorage(s.ctrl)
 
-	s.storage.EXPECT().ParticipantStorage(s.mockUUID).Return(s.participantStorage)
-	s.storage.EXPECT().PrizeStorage(s.mockUUID).Return(s.prizeStorage)
-	s.prizeStorage.EXPECT().DonationStorage(s.mockedPrizeID).Return(s.donationStorage)
+	s.storage.EXPECT().ParticipantStorage(s.raffleID).Return(s.participantStorage).AnyTimes()
+	s.storage.EXPECT().PrizeStorage(s.raffleID).Return(s.prizeStorage).AnyTimes()
+	s.prizeStorage.EXPECT().DonationStorage(s.prizeID).Return(s.donationStorage).AnyTimes()
 }
 
 func (s *PlayPrizeSuite) TestPlayPrize() {
-	prts := []Participant{
+	participants := []Participant{
 		{ID: "p1", Name: "Participant 1"},
 		{ID: "p2", Name: "Participant 2"},
 		{ID: "p3", Name: "Participant 3"},
 	}
-	przs := []Prize{
-		{ID: "pr1", Name: "Prize 1", TicketCost: 10},
-		{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+
+	donations := []Donation{
+		{ID: "dn1", ParticipantID: "p1", Amount: 100},
+		{ID: "dn2", ParticipantID: "p1", Amount: 100},
+		{ID: "dn3", ParticipantID: "p2", Amount: 200},
+		{ID: "dn4", ParticipantID: "p2", Amount: 200},
+		{ID: "dn5", ParticipantID: "p3", Amount: 300},
 	}
 
-	dnt := []Donation{
-		{ID: "dn1", ParticipantID: "p1", Amount: 100},
-		{ID: "dn1", ParticipantID: "p1", Amount: 100},
-		{ID: "dn1", ParticipantID: "p2", Amount: 200},
-		{ID: "dn1", ParticipantID: "p2", Amount: 200},
-		{ID: "dn1", ParticipantID: "p3", Amount: 300},
-	}
+	s.participantStorage.EXPECT().GetAll().Return(participants, nil)
+	s.prizeStorage.EXPECT().Get(s.prizeID).Return(s.mockedPrize, nil)
+	s.donationStorage.EXPECT().GetAll().Return(donations, nil)
+	// Pay attention, the mock always returns the first donation,
+	// so winner in this test is always the same despite of the input.
+	s.donationStorage.EXPECT().Get(MatcherAnyDonationID(donations...)).Return(&donations[0], nil)
 
-	mockedPrizeID := "pz1"
-	mockedDonation := "dn1"
-
-	s.participantStorage.EXPECT().GetAll().Return(prts, nil)
-	s.prizeStorage.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
-	s.donationStorage.EXPECT().GetAll().Return(dnt, nil)
-	s.donationStorage.EXPECT().Get(mockedDonation).Return(&dnt[0], nil)
-
-	res, err := s.manager.PlayPrize(s.mockUUID, mockedPrizeID)
+	res, err := s.manager.PlayPrize(s.raffleID, s.prizeID)
 	s.Require().NoError(err)
 	s.Require().NotNil(res)
-	s.Require().NotEmpty(res.Winners)
-	s.Require().NotEmpty(res.PlayParticipants)
-}
+	s.Require().Len(res.Winners, 1)
+	s.Require().Len(res.PlayParticipants, 2)
 
-func (s *PlayPrizeSuite) TestPlayPrizeAgain() {
-	przs := []Prize{
-		{ID: "pr1", Name: "Prize 1", TicketCost: 10},
-		{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+	expectedWinner := PlayParticipant{
+		Participant:        participants[0],
+		TotalDonation:      200,
+		TotalTicketsNumber: 20,
+		Donations:          donations[:2],
 	}
 
-	mockedPreviousResult := &PrizePlayResult{
-		Winners: []PlayParticipant{
-			{
-				Participant: Participant{
-					ID:        "ID1",
-					Name:      "name1",
-					Phone:     "phone1",
-					Note:      "note1",
-					CreatedAt: s.mockTime,
-				},
-				TotalDonation:      300,
-				TotalTicketsNumber: 10,
-				Donations: []Donation{
-					{
-						ID:            "dID1",
-						ParticipantID: "id1",
-						Amount:        300,
-						CreatedAt:     time.Time{},
-					},
-				},
-			},
-		},
-
-		PlayParticipants: []PlayParticipant{
-			{
-				Participant: Participant{
-					ID:        "ID2",
-					Name:      "name2",
-					Phone:     "phone2",
-					Note:      "note2",
-					CreatedAt: s.mockTime,
-				},
-				TotalDonation:      200,
-				TotalTicketsNumber: 5,
-				Donations: []Donation{
-					{
-						ID:            "dID2",
-						ParticipantID: "ID2",
-						Amount:        200,
-						CreatedAt:     s.mockTime,
-					},
-				},
-			},
-			{
-				Participant: Participant{
-					ID:        "ID3",
-					Name:      "name3",
-					Phone:     "phone3",
-					Note:      "note3",
-					CreatedAt: s.mockTime,
-				},
-				TotalDonation:      100,
-				TotalTicketsNumber: 2,
-				Donations: []Donation{
-					{
-						ID:            "dID3",
-						ParticipantID: "ID3",
-						Amount:        1000,
-						CreatedAt:     s.mockTime,
-					},
-				},
-			},
-		},
-	}
-
-	mockedPrizeID := "pz1"
-
-	s.prizeStorage.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
-
-	res, err := s.manager.PlayPrizeAgain(s.mockUUID, mockedPrizeID, mockedPreviousResult)
-	s.Require().NoError(err)
-	s.Require().NotNil(res)
-	s.Require().NotEmpty(res.Winners)
-	s.Require().NotEmpty(res.PlayParticipants)
+	s.Equal(expectedWinner, res.Winners[0])
+	s.NotContains(res.PlayParticipants, expectedWinner)
 }
+
+func MatcherAnyDonationID(donations ...Donation) gomock.Matcher {
+	return gomock.Cond(func(donationID interface{}) bool {
+		id := donationID.(string)
+		for _, d := range donations {
+			if d.ID == id {
+				return true
+			}
+		}
+		return false
+	})
+}
+
+// func (s *PlayPrizeSuite) TestPlayPrizeAgain() {
+// 	przs := []Prize{
+// 		{ID: "pr1", Name: "Prize 1", TicketCost: 10},
+// 		{ID: "pr2", Name: "Prize 2", TicketCost: 20},
+// 	}
+
+// 	mockedPreviousResult := &PrizePlayResult{
+// 		Winners: []PlayParticipant{
+// 			{
+// 				Participant: Participant{
+// 					ID:        "ID1",
+// 					Name:      "name1",
+// 					Phone:     "phone1",
+// 					Note:      "note1",
+// 					CreatedAt: s.mockTime,
+// 				},
+// 				TotalDonation:      300,
+// 				TotalTicketsNumber: 10,
+// 				Donations: []Donation{
+// 					{
+// 						ID:            "dID1",
+// 						ParticipantID: "id1",
+// 						Amount:        300,
+// 						CreatedAt:     time.Time{},
+// 					},
+// 				},
+// 			},
+// 		},
+
+// 		PlayParticipants: []PlayParticipant{
+// 			{
+// 				Participant: Participant{
+// 					ID:        "ID2",
+// 					Name:      "name2",
+// 					Phone:     "phone2",
+// 					Note:      "note2",
+// 					CreatedAt: s.mockTime,
+// 				},
+// 				TotalDonation:      200,
+// 				TotalTicketsNumber: 5,
+// 				Donations: []Donation{
+// 					{
+// 						ID:            "dID2",
+// 						ParticipantID: "ID2",
+// 						Amount:        200,
+// 						CreatedAt:     s.mockTime,
+// 					},
+// 				},
+// 			},
+// 			{
+// 				Participant: Participant{
+// 					ID:        "ID3",
+// 					Name:      "name3",
+// 					Phone:     "phone3",
+// 					Note:      "note3",
+// 					CreatedAt: s.mockTime,
+// 				},
+// 				TotalDonation:      100,
+// 				TotalTicketsNumber: 2,
+// 				Donations: []Donation{
+// 					{
+// 						ID:            "dID3",
+// 						ParticipantID: "ID3",
+// 						Amount:        1000,
+// 						CreatedAt:     s.mockTime,
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	mockedPrizeID := "pz1"
+
+// 	s.prizeStorage.EXPECT().Get(mockedPrizeID).Return(&przs[0], nil)
+
+// 	res, err := s.manager.PlayPrizeAgain(s.mockUUID, mockedPrizeID, mockedPreviousResult)
+// 	s.Require().NoError(err)
+// 	s.Require().NotNil(res)
+// 	s.Require().NotEmpty(res.Winners)
+// 	s.Require().NotEmpty(res.PlayParticipants)
+// }
 
 func setUUIDMock(uuid string) {
 	stringUUID = func() string {

@@ -15,12 +15,12 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"go.uber.org/mock/gomock"
 
 	"github.com/kaznasho/yarmarok/logger"
 	"github.com/kaznasho/yarmarok/service"
 	"github.com/kaznasho/yarmarok/web/mocks"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
