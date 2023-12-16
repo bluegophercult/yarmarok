@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var ErrPrizeAlreadyPlayed = fmt.Errorf("prize already played")
+
 // Prize represents a prize of the application.
 type Prize struct {
 	ID          string           `json:"id"`
@@ -105,6 +107,10 @@ func (pm *PrizeManager) Edit(id string, p *PrizeRequest) error {
 	prize, err := pm.prizeStorage.Get(id)
 	if err != nil {
 		return fmt.Errorf("get prize: %w", err)
+	}
+
+	if prize.PlayResult != nil {
+		return ErrPrizeAlreadyPlayed
 	}
 
 	prize.Name = p.Name

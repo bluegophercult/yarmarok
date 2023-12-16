@@ -161,6 +161,62 @@ func (s *PrizeSuite) TestEditPrize() {
 		err := s.manager.Edit(mockedPrize.ID, request)
 		require.Error(s.T(), err)
 	})
+
+	s.Run("already played", func() {
+		prizeRequest := dummyPrizeRequest()
+		mockedPrize := &Prize{
+			ID:          s.mockUUID,
+			Name:        prizeRequest.Name,
+			TicketCost:  prizeRequest.TicketCost,
+			Description: prizeRequest.Description,
+			CreatedAt:   s.mockTime,
+			PlayResult:  dummyPlayResult(),
+		}
+
+		s.storage.EXPECT().Get(mockedPrize.ID).Return(mockedPrize, nil)
+
+		err := s.manager.Edit(mockedPrize.ID, prizeRequest)
+		s.Require().ErrorIs(err, ErrPrizeAlreadyPlayed)
+	})
+}
+
+func dummyPlayResult() *PrizePlayResult {
+	return &PrizePlayResult{
+		Winners: []PlayParticipant{
+			*dummyplayParticipant(),
+			*dummyplayParticipant(),
+		},
+		PlayParticipants: []PlayParticipant{
+			*dummyplayParticipant(),
+			*dummyplayParticipant(),
+			*dummyplayParticipant(),
+			*dummyplayParticipant(),
+			*dummyplayParticipant(),
+			*dummyplayParticipant(),
+		},
+	}
+}
+
+func dummyplayParticipant() *PlayParticipant {
+	return &PlayParticipant{
+		Participant: Participant{
+			ID:        "participant_id_1",
+			Name:      "participant_name_1",
+			Phone:     "participant_phone_1",
+			Note:      "participant_note_1",
+			CreatedAt: time.Now().UTC(),
+		},
+		TotalDonation:      200,
+		TotalTicketsNumber: 10,
+		Donations: []Donation{
+			{
+				ID:            "donation_id_1",
+				ParticipantID: "participant_id_1",
+				Amount:        200,
+				CreatedAt:     time.Now().UTC(),
+			},
+		},
+	}
 }
 
 func (s *PrizeSuite) TestDeletePrize() {

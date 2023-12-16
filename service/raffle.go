@@ -231,7 +231,7 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 
 	err = pzs.Update(prize)
 	if err != nil {
-		return nil, fmt.Errorf(": %w", err)
+		return nil, fmt.Errorf("update prize with play results: %w", err)
 	}
 
 	return prizePlayResult, nil
