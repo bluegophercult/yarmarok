@@ -172,72 +172,58 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 		return nil, fmt.Errorf("get donation list: %w", err)
 	}
 
-	prizePlayer := NewPrizePlayer(pm.randomizer, donationsList, participantList, prize)
-	prize.PlayResult = prizePlayer.Play()
+	participants := countDonations(donationsList, participantList, prize.TicketCost)
+
+	prize.PlayResult = &PrizePlayResult{
+		Winners:          []PlayParticipant{},
+		PlayParticipants: participants,
+	}
+
+	playResult := pm.play(prize)
 
 	err = pm.prizeStorage.Update(prize)
 	if err != nil {
 		return nil, fmt.Errorf("update prize with play results: %w", err)
 	}
 
-	return prize.PlayResult, nil
+	return playResult, nil
 }
 
-// PrizePlayer is responsible for playing prizes.
-type PrizePlayer struct {
-	randomizer   Randomizer
-	donations    []Donation
-	participants []Participant
-	prize        *Prize
-}
-
-func NewPrizePlayer(randomizer Randomizer, donations []Donation, participants []Participant, prize *Prize) *PrizePlayer {
-	return &PrizePlayer{
-		randomizer:   randomizer,
-		donations:    donations,
-		participants: participants,
-		prize:        prize,
-	}
-}
-
-func (pp *PrizePlayer) Play() *PrizePlayResult {
-	participantDonations := pp.countDonations()
-
-	winnerID := pp.randomizer.GenerateWinner(participantDonations, pp.prize.TicketCost)
+func (pm *PrizeManager) play(prize *Prize) *PrizePlayResult {
+	participants := prize.PlayResult.PlayParticipants
+	winnerDonationID := pm.randomizer.GenerateWinner(participants, prize.TicketCost)
 
 	winnerIndex := slices.IndexFunc(
-		participantDonations,
+		participants,
 		func(p PlayParticipant) bool {
-			return p.Participant.ID == winnerID
+			return p.Participant.ID == winnerDonationID
 		},
 	)
 
-	winner := participantDonations[winnerIndex]
-	participants := append(participantDonations[:winnerIndex], participantDonations[winnerIndex+1:]...)
+	winner := participants[winnerIndex]
+	participants = append(participants[:winnerIndex], participants[winnerIndex+1:]...)
 
-	return &PrizePlayResult{
-		Winners: []PlayParticipant{
-			winner,
-		},
-		PlayParticipants: participants,
-	}
+	prize.PlayResult.Winners = append(prize.PlayResult.Winners, winner)
+	prize.PlayResult.PlayParticipants = participants
+
+	return prize.PlayResult
 }
 
 // countDonations counts donations, total amount and totat tickets count for each participant.
-func (pp *PrizePlayer) countDonations() []PlayParticipant {
+func countDonations(donations []Donation, participants []Participant, ticketCost int) []PlayParticipant {
 	donationsMap := make(map[string][]Donation)
 
-	for _, d := range pp.donations {
+	for _, d := range donations {
 		donationsMap[d.ParticipantID] = append(donationsMap[d.ParticipantID], d)
 	}
 
 	result := make([]PlayParticipant, 0, len(donationsMap))
 
-	for _, participant := range pp.participants {
+	for _, participant := range participants {
 		donations := donationsMap[participant.ID]
-		totalDonation := pp.countTotalDonation(donations)
+		totalDonation := countTotalDonation(donations)
 
-		ticketsNumber := totalDonation / pp.prize.TicketCost
+		ticketsNumber := totalDonation / ticketCost
 		if ticketsNumber == 0 {
 			continue
 		}
@@ -253,7 +239,7 @@ func (pp *PrizePlayer) countDonations() []PlayParticipant {
 	return result
 }
 
-func (pp *PrizePlayer) countTotalDonation(donations []Donation) int {
+func countTotalDonation(donations []Donation) int {
 	total := 0
 
 	for _, d := range donations {
