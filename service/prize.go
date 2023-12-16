@@ -50,6 +50,7 @@ type PrizeService interface {
 	Delete(id string) error
 	List() ([]Prize, error)
 	DonationService(id string) DonationService
+	PlayPrize(prizeID string) (*PrizePlayResult, error)
 }
 
 // PrizeStorage is a storage for prizes.
@@ -66,12 +67,13 @@ type PrizeStorage interface {
 
 // PrizeManager is an implementation of PrizeService.
 type PrizeManager struct {
-	prizeStorage PrizeStorage
+	prizeStorage       PrizeStorage
+	participantStorage ParticipantStorage
 }
 
 // NewPrizeManager creates a new PrizeManager.
-func NewPrizeManager(ps PrizeStorage) *PrizeManager {
-	return &PrizeManager{prizeStorage: ps}
+func NewPrizeManager(ps PrizeStorage, pts ParticipantStorage) *PrizeManager {
+	return &PrizeManager{prizeStorage: ps, participantStorage: pts}
 }
 
 // Create creates a new prize
@@ -141,6 +143,70 @@ func (pm *PrizeManager) List() ([]Prize, error) {
 	}
 
 	return prizes, nil
+}
+
+// PlayPrize plays a prize.
+func (pm *PrizeManager) PlayPrize(prizeID string) (*PrizePlayResult, error) {
+	participantList, err := pm.participantStorage.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("get participant list: %w", err)
+	}
+
+	prize, err := pm.prizeStorage.Get(prizeID)
+	if err != nil {
+		return nil, fmt.Errorf("get prize to play: %w", err)
+	}
+
+	ds := pm.prizeStorage.DonationStorage(prizeID)
+	donationsList, err := ds.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("get donation list: %w", err)
+	}
+
+	seed := time.Now().UnixNano()
+	ticketCost := prize.TicketCost
+	winnerDonationID := GetWinnerDonationID(donationsList, ticketCost, seed)
+
+	winnerDonation, err := ds.Get(winnerDonationID)
+	if err != nil {
+		return nil, fmt.Errorf("get winner donation: %w", err)
+	}
+
+	prizePlayResult := new(PrizePlayResult)
+	for _, participant := range participantList {
+		tempPlayParticipant := PlayParticipant{
+			Participant: participant,
+		}
+
+		// add participant donations
+		totalDonation := 0
+		for _, donation := range donationsList {
+			if participant.ID == donation.ParticipantID {
+				totalDonation += donation.Amount
+				tempPlayParticipant.Donations = append(tempPlayParticipant.Donations, donation)
+			}
+		}
+
+		// calculate total donation and number of tickets
+		tempPlayParticipant.TotalDonation = totalDonation
+		tempPlayParticipant.TotalTicketsNumber = totalDonation / ticketCost
+
+		if participant.ID == winnerDonation.ParticipantID {
+			prizePlayResult.Winners = append(prizePlayResult.Winners, tempPlayParticipant)
+			continue
+		}
+
+		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, tempPlayParticipant)
+	}
+
+	prize.PlayResult = prizePlayResult
+
+	err = pm.prizeStorage.Update(prize)
+	if err != nil {
+		return nil, fmt.Errorf("update prize with play results: %w", err)
+	}
+
+	return prizePlayResult, nil
 }
 
 // DonationService is a service for donations.

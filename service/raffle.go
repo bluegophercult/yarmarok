@@ -43,7 +43,6 @@ type RaffleService interface {
 	Delete(id string) error
 	List() ([]Raffle, error)
 	Export(id string) (*RaffleExportResult, error)
-	PlayPrize(raffleID, prizeID string) (*PrizePlayResult, error)
 	ParticipantService(id string) ParticipantService
 	PrizeService(id string) PrizeService
 }
@@ -171,71 +170,6 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResult, error) {
 	return &resp, nil
 }
 
-// PlayPrize find winner of prize
-func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, error) {
-	participantList, err := rm.ParticipantService(raffleID).List()
-	if err != nil {
-		return nil, fmt.Errorf("get participant list: %w", err)
-	}
-
-	pzs := rm.raffleStorage.PrizeStorage(raffleID)
-	prize, err := pzs.Get(prizeID)
-	if err != nil {
-		return nil, fmt.Errorf("get prize to play: %w", err)
-	}
-
-	ds := pzs.DonationStorage(prizeID)
-	donationsList, err := ds.GetAll()
-	if err != nil {
-		return nil, fmt.Errorf("get donation list: %w", err)
-	}
-
-	seed := time.Now().UnixNano()
-	ticketCost := prize.TicketCost
-	winnerDonationID := GetWinnerDonationID(donationsList, ticketCost, seed)
-
-	winnerDonation, err := ds.Get(winnerDonationID)
-	if err != nil {
-		return nil, fmt.Errorf("get winner donation: %w", err)
-	}
-
-	prizePlayResult := new(PrizePlayResult)
-	for _, participant := range participantList {
-		tempPlayParticipant := PlayParticipant{
-			Participant: participant,
-		}
-
-		// add participant donations
-		totalDonation := 0
-		for _, donation := range donationsList {
-			if participant.ID == donation.ParticipantID {
-				totalDonation += donation.Amount
-				tempPlayParticipant.Donations = append(tempPlayParticipant.Donations, donation)
-			}
-		}
-
-		// calculate total donation and number of tickets
-		tempPlayParticipant.TotalDonation = totalDonation
-		tempPlayParticipant.TotalTicketsNumber = totalDonation / ticketCost
-
-		if participant.ID == winnerDonation.ParticipantID {
-			prizePlayResult.Winners = append(prizePlayResult.Winners, tempPlayParticipant)
-			continue
-		}
-
-		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, tempPlayParticipant)
-	}
-
-	prize.PlayResult = prizePlayResult
-
-	err = pzs.Update(prize)
-	if err != nil {
-		return nil, fmt.Errorf("update prize with play results: %w", err)
-	}
-
-	return prizePlayResult, nil
-}
-
 // GetWinnerDonationID find donation that wins
 func GetWinnerDonationID(donationsList []Donation, ticketCost int, seed int64) (id string) {
 	tickets := make([]string, 0)
@@ -260,7 +194,10 @@ func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
 
 // PrizeService is a service for prizes.
 func (rm *RaffleManager) PrizeService(id string) PrizeService {
-	return NewPrizeManager(rm.raffleStorage.PrizeStorage(id))
+	return NewPrizeManager(
+		rm.raffleStorage.PrizeStorage(id),
+		rm.raffleStorage.ParticipantStorage(id),
+	)
 }
 
 // RaffleRequest is a request for initializing a raffle.

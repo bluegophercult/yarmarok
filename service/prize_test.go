@@ -14,9 +14,12 @@ import (
 type PrizeSuite struct {
 	suite.Suite
 
-	ctrl     *gomock.Controller
-	storage  *MockPrizeStorage
-	manager  *PrizeManager
+	ctrl               *gomock.Controller
+	storage            *MockPrizeStorage
+	participantStorage *MockParticipantStorage
+
+	manager *PrizeManager
+
 	mockTime time.Time
 	mockUUID string
 }
@@ -33,7 +36,8 @@ func (s *PrizeSuite) SetupTest() {
 
 	s.ctrl = gomock.NewController(s.T())
 	s.storage = NewMockPrizeStorage(s.ctrl)
-	s.manager = NewPrizeManager(s.storage)
+	s.participantStorage = NewMockParticipantStorage(s.ctrl)
+	s.manager = NewPrizeManager(s.storage, s.participantStorage)
 }
 
 func (s *PrizeSuite) TestCreatePrize() {
@@ -250,6 +254,109 @@ func (s *PrizeSuite) TestListPrize() {
 		res, err := s.manager.List()
 		require.ErrorIs(s.T(), err, assert.AnError)
 		require.Nil(s.T(), res)
+	})
+}
+
+func TestPlayPrize(t *testing.T) {
+	suite.Run(t, &PlayPrizeSuite{})
+}
+
+type PlayPrizeSuite struct {
+	PrizeSuite
+
+	raffleID    string
+	prizeID     string
+	mockedPrize *Prize
+
+	donationStorage *MockDonationStorage
+}
+
+func (s *PlayPrizeSuite) SetupTest() {
+	s.PrizeSuite.SetupTest()
+
+	s.raffleID = uuid.New().String()
+	s.prizeID = uuid.New().String()
+	s.mockedPrize = &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+	}
+
+	s.donationStorage = NewMockDonationStorage(s.ctrl)
+
+	s.storage.EXPECT().DonationStorage(s.prizeID).Return(s.donationStorage).AnyTimes()
+}
+
+func (s *PlayPrizeSuite) TestPlayPrize() {
+	participants := []Participant{
+		{ID: "p1", Name: "Participant 1"},
+		{ID: "p2", Name: "Participant 2"},
+		{ID: "p3", Name: "Participant 3"},
+	}
+
+	donations := []Donation{
+		{ID: "dn1", ParticipantID: "p1", Amount: 100},
+		{ID: "dn2", ParticipantID: "p1", Amount: 100},
+		{ID: "dn3", ParticipantID: "p2", Amount: 200},
+		{ID: "dn4", ParticipantID: "p2", Amount: 200},
+		{ID: "dn5", ParticipantID: "p3", Amount: 300},
+	}
+
+	s.participantStorage.EXPECT().GetAll().Return(participants, nil)
+	s.storage.EXPECT().Get(s.prizeID).Return(s.mockedPrize, nil)
+	s.donationStorage.EXPECT().GetAll().Return(donations, nil)
+	// Pay attention, the mock always returns the first donation,
+	// so winner in this test is always the same despite of the input.
+	s.donationStorage.EXPECT().Get(MatcherAnyDonationID(donations...)).Return(&donations[0], nil)
+
+	expectedWinner := PlayParticipant{
+		Participant:        participants[0],
+		TotalDonation:      200,
+		TotalTicketsNumber: 20,
+		Donations:          donations[:2],
+	}
+
+	expectedParticipants := []PlayParticipant{
+		{
+			Participant:        participants[1],
+			TotalDonation:      400,
+			TotalTicketsNumber: 40,
+			Donations:          donations[2:4],
+		},
+		{
+			Participant:        participants[2],
+			TotalDonation:      300,
+			TotalTicketsNumber: 30,
+			Donations:          donations[4:],
+		},
+	}
+
+	s.mockedPrize.PlayResult = &PrizePlayResult{
+		Winners:          []PlayParticipant{expectedWinner},
+		PlayParticipants: expectedParticipants,
+	}
+
+	s.storage.EXPECT().Update(s.mockedPrize).Return(nil)
+
+	res, err := s.manager.PlayPrize(s.prizeID)
+	s.Require().NoError(err)
+	s.Require().NotNil(res)
+	s.Require().Len(res.Winners, 1)
+	s.Require().Len(res.PlayParticipants, 2)
+
+	s.Equal(expectedWinner, res.Winners[0])
+	s.NotContains(res.PlayParticipants, expectedWinner)
+}
+
+func MatcherAnyDonationID(donations ...Donation) gomock.Matcher {
+	return gomock.Cond(func(donationID interface{}) bool {
+		id := donationID.(string)
+		for _, d := range donations {
+			if d.ID == id {
+				return true
+			}
+		}
+		return false
 	})
 }
 
