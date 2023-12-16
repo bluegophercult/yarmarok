@@ -179,14 +179,14 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 		return nil, fmt.Errorf("get participant list: %w", err)
 	}
 
-	pzs := rm.PrizeService(raffleID)
+	pzs := rm.raffleStorage.PrizeStorage(raffleID)
 	prize, err := pzs.Get(prizeID)
 	if err != nil {
 		return nil, fmt.Errorf("get prize to play: %w", err)
 	}
 
-	ds := pzs.DonationService(prizeID)
-	donationsList, err := ds.List()
+	ds := pzs.DonationStorage(prizeID)
+	donationsList, err := ds.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get donation list: %w", err)
 	}
@@ -225,6 +225,13 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 		}
 
 		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, tempPlayParticipant)
+	}
+
+	prize.PlayResult = prizePlayResult
+
+	err = pzs.Update(prize)
+	if err != nil {
+		return nil, fmt.Errorf(": %w", err)
 	}
 
 	return prizePlayResult, nil

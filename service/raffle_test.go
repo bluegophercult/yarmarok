@@ -273,18 +273,40 @@ func (s *PlayPrizeSuite) TestPlayPrize() {
 	// so winner in this test is always the same despite of the input.
 	s.donationStorage.EXPECT().Get(MatcherAnyDonationID(donations...)).Return(&donations[0], nil)
 
-	res, err := s.manager.PlayPrize(s.raffleID, s.prizeID)
-	s.Require().NoError(err)
-	s.Require().NotNil(res)
-	s.Require().Len(res.Winners, 1)
-	s.Require().Len(res.PlayParticipants, 2)
-
 	expectedWinner := PlayParticipant{
 		Participant:        participants[0],
 		TotalDonation:      200,
 		TotalTicketsNumber: 20,
 		Donations:          donations[:2],
 	}
+
+	expectedParticipants := []PlayParticipant{
+		{
+			Participant:        participants[1],
+			TotalDonation:      400,
+			TotalTicketsNumber: 40,
+			Donations:          donations[2:4],
+		},
+		{
+			Participant:        participants[2],
+			TotalDonation:      300,
+			TotalTicketsNumber: 30,
+			Donations:          donations[4:],
+		},
+	}
+
+	s.mockedPrize.PlayResult = &PrizePlayResult{
+		Winners:          []PlayParticipant{expectedWinner},
+		PlayParticipants: expectedParticipants,
+	}
+
+	s.prizeStorage.EXPECT().Update(s.mockedPrize).Return(nil)
+
+	res, err := s.manager.PlayPrize(s.raffleID, s.prizeID)
+	s.Require().NoError(err)
+	s.Require().NotNil(res)
+	s.Require().Len(res.Winners, 1)
+	s.Require().Len(res.PlayParticipants, 2)
 
 	s.Equal(expectedWinner, res.Winners[0])
 	s.NotContains(res.PlayParticipants, expectedWinner)
