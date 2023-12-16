@@ -44,7 +44,6 @@ type RaffleService interface {
 	List() ([]Raffle, error)
 	Export(id string) (*RaffleExportResult, error)
 	PlayPrize(raffleID, prizeID string) (*PrizePlayResult, error)
-	PlayPrizeAgain(raffleID, prizeID string, previousResult *PrizePlayResult) (*PrizePlayResult, error)
 	ParticipantService(id string) ParticipantService
 	PrizeService(id string) PrizeService
 }
@@ -232,51 +231,6 @@ func (rm *RaffleManager) PlayPrize(raffleID, prizeID string) (*PrizePlayResult, 
 	err = pzs.Update(prize)
 	if err != nil {
 		return nil, fmt.Errorf("update prize with play results: %w", err)
-	}
-
-	return prizePlayResult, nil
-}
-
-func (rm *RaffleManager) PlayPrizeAgain(raffleID, prizeID string, previousResult *PrizePlayResult) (*PrizePlayResult, error) {
-	// check if participants left to play
-	if len(previousResult.PlayParticipants) == 0 {
-		return nil, ErrAllWinnersFound
-	}
-
-	prize, err := rm.PrizeService(raffleID).Get(prizeID)
-	if err != nil {
-		return nil, fmt.Errorf("get prize to play: %w", err)
-	}
-
-	ticketCost := prize.TicketCost
-	donations := make([]Donation, 0)
-	for _, participant := range previousResult.PlayParticipants {
-		donations = append(donations, participant.Donations...)
-	}
-
-	seed := time.Now().UnixNano()
-	winnerDonationID := GetWinnerDonationID(donations, ticketCost, seed)
-
-	prizePlayResult := new(PrizePlayResult)
-
-	prizePlayResult.Winners = append(prizePlayResult.Winners, previousResult.Winners...)
-
-	// add new winner
-	var winnerID string
-	for _, participant := range previousResult.PlayParticipants {
-		for _, donation := range participant.Donations {
-			if winnerDonationID == donation.ID {
-				winnerID = participant.Participant.ID
-				prizePlayResult.Winners = append(prizePlayResult.Winners, participant)
-			}
-		}
-	}
-
-	// add previous participants
-	for _, participant := range previousResult.PlayParticipants {
-		if participant.Participant.ID != winnerID {
-			prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, participant)
-		}
 	}
 
 	return prizePlayResult, nil
