@@ -348,6 +348,161 @@ func (s *PlayPrizeSuite) TestPlayPrize() {
 	s.NotContains(res.PlayParticipants, expectedWinner)
 }
 
+func (s *PlayPrizeSuite) TestWinnerGeneration() {
+	var r Randomizer = func(i uint) uint {
+		return 0
+	}
+
+	s.Run("no_donations", func() {
+		s.Panics(
+			func() {
+				donations := []Donation{}
+
+				winnerID := r.GenerateWinner(donations, 100)
+				s.Equal("", winnerID)
+			},
+		)
+	})
+
+	s.Run("zero_ticket_cost", func() {
+		s.Panics(
+			func() {
+				donations := []Donation{
+					{ID: "dn1", ParticipantID: "p1", Amount: 100},
+				}
+				ticketCost := 0
+
+				r.GenerateWinner(donations, ticketCost)
+			},
+		)
+	})
+
+	s.Run("many_donations", func() {
+		donations := []Donation{
+			{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn2", ParticipantID: "p1", Amount: 100},
+			{ID: "dn3", ParticipantID: "p2", Amount: 200},
+			{ID: "dn4", ParticipantID: "p2", Amount: 200},
+			{ID: "dn5", ParticipantID: "p3", Amount: 300},
+		}
+
+		ticketCost := 100
+
+		winnerID := r.GenerateWinner(donations, ticketCost)
+		s.Equal("dn1", winnerID)
+	})
+
+	s.Run("one_donation", func() {
+		donations := []Donation{
+			{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn2", ParticipantID: "p1", Amount: 100},
+			{ID: "dn3", ParticipantID: "p2", Amount: 200},
+			{ID: "dn4", ParticipantID: "p2", Amount: 200},
+			{ID: "dn5", ParticipantID: "p3", Amount: 300},
+		}
+
+		ticketCost := 100
+
+		winnerID := r.GenerateWinner(donations, ticketCost)
+		s.Equal("dn1", winnerID)
+	})
+}
+
+func (s *PlayPrizeSuite) TestGenerateDonationIDsList() {
+	type testCase struct {
+		donations  []Donation
+		ticketCost int
+		expected   []string
+	}
+
+	testCases := map[string]testCase{
+		"no_donations": {
+			donations:  []Donation{},
+			ticketCost: 100,
+			expected:   []string{},
+		},
+		"one_donation": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			},
+			ticketCost: 100,
+			expected:   []string{"dn1"},
+		},
+		"many_donations": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 100},
+				{ID: "dn2", ParticipantID: "p1", Amount: 100},
+				{ID: "dn3", ParticipantID: "p2", Amount: 200},
+				{ID: "dn4", ParticipantID: "p2", Amount: 200},
+				{ID: "dn5", ParticipantID: "p3", Amount: 300},
+			},
+			ticketCost: 100,
+			expected: []string{
+				"dn1",
+				"dn2",
+				"dn3",
+				"dn3",
+				"dn4",
+				"dn4",
+				"dn5",
+				"dn5",
+				"dn5",
+			},
+		},
+		"separately_2_together_3": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 155},
+				{ID: "dn1", ParticipantID: "p1", Amount: 155},
+			},
+			ticketCost: 100,
+			expected: []string{
+				"dn1",
+				"dn1",
+			},
+		},
+		"not_enough_money": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 50},
+			},
+			ticketCost: 100,
+			expected:   []string{},
+		},
+		"almost_enough_money": {
+			donations: []Donation{
+				{ID: "dn1", ParticipantID: "p1", Amount: 99},
+				{ID: "dn2", ParticipantID: "p1", Amount: 199},
+			},
+			ticketCost: 100,
+			expected: []string{
+				"dn2",
+			},
+		},
+	}
+
+	for name, tc := range testCases {
+		s.Run(name, func() {
+			res := generateDonationIDsList(tc.donations, tc.ticketCost)
+			s.Equal(tc.expected, res)
+		})
+	}
+
+	s.Run("ticket_cost_0", func() {
+		donations := []Donation{
+			{ID: "dn1", ParticipantID: "p1", Amount: 100},
+			{ID: "dn4", ParticipantID: "p2", Amount: 200},
+			{ID: "dn5", ParticipantID: "p3", Amount: 300},
+		}
+
+		ticketCost := 0
+
+		s.Panics(
+			func() {
+				generateDonationIDsList(donations, ticketCost)
+			},
+		)
+	})
+}
+
 func MatcherAnyDonationID(donations ...Donation) gomock.Matcher {
 	return gomock.Cond(func(donationID interface{}) bool {
 		id := donationID.(string)

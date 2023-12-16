@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -69,11 +70,16 @@ type PrizeStorage interface {
 type PrizeManager struct {
 	prizeStorage       PrizeStorage
 	participantStorage ParticipantStorage
+	randomizer         Randomizer
 }
 
 // NewPrizeManager creates a new PrizeManager.
 func NewPrizeManager(ps PrizeStorage, pts ParticipantStorage) *PrizeManager {
-	return &PrizeManager{prizeStorage: ps, participantStorage: pts}
+	return &PrizeManager{
+		prizeStorage:       ps,
+		participantStorage: pts,
+		randomizer:         NewSimpleRandomizer(),
+	}
 }
 
 // Create creates a new prize
@@ -163,9 +169,8 @@ func (pm *PrizeManager) PlayPrize(prizeID string) (*PrizePlayResult, error) {
 		return nil, fmt.Errorf("get donation list: %w", err)
 	}
 
-	seed := time.Now().UnixNano()
 	ticketCost := prize.TicketCost
-	winnerDonationID := GetWinnerDonationID(donationsList, ticketCost, seed)
+	winnerDonationID := pm.randomizer.GenerateWinner(donationsList, ticketCost)
 
 	winnerDonation, err := ds.Get(winnerDonationID)
 	if err != nil {
@@ -221,5 +226,40 @@ func toPrize(p *PrizeRequest) *Prize {
 		TicketCost:  p.TicketCost,
 		Description: p.Description,
 		CreatedAt:   timeNow(),
+	}
+}
+
+// Randomizer is a function type that returns a random number from 0 to n.
+type Randomizer func(uint) uint
+
+// GenerateWinner returns a winner ID.
+// The winner is selected randomly as the person that made the donation.
+// Function panics if donations list is empty or ticketCost is 0.
+func (r Randomizer) GenerateWinner(donations []Donation, ticketCost int) (id string) {
+	tickets := generateDonationIDsList(donations, ticketCost)
+	winnerTicketIndex := r(uint(len(tickets)))
+	return tickets[winnerTicketIndex]
+}
+
+func generateDonationIDsList(donations []Donation, ticketCost int) []string {
+	donationIDs := make([]string, 0)
+	for _, donation := range donations {
+		// calculate number of tickets in donation
+		numberOfTickets := donation.Amount / ticketCost
+		for i := 0; i < numberOfTickets; i++ {
+			donationIDs = append(donationIDs, donation.ID)
+		}
+	}
+
+	return donationIDs
+}
+
+// NewSimpleRandomizer creates a new Randomizer
+// that uses math/rand to generate random numbers.
+func NewSimpleRandomizer() Randomizer {
+	return func(i uint) uint {
+		seed := time.Now().UnixNano()
+
+		return uint(rand.New(rand.NewSource(seed)).Intn(int(i)))
 	}
 }

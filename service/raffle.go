@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -168,23 +167,6 @@ func (rm *RaffleManager) Export(id string) (*RaffleExportResult, error) {
 	}
 
 	return &resp, nil
-}
-
-// GetWinnerDonationID find donation that wins
-func GetWinnerDonationID(donationsList []Donation, ticketCost int, seed int64) (id string) {
-	tickets := make([]string, 0)
-	for _, donation := range donationsList {
-		// calculate number of tickets in donation
-		numberOfTickets := donation.Amount / ticketCost
-		for i := 0; i < numberOfTickets; i++ {
-			tickets = append(tickets, donation.ID)
-		}
-	}
-
-	rnd := rand.New(rand.NewSource(seed))
-	winnerDonationID := rnd.Intn(len(tickets))
-
-	return tickets[winnerDonationID]
 }
 
 // ParticipantService is a service for participants.
