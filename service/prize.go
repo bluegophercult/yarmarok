@@ -174,12 +174,7 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 
 	participants := countDonations(donationsList, participantList, prize.TicketCost)
 
-	prize.PlayResult = &PrizePlayResult{
-		Winners:          []PlayParticipant{},
-		PlayParticipants: participants,
-	}
-
-	playResult := pm.play(prize)
+	playResult := prize.Play(participants, pm.randomizer)
 
 	err = pm.prizeStorage.Update(prize)
 	if err != nil {
@@ -189,9 +184,8 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 	return playResult, nil
 }
 
-func (pm *PrizeManager) play(prize *Prize) *PrizePlayResult {
-	participants := prize.PlayResult.PlayParticipants
-	winnerDonationID := pm.randomizer.GenerateWinner(participants, prize.TicketCost)
+func (p *Prize) Play(participants []PlayParticipant, randomizer Randomizer) *PrizePlayResult {
+	winnerDonationID := randomizer.GenerateWinner(participants, p.TicketCost)
 
 	winnerIndex := slices.IndexFunc(
 		participants,
@@ -203,10 +197,14 @@ func (pm *PrizeManager) play(prize *Prize) *PrizePlayResult {
 	winner := participants[winnerIndex]
 	participants = append(participants[:winnerIndex], participants[winnerIndex+1:]...)
 
-	prize.PlayResult.Winners = append(prize.PlayResult.Winners, winner)
-	prize.PlayResult.PlayParticipants = participants
+	if p.PlayResult == nil {
+		p.PlayResult = &PrizePlayResult{}
+	}
 
-	return prize.PlayResult
+	p.PlayResult.Winners = append(p.PlayResult.Winners, winner)
+	p.PlayResult.PlayParticipants = participants
+
+	return p.PlayResult
 }
 
 // countDonations counts donations, total amount and totat tickets count for each participant.

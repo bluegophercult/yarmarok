@@ -264,9 +264,8 @@ func TestPlayPrize(t *testing.T) {
 type PlayPrizeSuite struct {
 	PrizeSuite
 
-	raffleID    string
-	prizeID     string
-	mockedPrize *Prize
+	raffleID string
+	prizeID  string
 
 	donationStorage *MockDonationStorage
 }
@@ -276,11 +275,6 @@ func (s *PlayPrizeSuite) SetupTest() {
 
 	s.raffleID = uuid.New().String()
 	s.prizeID = uuid.New().String()
-	s.mockedPrize = &Prize{
-		ID:         s.prizeID,
-		Name:       "Prize 1",
-		TicketCost: 10,
-	}
 
 	s.donationStorage = NewMockDonationStorage(s.ctrl)
 	s.manager.randomizer = func(i uint) uint {
@@ -305,8 +299,14 @@ func (s *PlayPrizeSuite) TestPlayPrize() {
 		{ID: "dn5", ParticipantID: "p3", Amount: 300},
 	}
 
+	mockedPrize := &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+	}
+
 	s.participantStorage.EXPECT().GetAll().Return(participants, nil)
-	s.storage.EXPECT().Get(s.prizeID).Return(s.mockedPrize, nil)
+	s.storage.EXPECT().Get(s.prizeID).Return(mockedPrize, nil)
 	s.donationStorage.EXPECT().GetAll().Return(donations, nil)
 
 	expectedWinner := PlayParticipant{
@@ -331,12 +331,17 @@ func (s *PlayPrizeSuite) TestPlayPrize() {
 		},
 	}
 
-	s.mockedPrize.PlayResult = &PrizePlayResult{
-		Winners:          []PlayParticipant{expectedWinner},
-		PlayParticipants: expectedParticipants,
+	expectedPrize := &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+		PlayResult: &PrizePlayResult{
+			Winners:          []PlayParticipant{expectedWinner},
+			PlayParticipants: expectedParticipants,
+		},
 	}
 
-	s.storage.EXPECT().Update(s.mockedPrize).Return(nil)
+	s.storage.EXPECT().Update(expectedPrize).Return(nil)
 
 	res, err := s.manager.Play(s.prizeID)
 	s.Require().NoError(err)
