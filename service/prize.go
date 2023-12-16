@@ -9,6 +9,8 @@ import (
 )
 
 var ErrPrizeAlreadyPlayed = fmt.Errorf("prize already played")
+var ErrNoParticipants = fmt.Errorf("no participants")
+var ErrNoDonations = fmt.Errorf("no donations")
 
 // Prize represents a prize of the application.
 type Prize struct {
@@ -161,6 +163,10 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 		return nil, fmt.Errorf("get participant list: %w", err)
 	}
 
+	if len(participantList) == 0 {
+		return nil, ErrNoParticipants
+	}
+
 	prize, err := pm.prizeStorage.Get(prizeID)
 	if err != nil {
 		return nil, fmt.Errorf("get prize to play: %w", err)
@@ -170,6 +176,10 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 	donationsList, err := ds.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get donation list: %w", err)
+	}
+
+	if len(donationsList) == 0 {
+		return nil, ErrNoDonations
 	}
 
 	participants := countDonations(donationsList, participantList, prize.TicketCost)
