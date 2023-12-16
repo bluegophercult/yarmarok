@@ -11,6 +11,7 @@ import (
 var ErrPrizeAlreadyPlayed = fmt.Errorf("prize already played")
 var ErrNoParticipants = fmt.Errorf("no participants")
 var ErrNoDonations = fmt.Errorf("no donations")
+var ErrNotEnoughDonations = fmt.Errorf("not enough donations")
 
 // Prize represents a prize of the application.
 type Prize struct {
@@ -158,31 +159,19 @@ func (pm *PrizeManager) List() ([]Prize, error) {
 
 // Play plays a prize.
 func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
-	participantList, err := pm.participantStorage.GetAll()
-	if err != nil {
-		return nil, fmt.Errorf("get participant list: %w", err)
-	}
-
-	if len(participantList) == 0 {
-		return nil, ErrNoParticipants
-	}
-
 	prize, err := pm.prizeStorage.Get(prizeID)
 	if err != nil {
 		return nil, fmt.Errorf("get prize to play: %w", err)
 	}
 
-	ds := pm.prizeStorage.DonationStorage(prizeID)
-	donationsList, err := ds.GetAll()
-	if err != nil {
-		return nil, fmt.Errorf("get donation list: %w", err)
-	}
+	var participants []PlayParticipant
 
-	if len(donationsList) == 0 {
-		return nil, ErrNoDonations
+	if prize.PlayResult == nil {
+		participants, err = pm.prepareParticipants(prize)
+		if err != nil {
+			return nil, fmt.Errorf("prepare participant for play: %w", err)
+		}
 	}
-
-	participants := countDonations(donationsList, participantList, prize.TicketCost)
 
 	playResult := prize.Play(participants, pm.randomizer)
 
@@ -192,6 +181,34 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 	}
 
 	return playResult, nil
+}
+
+func (pm *PrizeManager) prepareParticipants(prize *Prize) ([]PlayParticipant, error) {
+	participantList, err := pm.participantStorage.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("get participant list: %w", err)
+	}
+
+	if len(participantList) == 0 {
+		return nil, ErrNoParticipants
+	}
+
+	ds := pm.prizeStorage.DonationStorage(prize.ID)
+	donationsList, err := ds.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("get donation list: %w", err)
+	}
+
+	if len(donationsList) == 0 {
+		return nil, ErrNoDonations
+	}
+
+	donations := countDonations(donationsList, participantList, prize.TicketCost)
+	if len(donations) == 0 {
+		return nil, ErrNotEnoughDonations
+	}
+
+	return donations, nil
 }
 
 func (p *Prize) Play(participants []PlayParticipant, randomizer Randomizer) *PrizePlayResult {
