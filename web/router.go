@@ -297,13 +297,7 @@ func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
-	svc, err := r.getRaffleService(req)
-	if err != nil {
-		respondErr(w, err)
-		return
-	}
-
-	raffleID, err := extractParam(req, raffleIDParam)
+	svc, err := r.getPrizeService(req)
 	if err != nil {
 		respondErr(w, err)
 		return
@@ -315,7 +309,7 @@ func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := svc.PlayPrize(raffleID, prizeID)
+	res, err := svc.PlayPrize(prizeID)
 	if err != nil {
 		respondErr(w, err)
 		return

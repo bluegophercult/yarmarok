@@ -70,8 +70,6 @@ func TestRaffle(t *testing.T) {
 	raffleID := "raffle_id_1"
 	rafflePath := joinPath(ApiPath, RafflesPath)
 
-	prizeID := "prize_id_1"
-
 	t.Run("create_raffle", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			raffleNew := &service.RaffleRequest{
@@ -320,110 +318,6 @@ func TestRaffle(t *testing.T) {
 		})
 	})
 
-	t.Run("play_prize", func(t *testing.T) {
-		playPath := joinPath(rafflePath, raffleID, PrizesPath, prizeID, PlayPath)
-
-		t.Run("success", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodGet, playPath, nil)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			mockedTime := time.Now().UTC()
-			mockedResponse := &service.PrizePlayResult{
-				Winners: []service.PlayParticipant{
-					{
-						Participant: service.Participant{
-							ID:        "ID1",
-							Name:      "name1",
-							Phone:     "phone1",
-							Note:      "note1",
-							CreatedAt: mockedTime,
-						},
-						TotalDonation:      300,
-						TotalTicketsNumber: 10,
-						Donations: []service.Donation{
-							{
-								ID:            "dID1",
-								ParticipantID: "id1",
-								Amount:        300,
-								CreatedAt:     time.Time{},
-							},
-						},
-					},
-				},
-				PlayParticipants: []service.PlayParticipant{
-					{
-						Participant: service.Participant{
-							ID:        "ID2",
-							Name:      "name2",
-							Phone:     "phone2",
-							Note:      "note2",
-							CreatedAt: mockedTime,
-						},
-						TotalDonation:      200,
-						TotalTicketsNumber: 5,
-						Donations: []service.Donation{
-							{
-								ID:            "dID2",
-								ParticipantID: "ID2",
-								Amount:        200,
-								CreatedAt:     mockedTime,
-							},
-						},
-					},
-					{
-						Participant: service.Participant{
-							ID:        "ID3",
-							Name:      "name3",
-							Phone:     "phone3",
-							Note:      "note3",
-							CreatedAt: mockedTime,
-						},
-						TotalDonation:      100,
-						TotalTicketsNumber: 2,
-						Donations: []service.Donation{
-							{
-								ID:            "dID3",
-								ParticipantID: "ID3",
-								Amount:        100,
-								CreatedAt:     mockedTime,
-							},
-						},
-					},
-				},
-			}
-
-			rsMock.EXPECT().PlayPrize(raffleID, prizeID).Return(mockedResponse, nil)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusOK, writer.Code)
-			require.Equal(t, "application/json", writer.Header().Get("Content-Type"))
-		})
-
-		t.Run("error", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodGet, playPath, nil)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			mockedErr := assert.AnError
-			rsMock.EXPECT().PlayPrize(raffleID, prizeID).Return(nil, mockedErr)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-	})
 }
 
 func TestParticipant(t *testing.T) {
@@ -988,6 +882,119 @@ func TestPrize(t *testing.T) {
 			require.Equal(t, http.StatusInternalServerError, rw.Code)
 		})
 	})
+
+	t.Run("play_prize", func(t *testing.T) {
+		playPath := joinPath(prizePath, prizeID, PlayPath)
+
+		t.Run("success", func(t *testing.T) {
+			req, err := newRequestWithOrigin(http.MethodGet, playPath, nil)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, organizerID)
+			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
+
+			rsMock := mocks.NewMockRaffleService(ctrl)
+			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+			pzMock := mocks.NewMockPrizeService(ctrl)
+			rsMock.EXPECT().PrizeService(raffleID).Return(pzMock)
+
+
+			mockedTime := time.Now().UTC()
+			mockedResponse := &service.PrizePlayResult{
+				Winners: []service.PlayParticipant{
+					{
+						Participant: service.Participant{
+							ID:        "ID1",
+							Name:      "name1",
+							Phone:     "phone1",
+							Note:      "note1",
+							CreatedAt: mockedTime,
+						},
+						TotalDonation:      300,
+						TotalTicketsNumber: 10,
+						Donations: []service.Donation{
+							{
+								ID:            "dID1",
+								ParticipantID: "id1",
+								Amount:        300,
+								CreatedAt:     time.Time{},
+							},
+						},
+					},
+				},
+				PlayParticipants: []service.PlayParticipant{
+					{
+						Participant: service.Participant{
+							ID:        "ID2",
+							Name:      "name2",
+							Phone:     "phone2",
+							Note:      "note2",
+							CreatedAt: mockedTime,
+						},
+						TotalDonation:      200,
+						TotalTicketsNumber: 5,
+						Donations: []service.Donation{
+							{
+								ID:            "dID2",
+								ParticipantID: "ID2",
+								Amount:        200,
+								CreatedAt:     mockedTime,
+							},
+						},
+					},
+					{
+						Participant: service.Participant{
+							ID:        "ID3",
+							Name:      "name3",
+							Phone:     "phone3",
+							Note:      "note3",
+							CreatedAt: mockedTime,
+						},
+						TotalDonation:      100,
+						TotalTicketsNumber: 2,
+						Donations: []service.Donation{
+							{
+								ID:            "dID3",
+								ParticipantID: "ID3",
+								Amount:        100,
+								CreatedAt:     mockedTime,
+							},
+						},
+					},
+				},
+			}
+
+			pzMock.EXPECT().PlayPrize(prizeID).Return(mockedResponse, nil)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusOK, writer.Code)
+			require.Equal(t, "application/json", writer.Header().Get("Content-Type"))
+		})
+
+		t.Run("error", func(t *testing.T) {
+			req, err := newRequestWithOrigin(http.MethodGet, playPath, nil)
+			require.NoError(t, err)
+
+			req.Header.Set(GoogleUserIDHeader, organizerID)
+			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
+
+			rsMock := mocks.NewMockRaffleService(ctrl)
+			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
+
+			pzMock := mocks.NewMockPrizeService(ctrl)
+			rsMock.EXPECT().PrizeService(raffleID).Return(pzMock)
+
+			mockedErr := assert.AnError
+			pzMock.EXPECT().PlayPrize(prizeID).Return(nil, mockedErr)
+
+			writer := httptest.NewRecorder()
+			router.ServeHTTP(writer, req)
+			require.Equal(t, http.StatusInternalServerError, writer.Code)
+		})
+	})
+
 }
 
 func TestRecoverMiddleware(t *testing.T) {
