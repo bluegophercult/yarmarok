@@ -164,17 +164,12 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 		return nil, fmt.Errorf("get prize to play: %w", err)
 	}
 
-	var participants []PlayParticipant
-
-	if prize.PlayResult == nil {
-		participants, err = pm.prepareParticipants(prize)
-		if err != nil {
-			return nil, fmt.Errorf("prepare participant for play: %w", err)
-		}
+	participants, err := pm.prepareParticipants(prize)
+	if err != nil {
+		return nil, fmt.Errorf("prepare participant for play: %w", err)
 	}
 
 	playResult := prize.Play(participants, pm.randomizer)
-
 	err = pm.prizeStorage.Update(prize)
 	if err != nil {
 		return nil, fmt.Errorf("update prize with play results: %w", err)
@@ -184,6 +179,14 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 }
 
 func (pm *PrizeManager) prepareParticipants(prize *Prize) ([]PlayParticipant, error) {
+	if prize.PlayResult != nil {
+		if len(prize.PlayResult.PlayParticipants) == 0 {
+			return nil, ErrNoParticipants
+		}
+
+		return prize.PlayResult.PlayParticipants, nil
+	}
+
 	participantList, err := pm.participantStorage.GetAll()
 	if err != nil {
 		return nil, fmt.Errorf("get participant list: %w", err)

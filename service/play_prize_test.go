@@ -255,85 +255,171 @@ func (s *PlayPrizeSuite) TestPlayPrizeSingleParticipant() {
 	s.Equal(expectedWinner, res.Winners[0])
 }
 
-// func (s *PlayPrizeSuite) TestPlayPrizeAgain() {
-// 	participants := dummyParticipantsList()
-// 	donations := []Donation{
-// 		{ID: "dn1", ParticipantID: "p1", Amount: 100},
-// 		{ID: "dn2", ParticipantID: "p1", Amount: 100},
-// 		{ID: "dn3", ParticipantID: "p2", Amount: 200},
-// 		{ID: "dn4", ParticipantID: "p2", Amount: 200},
-// 		{ID: "dn5", ParticipantID: "p3", Amount: 300},
-// 	}
+func (s *PlayPrizeSuite) TestPlayPrizeAgain() {
+	participants := dummyParticipantsList()
+	donations := []Donation{
+		{ID: "dn1", ParticipantID: "p1", Amount: 100},
+		{ID: "dn2", ParticipantID: "p1", Amount: 100},
+		{ID: "dn3", ParticipantID: "p2", Amount: 200},
+		{ID: "dn4", ParticipantID: "p2", Amount: 200},
+		{ID: "dn5", ParticipantID: "p3", Amount: 300},
+	}
 
-// 	mockedPrize := &Prize{
-// 		ID:         s.prizeID,
-// 		Name:       "Prize 1",
-// 		TicketCost: 10,
-// 		PlayResult: &PrizePlayResult{
-// 			Winners: []PlayParticipant{
-// 				{
-// 					Participant:        participants[0],
-// 					TotalDonation:      200,
-// 					TotalTicketsNumber: 20,
-// 					Donations:          donations[:2],
-// 				},
-// 			},
-// 			PlayParticipants: []PlayParticipant{
-// 				{
-// 					Participant:        participants[1],
-// 					TotalDonation:      400,
-// 					TotalTicketsNumber: 40,
-// 					Donations:          donations[2:4],
-// 				},
-// 				{
-// 					Participant:        participants[2],
-// 					TotalDonation:      300,
-// 					TotalTicketsNumber: 30,
-// 					Donations:          donations[4:],
-// 				},
-// 			},
-// 		},
-// 	}
+	mockedPrize := &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+		PlayResult: &PrizePlayResult{
+			Winners: []PlayParticipant{
+				{
+					Participant:        participants[0],
+					TotalDonation:      200,
+					TotalTicketsNumber: 20,
+					Donations:          donations[:2],
+				},
+			},
+			PlayParticipants: []PlayParticipant{
+				{
+					Participant:        participants[1],
+					TotalDonation:      400,
+					TotalTicketsNumber: 40,
+					Donations:          donations[2:4],
+				},
+				{
+					Participant:        participants[2],
+					TotalDonation:      300,
+					TotalTicketsNumber: 30,
+					Donations:          donations[4:],
+				},
+			},
+		},
+	}
 
-// 	s.storage.EXPECT().Get(s.prizeID).Return(mockedPrize, nil)
+	expectedPrize := &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+		PlayResult: &PrizePlayResult{
+			Winners: []PlayParticipant{
+				{
+					Participant:        participants[0],
+					TotalDonation:      200,
+					TotalTicketsNumber: 20,
+					Donations:          donations[:2],
+				},
+				{
+					Participant:        participants[1],
+					TotalDonation:      400,
+					TotalTicketsNumber: 40,
+					Donations:          donations[2:4],
+				},
+			},
+			PlayParticipants: []PlayParticipant{
+				{
+					Participant:        participants[2],
+					TotalDonation:      300,
+					TotalTicketsNumber: 30,
+					Donations:          donations[4:],
+				},
+			},
+		},
+	}
 
-// 	res, err := s.manager.Play(s.prizeID)
-// 	s.Require().NoError(err)
-// 	s.Require().NotNil(res)
+	s.storage.EXPECT().Get(s.prizeID).Return(mockedPrize, nil)
+	s.storage.EXPECT().Update(expectedPrize).Return(nil)
 
-// 	expected := &Prize{
-// 		ID:         s.prizeID,
-// 		Name:       "Prize 1",
-// 		TicketCost: 10,
-// 		PlayResult: &PrizePlayResult{
-// 			Winners: []PlayParticipant{
-// 				{
-// 					Participant:        participants[0],
-// 					TotalDonation:      200,
-// 					TotalTicketsNumber: 20,
-// 					Donations:          donations[:2],
-// 				},
-// 				{
-// 					Participant:        participants[1],
-// 					TotalDonation:      400,
-// 					TotalTicketsNumber: 40,
-// 					Donations:          donations[2:4],
-// 				},
-// 			},
-// 			PlayParticipants: []PlayParticipant{
-// 				{
-// 					Participant:        participants[2],
-// 					TotalDonation:      300,
-// 					TotalTicketsNumber: 30,
-// 					Donations:          donations[4:],
-// 				},
-// 			},
-// 		},
-// 	}
+	res, err := s.manager.Play(s.prizeID)
+	s.Require().NoError(err)
+	s.Require().NotNil(res)
 
-// 	s.Equal(expected, res)
+	s.Equal(expectedPrize.PlayResult, res)
+}
 
-// }
+func (s *PlayPrizeSuite) TestPlayPrizeAgainNoParticipants() {
+	mockedPrize := &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 10,
+		PlayResult: &PrizePlayResult{
+			Winners: []PlayParticipant{
+				{
+					Participant:        Participant{ID: "p1"},
+					TotalDonation:      200,
+					TotalTicketsNumber: 20,
+					Donations: []Donation{
+						{ID: "dn1", ParticipantID: "p1", Amount: 100},
+						{ID: "dn2", ParticipantID: "p1", Amount: 100},
+					},
+				},
+			},
+			PlayParticipants: []PlayParticipant{},
+		},
+	}
+
+	s.storage.EXPECT().Get(s.prizeID).Return(mockedPrize, nil)
+
+	res, err := s.manager.Play(s.prizeID)
+	s.Require().ErrorIs(err, ErrNoParticipants)
+	s.Require().Nil(res)
+}
+
+func (s *PlayPrizeSuite) TestPlayPrizeAgainNoDonations() {
+	participants := dummyParticipantsList()
+
+	mockedPrize := &Prize{
+		ID:         s.prizeID,
+		Name:       "Prize 1",
+		TicketCost: 1000,
+		PlayResult: &PrizePlayResult{
+			Winners: []PlayParticipant{
+				{
+					Participant:        participants[0],
+					TotalDonation:      200,
+					TotalTicketsNumber: 20,
+					Donations: []Donation{
+						{ID: "dn1", ParticipantID: "p1", Amount: 1000},
+						{ID: "dn2", ParticipantID: "p1", Amount: 1000},
+					},
+				},
+			},
+			PlayParticipants: []PlayParticipant{
+				{
+					Participant:        participants[1],
+					TotalDonation:      400,
+					TotalTicketsNumber: 0,
+					Donations: []Donation{
+						{ID: "dn3", ParticipantID: "p2", Amount: 200},
+						{ID: "dn4", ParticipantID: "p2", Amount: 200},
+					},
+				},
+				{
+					Participant:        participants[2],
+					TotalDonation:      300,
+					TotalTicketsNumber: 0,
+					Donations: []Donation{
+						{ID: "dn5", ParticipantID: "p3", Amount: 300},
+					},
+				},
+			},
+		},
+	}
+
+	s.storage.EXPECT().Get(s.prizeID).Return(mockedPrize, nil)
+
+	s.Panics(func() {
+		// This scenario should simply never happen
+		// because we can't have list of participants with not enough donations.
+		s.manager.Play(s.prizeID)
+	})
+}
+
+func (s *PlayPrizeSuite) TestPlayPrizeAgainErrorGetPrize() {
+	s.storage.EXPECT().Get(s.prizeID).Return(nil, assert.AnError)
+
+	res, err := s.manager.Play(s.prizeID)
+	s.Require().ErrorIs(err, assert.AnError)
+	s.Require().Nil(res)
+}
 
 func (s *PlayPrizeSuite) TestWinnerGeneration() {
 	var r Randomizer = func(i uint) uint {
