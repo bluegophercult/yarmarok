@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"golang.org/x/exp/slices"
 )
 
 var ErrPrizeAlreadyPlayed = fmt.Errorf("prize already played")
@@ -170,51 +172,33 @@ func (pm *PrizeManager) Play(prizeID string) (*PrizePlayResult, error) {
 		return nil, fmt.Errorf("get donation list: %w", err)
 	}
 
-	ticketCost := prize.TicketCost
-	winnerDonationID := pm.randomizer.GenerateWinner(donationsList, ticketCost)
+	participantDonations := countDonations(donationsList, participantList, prize.TicketCost)
 
-	winnerDonation, err := ds.Get(winnerDonationID)
-	if err != nil {
-		return nil, fmt.Errorf("get winner donation: %w", err)
+	winnerDonationID := pm.randomizer.GenerateWinner(participantDonations, prize.TicketCost)
+
+	winnerIndex := slices.IndexFunc(participantDonations, func(p PlayParticipant) bool {
+		return p.Participant.ID == winnerDonationID
+	})
+
+	winner := participantDonations[winnerIndex]
+	participants := append(participantDonations[:winnerIndex], participantDonations[winnerIndex+1:]...)
+
+	prize.PlayResult = &PrizePlayResult{
+		Winners: []PlayParticipant{
+			winner,
+		},
+		PlayParticipants: participants,
 	}
-
-	prizePlayResult := new(PrizePlayResult)
-	for _, participant := range participantList {
-		tempPlayParticipant := PlayParticipant{
-			Participant: participant,
-		}
-
-		// add participant donations
-		totalDonation := 0
-		for _, donation := range donationsList {
-			if participant.ID == donation.ParticipantID {
-				totalDonation += donation.Amount
-				tempPlayParticipant.Donations = append(tempPlayParticipant.Donations, donation)
-			}
-		}
-
-		// calculate total donation and number of tickets
-		tempPlayParticipant.TotalDonation = totalDonation
-		tempPlayParticipant.TotalTicketsNumber = totalDonation / ticketCost
-
-		if participant.ID == winnerDonation.ParticipantID {
-			prizePlayResult.Winners = append(prizePlayResult.Winners, tempPlayParticipant)
-			continue
-		}
-
-		prizePlayResult.PlayParticipants = append(prizePlayResult.PlayParticipants, tempPlayParticipant)
-	}
-
-	prize.PlayResult = prizePlayResult
 
 	err = pm.prizeStorage.Update(prize)
 	if err != nil {
 		return nil, fmt.Errorf("update prize with play results: %w", err)
 	}
 
-	return prizePlayResult, nil
+	return prize.PlayResult, nil
 }
 
+// countDonations counts donations, total amount and totat tickets count for each participant.
 func countDonations(donations []Donation, participants []Participant, ticketCost int) []PlayParticipant {
 	donationsMap := make(map[string][]Donation)
 
@@ -275,23 +259,21 @@ type Randomizer func(uint) uint
 // GenerateWinner returns a winner ID.
 // The winner is selected randomly as the person that made the donation.
 // Function panics if donations list is empty or ticketCost is 0.
-func (r Randomizer) GenerateWinner(donations []Donation, ticketCost int) (id string) {
-	tickets := generateDonationIDsList(donations, ticketCost)
+func (r Randomizer) GenerateWinner(participants []PlayParticipant, ticketCost int) (id string) {
+	tickets := generateParticipantChanceList(participants, ticketCost)
 	winnerTicketIndex := r(uint(len(tickets)))
 	return tickets[winnerTicketIndex]
 }
 
-func generateDonationIDsList(donations []Donation, ticketCost int) []string {
-	donationIDs := make([]string, 0)
-	for _, donation := range donations {
-		// calculate number of tickets in donation
-		numberOfTickets := donation.Amount / ticketCost
-		for i := 0; i < numberOfTickets; i++ {
-			donationIDs = append(donationIDs, donation.ID)
+func generateParticipantChanceList(participants []PlayParticipant, ticketCost int) []string {
+	participantIDs := make([]string, 0)
+	for _, participant := range participants {
+		for i := 0; i < participant.TotalTicketsNumber; i++ {
+			participantIDs = append(participantIDs, participant.Participant.ID)
 		}
 	}
 
-	return donationIDs
+	return participantIDs
 }
 
 // NewSimpleRandomizer creates a new Randomizer

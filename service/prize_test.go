@@ -283,6 +283,9 @@ func (s *PlayPrizeSuite) SetupTest() {
 	}
 
 	s.donationStorage = NewMockDonationStorage(s.ctrl)
+	s.manager.randomizer = func(i uint) uint {
+		return 0
+	}
 
 	s.storage.EXPECT().DonationStorage(s.prizeID).Return(s.donationStorage).AnyTimes()
 }
@@ -305,9 +308,6 @@ func (s *PlayPrizeSuite) TestPlayPrize() {
 	s.participantStorage.EXPECT().GetAll().Return(participants, nil)
 	s.storage.EXPECT().Get(s.prizeID).Return(s.mockedPrize, nil)
 	s.donationStorage.EXPECT().GetAll().Return(donations, nil)
-	// Pay attention, the mock always returns the first donation,
-	// so winner in this test is always the same despite of the input.
-	s.donationStorage.EXPECT().Get(MatcherAnyDonationID(donations...)).Return(&donations[0], nil)
 
 	expectedWinner := PlayParticipant{
 		Participant:        participants[0],
@@ -353,157 +353,73 @@ func (s *PlayPrizeSuite) TestWinnerGeneration() {
 		return 0
 	}
 
-	s.Run("no_donations", func() {
+	s.Run("no_participants", func() {
 		s.Panics(
 			func() {
-				donations := []Donation{}
+				participants := []PlayParticipant{}
 
-				winnerID := r.GenerateWinner(donations, 100)
-				s.Equal("", winnerID)
+				r.GenerateWinner(participants, 100)
 			},
 		)
 	})
 
-	s.Run("zero_ticket_cost", func() {
-		s.Panics(
-			func() {
-				donations := []Donation{
+	s.Run("many_participants", func() {
+		participants := []PlayParticipant{
+			{
+				Participant:        Participant{ID: "p1"},
+				TotalDonation:      200,
+				TotalTicketsNumber: 2,
+				Donations: []Donation{
 					{ID: "dn1", ParticipantID: "p1", Amount: 100},
-				}
-				ticketCost := 0
-
-				r.GenerateWinner(donations, ticketCost)
+					{ID: "dn2", ParticipantID: "p1", Amount: 100},
+				},
 			},
-		)
-	})
-
-	s.Run("many_donations", func() {
-		donations := []Donation{
-			{ID: "dn1", ParticipantID: "p1", Amount: 100},
-			{ID: "dn2", ParticipantID: "p1", Amount: 100},
-			{ID: "dn3", ParticipantID: "p2", Amount: 200},
-			{ID: "dn4", ParticipantID: "p2", Amount: 200},
-			{ID: "dn5", ParticipantID: "p3", Amount: 300},
+			{
+				Participant:        Participant{ID: "p2"},
+				TotalDonation:      400,
+				TotalTicketsNumber: 4,
+				Donations: []Donation{
+					{ID: "dn3", ParticipantID: "p2", Amount: 200},
+					{ID: "dn4", ParticipantID: "p2", Amount: 200},
+				},
+			},
+			{
+				Participant:        Participant{ID: "p3"},
+				TotalDonation:      300,
+				TotalTicketsNumber: 3,
+				Donations: []Donation{
+					{ID: "dn5", ParticipantID: "p3", Amount: 300},
+				},
+			},
 		}
 
 		ticketCost := 100
 
-		winnerID := r.GenerateWinner(donations, ticketCost)
-		s.Equal("dn1", winnerID)
+		winnerID := r.GenerateWinner(participants, ticketCost)
+		s.Equal("p1", winnerID)
 	})
 
-	s.Run("one_donation", func() {
-		donations := []Donation{
-			{ID: "dn1", ParticipantID: "p1", Amount: 100},
-			{ID: "dn2", ParticipantID: "p1", Amount: 100},
-			{ID: "dn3", ParticipantID: "p2", Amount: 200},
-			{ID: "dn4", ParticipantID: "p2", Amount: 200},
-			{ID: "dn5", ParticipantID: "p3", Amount: 300},
+	s.Run("one_participant", func() {
+		participants := []PlayParticipant{
+			{
+				Participant:        Participant{ID: "p2"},
+				TotalDonation:      400,
+				TotalTicketsNumber: 4,
+				Donations: []Donation{
+					{ID: "dn3", ParticipantID: "p2", Amount: 200},
+					{ID: "dn4", ParticipantID: "p2", Amount: 200},
+				},
+			},
 		}
 
 		ticketCost := 100
 
-		winnerID := r.GenerateWinner(donations, ticketCost)
-		s.Equal("dn1", winnerID)
+		winnerID := r.GenerateWinner(participants, ticketCost)
+		s.Equal("p2", winnerID)
 	})
 }
 
-func (s *PlayPrizeSuite) TestGenerateDonationIDsList() {
-	type testCase struct {
-		donations  []Donation
-		ticketCost int
-		expected   []string
-	}
-
-	testCases := map[string]testCase{
-		"no_donations": {
-			donations:  []Donation{},
-			ticketCost: 100,
-			expected:   []string{},
-		},
-		"one_donation": {
-			donations: []Donation{
-				{ID: "dn1", ParticipantID: "p1", Amount: 100},
-			},
-			ticketCost: 100,
-			expected:   []string{"dn1"},
-		},
-		"many_donations": {
-			donations: []Donation{
-				{ID: "dn1", ParticipantID: "p1", Amount: 100},
-				{ID: "dn2", ParticipantID: "p1", Amount: 100},
-				{ID: "dn3", ParticipantID: "p2", Amount: 200},
-				{ID: "dn4", ParticipantID: "p2", Amount: 200},
-				{ID: "dn5", ParticipantID: "p3", Amount: 300},
-			},
-			ticketCost: 100,
-			expected: []string{
-				"dn1",
-				"dn2",
-				"dn3",
-				"dn3",
-				"dn4",
-				"dn4",
-				"dn5",
-				"dn5",
-				"dn5",
-			},
-		},
-		"separately_2_together_3": {
-			donations: []Donation{
-				{ID: "dn1", ParticipantID: "p1", Amount: 155},
-				{ID: "dn1", ParticipantID: "p1", Amount: 155},
-			},
-			ticketCost: 100,
-			expected: []string{
-				"dn1",
-				"dn1",
-			},
-		},
-		"not_enough_money": {
-			donations: []Donation{
-				{ID: "dn1", ParticipantID: "p1", Amount: 50},
-			},
-			ticketCost: 100,
-			expected:   []string{},
-		},
-		"almost_enough_money": {
-			donations: []Donation{
-				{ID: "dn1", ParticipantID: "p1", Amount: 99},
-				{ID: "dn2", ParticipantID: "p1", Amount: 199},
-			},
-			ticketCost: 100,
-			expected: []string{
-				"dn2",
-			},
-		},
-	}
-
-	for name, tc := range testCases {
-		s.Run(name, func() {
-			res := generateDonationIDsList(tc.donations, tc.ticketCost)
-			s.Equal(tc.expected, res)
-		})
-	}
-
-	s.Run("ticket_cost_0", func() {
-		donations := []Donation{
-			{ID: "dn1", ParticipantID: "p1", Amount: 100},
-			{ID: "dn4", ParticipantID: "p2", Amount: 200},
-			{ID: "dn5", ParticipantID: "p3", Amount: 300},
-		}
-
-		ticketCost := 0
-
-		s.Panics(
-			func() {
-				generateDonationIDsList(donations, ticketCost)
-			},
-		)
-	})
-}
-
-func (s *PlayPrizeSuite) TestCalculateParicipants() {
+func (s *PlayPrizeSuite) TestCountDonations() {
 	type testCase struct {
 		donations []Donation
 		expected  []PlayParticipant
