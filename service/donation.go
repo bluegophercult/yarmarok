@@ -49,14 +49,12 @@ var _ DonationService = (*DonationManager)(nil)
 // DonationManager is an implementation of DonationService.
 type DonationManager struct {
 	donationStorage DonationStorage
-	prizeStorage    PrizeStorage
 }
 
 // NewDonationManager creates a new DonationManager.
-func NewDonationManager(ds DonationStorage, ps PrizeStorage) *DonationManager {
+func NewDonationManager(ds DonationStorage) *DonationManager {
 	return &DonationManager{
 		donationStorage: ds,
-		prizeStorage:    ps,
 	}
 }
 

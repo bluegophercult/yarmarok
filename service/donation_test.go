@@ -13,8 +13,8 @@ import (
 func TestDonationManagerCreateDonation(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	storageMock := NewMockDonationStorage(ctrl)
-	prizeStorageMock := NewMockPrizeStorage(ctrl)
-	manager := NewDonationManager(storageMock, prizeStorageMock)
+
+	manager := NewDonationManager(storageMock)
 
 	t.Run("Add donation", func(t *testing.T) {
 		storageMock.EXPECT().Create(gomock.Any()).Return(nil)
@@ -29,7 +29,7 @@ func TestDonationManagerCreateDonation(t *testing.T) {
 
 		storageMock.EXPECT().Create(gomock.Any()).Return(ErrDonationAlreadyExists)
 
-		donationManager := NewDonationManager(storageMock, prizeStorageMock)
+		donationManager := NewDonationManager(storageMock)
 		_, err := donationManager.Create(&DonationRequest{Amount: 777, ParticipantID: stringUUID()})
 		require.ErrorIs(t, err, ErrDonationAlreadyExists)
 	})
@@ -38,8 +38,8 @@ func TestDonationManagerCreateDonation(t *testing.T) {
 func TestDonationManagerEditDonation(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	storageMock := NewMockDonationStorage(ctrl)
-	prizeStorageMock := NewMockPrizeStorage(ctrl)
-	manager := NewDonationManager(storageMock, prizeStorageMock)
+
+	manager := NewDonationManager(storageMock)
 	testID := "donation_test_id"
 
 	t.Run("Edit donation", func(t *testing.T) {
@@ -63,8 +63,7 @@ func TestDonationManagerEditDonation(t *testing.T) {
 func TestDonationManagerListDonations(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	storageMock := NewMockDonationStorage(ctrl)
-	prizeStorageMock := NewMockPrizeStorage(ctrl)
-	manager := NewDonationManager(storageMock, prizeStorageMock)
+	manager := NewDonationManager(storageMock)
 
 	t.Run("Success", func(t *testing.T) {
 		date := time.Now()
@@ -91,8 +90,7 @@ func TestDonationManagerListDonations(t *testing.T) {
 func TestDonationManagerGetDonations(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	storageMock := NewMockDonationStorage(ctrl)
-	prizeStorageMock := NewMockPrizeStorage(ctrl)
-	manager := NewDonationManager(storageMock, prizeStorageMock)
+	manager := NewDonationManager(storageMock)
 
 	t.Run("Success", func(t *testing.T) {
 		donation := &Donation{ID: "1", ParticipantID: "1", Amount: 10, CreatedAt: time.Now()}
@@ -116,8 +114,7 @@ func TestDonationManagerGetDonations(t *testing.T) {
 func TestDonationManagerDeleteDonation(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	storageMock := NewMockDonationStorage(ctrl)
-	prizeStorageMock := NewMockPrizeStorage(ctrl)
-	manager := NewDonationManager(storageMock, prizeStorageMock)
+	manager := NewDonationManager(storageMock)
 
 	t.Run("Success", func(t *testing.T) {
 		id := "donation_id"

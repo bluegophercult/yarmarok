@@ -288,8 +288,7 @@ func (pm *PrizeManager) DonationService(prizeID string) (DonationService, error)
 	}
 
 	donationStorage := pm.prizeStorage.DonationStorage(prize.ID)
-
-	donationService := NewDonationManager(donationStorage, pm.prizeStorage)
+	donationService := NewDonationManager(donationStorage)
 
 	if prize.PlayResult != nil {
 		return &ReadonlyDonationService{
