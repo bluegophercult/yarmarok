@@ -8,10 +8,13 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var ErrPrizeAlreadyPlayed = fmt.Errorf("prize already played")
-var ErrNoParticipants = fmt.Errorf("no participants")
-var ErrNoDonations = fmt.Errorf("no donations")
-var ErrNotEnoughDonations = fmt.Errorf("not enough donations")
+var (
+	ErrPrizeAlreadyPlayed       = fmt.Errorf("prize already played")
+	ErrNoParticipants           = fmt.Errorf("no participants")
+	ErrNoDonations              = fmt.Errorf("no donations")
+	ErrNotEnoughDonations       = fmt.Errorf("not enough donations")
+	ErrEditPlayedPrizeDonations = fmt.Errorf("can't edit played prize donations")
+)
 
 // Prize represents a prize of the application.
 type Prize struct {
@@ -56,7 +59,7 @@ type PrizeService interface {
 	Edit(id string, p *PrizeRequest) error
 	Delete(id string) error
 	List() ([]Prize, error)
-	DonationService(id string) DonationService
+	DonationService(id string) (DonationService, error)
 	Play(prizeID string) (*PrizePlayResult, error)
 }
 
@@ -278,8 +281,50 @@ func countTotalDonation(donations []Donation) int {
 }
 
 // DonationService returns a DonationService for a prize.
-func (pm *PrizeManager) DonationService(prizeID string) DonationService {
-	return NewDonationManager(pm.prizeStorage.DonationStorage(prizeID), pm.prizeStorage)
+func (pm *PrizeManager) DonationService(prizeID string) (DonationService, error) {
+	prize, err := pm.prizeStorage.Get(prizeID)
+	if err != nil {
+		return nil, fmt.Errorf("get prize: %w", err)
+	}
+
+	donationStorage := pm.prizeStorage.DonationStorage(prize.ID)
+
+	donationService := NewDonationManager(donationStorage, pm.prizeStorage)
+
+	if prize.PlayResult != nil {
+		return &ReadonlyDonationService{
+			DonationService: donationService,
+		}, nil
+	}
+
+	return donationService, nil
+}
+
+// ReadonlyDonationService is a DonationService that
+// disallows editing donations for played prizes.
+type ReadonlyDonationService struct {
+	DonationService
+}
+
+func NewReadonlyDonationService(ds DonationService) *ReadonlyDonationService {
+	return &ReadonlyDonationService{
+		DonationService: ds,
+	}
+}
+
+// Create is a stub that returns an error.
+func (r *ReadonlyDonationService) Create(*DonationRequest) (string, error) {
+	return "", ErrEditPlayedPrizeDonations
+}
+
+// Edit is a stub that returns an error.
+func (r *ReadonlyDonationService) Edit(string, *DonationRequest) error {
+	return ErrEditPlayedPrizeDonations
+}
+
+// Delete is a stub that returns an error.
+func (r *ReadonlyDonationService) Delete(string) error {
+	return ErrEditPlayedPrizeDonations
 }
 
 func toPrize(p *PrizeRequest) *Prize {

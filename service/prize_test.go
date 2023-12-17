@@ -257,6 +257,114 @@ func (s *PrizeSuite) TestListPrize() {
 	})
 }
 
+func (s *PrizeSuite) TestDontaionService() {
+	mockedPrize := dummyPrize()
+
+	s.storage.EXPECT().Get(mockedPrize.ID).Return(mockedPrize, nil)
+	donationsStorageMock := NewMockDonationStorage(s.ctrl)
+	s.storage.EXPECT().DonationStorage(mockedPrize.ID).Return(donationsStorageMock)
+
+	mockedDonation := &DonationRequest{
+		ParticipantID: "participant_id_1",
+		Amount:        200,
+	}
+
+	expectedDonation := &Donation{
+		ID:            s.mockUUID,
+		ParticipantID: mockedDonation.ParticipantID,
+		Amount:        mockedDonation.Amount,
+		CreatedAt:     s.mockTime,
+	}
+
+	donationsStorageMock.EXPECT().Create(expectedDonation).Return(nil)
+
+	ds, err := s.manager.DonationService(mockedPrize.ID)
+	s.NoError(err)
+	s.NotNil(ds)
+
+	resID, err := ds.Create(mockedDonation)
+	s.NoError(err)
+	s.Equal(expectedDonation.ID, resID)
+}
+
+func (s *PrizeSuite) TestDonationServiceReadonly() {
+	mockedPrize := dummyPrize()
+	mockedPrize.PlayResult = dummyPlayResult()
+
+	s.storage.EXPECT().Get(mockedPrize.ID).Return(mockedPrize, nil)
+	donationsStorageMock := NewMockDonationStorage(s.ctrl)
+	s.storage.EXPECT().DonationStorage(mockedPrize.ID).Return(donationsStorageMock)
+
+	ds, err := s.manager.DonationService(mockedPrize.ID)
+	s.NoError(err)
+	s.NotNil(ds)
+
+	s.Run("get", func() {
+		existingDonation := &Donation{
+			ID:            s.mockUUID,
+			ParticipantID: "participant_id_1",
+			Amount:        200,
+			CreatedAt:     s.mockTime,
+		}
+
+		donationsStorageMock.EXPECT().Get(existingDonation.ID).Return(existingDonation, nil)
+
+		response, err := ds.Get(existingDonation.ID)
+		s.NoError(err)
+		s.Equal(existingDonation, response)
+	})
+
+	s.Run("list", func() {
+		donations := []Donation{
+			{
+				ID:            s.mockUUID,
+				ParticipantID: "participant_id_1",
+				Amount:        200,
+				CreatedAt:     s.mockTime,
+			},
+			{
+				ID:            s.mockUUID,
+				ParticipantID: "participant_id_2",
+				Amount:        200,
+				CreatedAt:     s.mockTime,
+			},
+		}
+
+		donationsStorageMock.EXPECT().GetAll().Return(donations, nil)
+
+		res, err := ds.List()
+		s.NoError(err)
+		s.Equal(donations, res)
+	})
+
+	s.Run("create", func() {
+		mockedDonation := &DonationRequest{
+			ParticipantID: "participant_id_1",
+			Amount:        200,
+		}
+
+		response, err := ds.Create(mockedDonation)
+		s.ErrorIs(err, ErrEditPlayedPrizeDonations)
+		s.Empty(response)
+	})
+
+	s.Run("edit", func() {
+		mockedDonation := &DonationRequest{
+			ParticipantID: "participant_id_1",
+			Amount:        200,
+		}
+
+		err := ds.Edit(s.mockUUID, mockedDonation)
+		s.ErrorIs(err, ErrEditPlayedPrizeDonations)
+	})
+
+	s.Run("delete", func() {
+		err := ds.Delete(s.mockUUID)
+		s.ErrorIs(err, ErrEditPlayedPrizeDonations)
+	})
+
+}
+
 func dummyPrizeRequest() *PrizeRequest {
 	return &PrizeRequest{
 		Name:        "prize_name_1",
