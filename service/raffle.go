@@ -9,6 +9,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrAllWinnersFound = errors.New("all winners already found")
+)
+
 // stringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
 var stringUUID = func() string {
@@ -172,7 +176,10 @@ func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
 
 // PrizeService is a service for prizes.
 func (rm *RaffleManager) PrizeService(id string) PrizeService {
-	return NewPrizeManager(rm.raffleStorage.PrizeStorage(id))
+	return NewPrizeManager(
+		rm.raffleStorage.PrizeStorage(id),
+		rm.raffleStorage.ParticipantStorage(id),
+	)
 }
 
 // RaffleRequest is a request for initializing a raffle.

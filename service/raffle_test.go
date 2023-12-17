@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
 type RaffleSuite struct {
@@ -200,7 +200,7 @@ func (s *RaffleSuite) TestExportRaffle() {
 	s.storage.EXPECT().Get(s.mockUUID).Return(raffle, nil)
 
 	psMock := NewMockParticipantStorage(s.ctrl)
-	s.storage.EXPECT().ParticipantStorage(s.mockUUID).Return(psMock)
+	s.storage.EXPECT().ParticipantStorage(s.mockUUID).Return(psMock).Times(2)
 	psMock.EXPECT().GetAll().Return(prts, nil)
 
 	pzMock := NewMockPrizeStorage(s.ctrl)

@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/testcontainers/testcontainers-go v0.22.0
 	github.com/xuri/excelize/v2 v2.7.1
+	go.uber.org/mock v0.3.0
 	google.golang.org/grpc v1.57.0
 )
 
