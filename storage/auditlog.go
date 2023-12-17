@@ -6,12 +6,12 @@ import (
 	"github.com/kaznasho/yarmarok/auditlog"
 )
 
-// FirestoreDonationStorage is a storage for donation based on Firestore.
+// FirestoreAuditLogStorage is a storage for audit logs based on Firestore.
 type FirestoreAuditLogStorage struct {
 	*StorageBase[auditlog.AuditLogRecord]
 }
 
-// NewFirestoreDonationStorage creates a new FirestoreDonationStorage.
+// NewFirestoreAuditLogStorage creates a new FirestoreAuditLogStorage.
 func NewFirestoreAuditLogStorage(
 	client *firestore.CollectionRef,
 ) *FirestoreAuditLogStorage {

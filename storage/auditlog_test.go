@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+
+
 func TestAuditLogStorage(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
 
@@ -42,7 +44,7 @@ func TestAuditLogStorage(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("List", func(t *testing.T) {
+	t.Run("list", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			records, err := storage.GetAll()
 			require.NoError(t, err)
