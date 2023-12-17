@@ -68,11 +68,12 @@ func (mr *MockPrizeServiceMockRecorder) Delete(arg0 any) *gomock.Call {
 }
 
 // DonationService mocks base method.
-func (m *MockPrizeService) DonationService(arg0 string) service.DonationService {
+func (m *MockPrizeService) DonationService(arg0 string) (service.DonationService, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DonationService", arg0)
 	ret0, _ := ret[0].(service.DonationService)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // DonationService indicates an expected call of DonationService.
