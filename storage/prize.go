@@ -8,7 +8,6 @@ import (
 
 // FirestorePrizeStorage is a storage for prizes based on Firestore.
 type FirestorePrizeStorage struct {
-	raffleID string
 	*StorageBase[service.Prize]
 }
 

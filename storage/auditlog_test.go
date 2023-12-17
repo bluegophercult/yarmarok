@@ -11,8 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-
 func TestAuditLogStorage(t *testing.T) {
 	testinfra.SkipIfNotIntegrationRun(t)
 
@@ -55,3 +53,5 @@ func TestAuditLogStorage(t *testing.T) {
 	})
 
 }
+
+var _ auditlog.AuditLogStorage = &FirestoreAuditLogStorage{}

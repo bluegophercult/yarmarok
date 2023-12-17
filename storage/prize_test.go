@@ -82,3 +82,5 @@ func TestPrizeStorage(t *testing.T) {
 		})
 	})
 }
+
+var _ service.PrizeStorage = &FirestorePrizeStorage{}
