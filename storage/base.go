@@ -7,14 +7,29 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/kaznasho/yarmarok/auditlog"
 	"github.com/kaznasho/yarmarok/service"
 
 	"cloud.google.com/go/firestore"
 )
 
+const (
+	organizerCollection   = "organizers"
+	raffleCollection      = "raffles"
+	participantCollection = "participants"
+	prizeCollection       = "prizes"
+	donationCollection    = "donations"
+	auditLogCollection    = "auditlogs"
+)
+
 // Storable is a type parameter constraint for all storable items.
 type Storable interface {
-	service.Raffle | service.Prize | service.Participant | service.Organizer | service.Donation
+	service.Raffle |
+		service.Prize |
+		service.Participant |
+		service.Organizer |
+		service.Donation |
+		auditlog.AuditLogRecord
 }
 
 // IDExtractor is a typed function that extracts an ID from the item it serves.
