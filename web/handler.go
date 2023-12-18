@@ -33,18 +33,18 @@ func NewCreateHandler[I any](router *Router, fn Create[I]) CreateHandler[I] {
 // Handle handles a create request.
 func (h CreateHandler[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
-	if err := decodeBody(req.Body, &in); err != nil {
-		respondErr(rw, err)
+	if err := h.decodeBody(req.Body, &in); err != nil {
+		h.respondErr(rw, err)
 		return
 	}
 
 	id, err := h.Create(in)
 	if err != nil {
-		respondErr(rw, err)
+		h.respondErr(rw, err)
 		return
 	}
 
-	respond(rw, CreateResponse{id})
+	h.respond(rw, CreateResponse{id})
 }
 
 // CreateResponse represents the response structure containing an item ID.
@@ -73,11 +73,11 @@ func (h GetHandler[O]) Handle(rw http.ResponseWriter, req *http.Request) {
 
 	out, err := h.Get(id)
 	if err != nil {
-		respondErr(rw, err)
+		h.respondErr(rw, err)
 		return
 	}
 
-	respond(rw, out)
+	h.respond(rw, out)
 }
 
 // EditHandler is a wrapper around a service method
@@ -98,14 +98,14 @@ func NewEditHandler[I any](router *Router, fn Edit[I]) EditHandler[I] {
 // Handle handles an edit request.
 func (h EditHandler[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
-	if err := decodeBody(req.Body, &in); err != nil {
-		respondErr(rw, err)
+	if err := h.decodeBody(req.Body, &in); err != nil {
+		h.respondErr(rw, err)
 		return
 	}
 
 	id := path.Base(req.URL.String())
 	if err := h.Edit(id, in); err != nil {
-		respondErr(rw, err)
+		h.respondErr(rw, err)
 		return
 	}
 }
@@ -130,7 +130,7 @@ func (h DeleteHandler) Handle(rw http.ResponseWriter, req *http.Request) {
 	id := path.Base(req.URL.String())
 
 	if err := h.Delete(id); err != nil {
-		respondErr(rw, err)
+		h.respondErr(rw, err)
 	}
 }
 
@@ -153,11 +153,11 @@ func NewListHandler[O any](router *Router, fn List[O]) ListHandler[O] {
 func (h ListHandler[O]) Handle(rw http.ResponseWriter, _ *http.Request) {
 	out, err := h.List()
 	if err != nil {
-		respondErr(rw, err)
+		h.respondErr(rw, err)
 		return
 	}
 
-	respond(rw, ListResponse[O]{out})
+	h.respond(rw, ListResponse[O]{out})
 }
 
 // ListResponse represents a generic response containing an array of items.

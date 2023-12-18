@@ -23,14 +23,14 @@ func (r *Router) organizerMiddleware(next http.Handler) http.Handler {
 		organizerID, err := extractOrganizerID(req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			r.logger.WithError(err).Error("failed to extract organizer id")
+			r.logger.WithError(err).Warn("failed to extract organizer id")
 			return
 		}
 
 		err = r.organizerService.CreateOrganizerIfNotExists(organizerID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			r.logger.WithError(err).Error("failed to init organizer")
+			r.logger.WithError(err).Warn("failed to init organizer")
 			return
 		}
 

@@ -142,7 +142,7 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -162,7 +162,7 @@ func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
 func (r *Router) deleteRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -172,7 +172,7 @@ func (r *Router) deleteRaffle(w http.ResponseWriter, req *http.Request) {
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -182,19 +182,19 @@ func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	id, err := extractParam(req, raffleIDParam)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	res, err := svc.Export(id)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -202,15 +202,14 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename="+res.FileName)
 
 	if _, err := w.Write(res.Content); err != nil {
-		respondErr(w, err)
-		r.logger.WithError(err).Error("writing xlsx")
+		r.respondErr(w, err)
 	}
 }
 
 func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -220,7 +219,7 @@ func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -230,7 +229,7 @@ func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
 func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -240,7 +239,7 @@ func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -250,7 +249,7 @@ func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -260,7 +259,7 @@ func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
 func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -270,7 +269,7 @@ func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
 func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -280,7 +279,7 @@ func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
 func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -290,7 +289,7 @@ func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
 func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -300,40 +299,40 @@ func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	prizeID, err := extractParam(req, prizeIDParam)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	res, err := svc.Play(prizeID)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	b, err := json.Marshal(res)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 
 	if _, err := w.Write(b); err != nil {
-		respondErr(w, err)
-		r.logger.WithError(err).Error("writing prize winner list")
+		r.respondErr(w, err)
+		r.logger.WithError(err).Warn("writing prize winner list")
 	}
 }
 
 func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -343,7 +342,7 @@ func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
 func (r *Router) getDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -353,7 +352,7 @@ func (r *Router) getDonation(w http.ResponseWriter, req *http.Request) {
 func (r *Router) listDonations(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -363,7 +362,7 @@ func (r *Router) listDonations(w http.ResponseWriter, req *http.Request) {
 func (r *Router) editDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -373,13 +372,9 @@ func (r *Router) editDonation(w http.ResponseWriter, req *http.Request) {
 func (r *Router) deleteDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	NewDeleteHandler(r, svc.Delete).Handle(w, req)
-}
-
-type donationApi struct {
-	*Router
 }
