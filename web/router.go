@@ -139,57 +139,6 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 	return router, nil
 }
 
-func newCreate[I any](router *Router, fn Create[I]) Create[I] {
-	return func(i I) (string, error) {
-		id, err := fn(i)
-		if err != nil {
-			router.logger.WithError(err).Error("Failed to create")
-		}
-
-		return id, err
-	}
-}
-func newGet[O any](router *Router, fn Get[O]) Get[O] {
-	return func(id string) (O, error) {
-		response, err := fn(id)
-		if err != nil {
-			router.logger.WithError(err).Error("Failed to get")
-		}
-
-		return response, err
-	}
-}
-func newEdit[I any](router *Router, fn Edit[I]) Edit[I] {
-	return func(id string, i I) error {
-		err := fn(id, i)
-		if err != nil {
-			router.logger.WithError(err).Error("Failed to edit")
-		}
-
-		return err
-	}
-}
-func newDelete(router *Router, fn Delete) Delete {
-	return func(id string) error {
-		err := fn(id)
-		if err != nil {
-			router.logger.WithError(err).Error("Failed to delete")
-		}
-
-		return err
-	}
-}
-func newList[O any](router *Router, fn List[O]) List[O] {
-	return func() ([]O, error) {
-		response, err := fn()
-		if err != nil {
-			router.logger.WithError(err).Error("Failed to list")
-		}
-
-		return response, err
-	}
-}
-
 func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
@@ -197,7 +146,7 @@ func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newCreate(r, svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
@@ -207,7 +156,7 @@ func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newEdit(r, svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deleteRaffle(w http.ResponseWriter, req *http.Request) {
@@ -217,7 +166,7 @@ func (r *Router) deleteRaffle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newDelete(r, svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
@@ -227,7 +176,7 @@ func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newList(r, svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
@@ -265,7 +214,7 @@ func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newCreate(r, svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
@@ -275,7 +224,7 @@ func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newEdit(r, svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
@@ -285,7 +234,7 @@ func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newDelete(r, svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
@@ -295,7 +244,7 @@ func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newList(r, svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
@@ -305,7 +254,7 @@ func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newCreate(r, svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
@@ -315,7 +264,7 @@ func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newGet(r, svc.Get).Handle(w, req)
+	NewGetHandler(r, svc.Get).Handle(w, req)
 }
 
 func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
@@ -325,7 +274,7 @@ func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newEdit(r, svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
@@ -335,7 +284,7 @@ func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newDelete(r, svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
@@ -345,7 +294,7 @@ func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newList(r, svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
@@ -388,7 +337,7 @@ func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newCreate(r, svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) getDonation(w http.ResponseWriter, req *http.Request) {
@@ -398,7 +347,7 @@ func (r *Router) getDonation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newGet(r, svc.Get).Handle(w, req)
+	NewGetHandler(r, svc.Get).Handle(w, req)
 }
 
 func (r *Router) listDonations(w http.ResponseWriter, req *http.Request) {
@@ -408,7 +357,7 @@ func (r *Router) listDonations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newList(r, svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) editDonation(w http.ResponseWriter, req *http.Request) {
@@ -418,7 +367,7 @@ func (r *Router) editDonation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newEdit(r, svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deleteDonation(w http.ResponseWriter, req *http.Request) {
@@ -428,7 +377,7 @@ func (r *Router) deleteDonation(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newDelete(r, svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 type donationApi struct {

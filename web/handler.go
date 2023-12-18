@@ -15,24 +15,30 @@ type (
 	List[O any]   func() ([]O, error)
 )
 
-// CreateResponse represents the response structure containing an item ID.
-type CreateResponse struct {
-	ID string `json:"id"`
+// CreateHandler is a wrapper around a service method
+// that creates a new object.
+type CreateHandler[I any] struct {
+	Create[I]
+	*Router
 }
 
-// ListResponse represents a generic response containing an array of items.
-type ListResponse[O any] struct {
-	Items []O `json:"items"`
+// NewCreateHandler creates a new CreateHandler.
+func NewCreateHandler[I any](router *Router, fn Create[I]) CreateHandler[I] {
+	return CreateHandler[I]{
+		Create: fn,
+		Router: router,
+	}
 }
 
-func (m Create[I]) Handle(rw http.ResponseWriter, req *http.Request) {
+// Handle handles a create request.
+func (h CreateHandler[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
 	if err := decodeBody(req.Body, &in); err != nil {
 		respondErr(rw, err)
 		return
 	}
 
-	id, err := m(in)
+	id, err := h.Create(in)
 	if err != nil {
 		respondErr(rw, err)
 		return
@@ -41,10 +47,31 @@ func (m Create[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	respond(rw, CreateResponse{id})
 }
 
-func (m Get[_]) Handle(rw http.ResponseWriter, req *http.Request) {
+// CreateResponse represents the response structure containing an item ID.
+type CreateResponse struct {
+	ID string `json:"id"`
+}
+
+// GetHandler is a wrapper around a service method
+// that returns an object by ID.
+type GetHandler[O any] struct {
+	Get[O]
+	*Router
+}
+
+// NewGetHandler creates a new GetHandler.
+func NewGetHandler[O any](router *Router, fn Get[O]) GetHandler[O] {
+	return GetHandler[O]{
+		Get:    fn,
+		Router: router,
+	}
+}
+
+// Handle handles a get request.
+func (h GetHandler[O]) Handle(rw http.ResponseWriter, req *http.Request) {
 	id := path.Base(req.URL.String())
 
-	out, err := m(id)
+	out, err := h.Get(id)
 	if err != nil {
 		respondErr(rw, err)
 		return
@@ -53,8 +80,23 @@ func (m Get[_]) Handle(rw http.ResponseWriter, req *http.Request) {
 	respond(rw, out)
 }
 
-// Handle handles the HTTP request for the Edit operation.
-func (m Edit[I]) Handle(rw http.ResponseWriter, req *http.Request) {
+// EditHandler is a wrapper around a service method
+// that updates an object.
+type EditHandler[I any] struct {
+	Edit[I]
+	*Router
+}
+
+// NewEditHandler creates a new EditHandler.
+func NewEditHandler[I any](router *Router, fn Edit[I]) EditHandler[I] {
+	return EditHandler[I]{
+		Edit:   fn,
+		Router: router,
+	}
+}
+
+// Handle handles an edit request.
+func (h EditHandler[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	var in I
 	if err := decodeBody(req.Body, &in); err != nil {
 		respondErr(rw, err)
@@ -62,28 +104,63 @@ func (m Edit[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	id := path.Base(req.URL.String())
-	if err := m(id, in); err != nil {
+	if err := h.Edit(id, in); err != nil {
 		respondErr(rw, err)
 		return
 	}
 }
 
-// Handle handles the HTTP request for the Delete operation.
-func (m Delete) Handle(rw http.ResponseWriter, req *http.Request) {
+// DeleteHandler is a wrapper around a service method
+// that deletes an object by ID.
+type DeleteHandler struct {
+	Delete
+	*Router
+}
+
+// NewDeleteHandler creates a new DeleteHandler.
+func NewDeleteHandler(router *Router, fn Delete) DeleteHandler {
+	return DeleteHandler{
+		Delete: fn,
+		Router: router,
+	}
+}
+
+// Handle handles a delete request.
+func (h DeleteHandler) Handle(rw http.ResponseWriter, req *http.Request) {
 	id := path.Base(req.URL.String())
 
-	if err := m(id); err != nil {
+	if err := h.Delete(id); err != nil {
 		respondErr(rw, err)
 	}
 }
 
-// Handle handles the HTTP request for the List operation.
-func (m List[O]) Handle(rw http.ResponseWriter, _ *http.Request) {
-	out, err := m()
+// ListHandler is a wrapper around a service method
+// that returns a all objects of kind.
+type ListHandler[O any] struct {
+	List[O]
+	*Router
+}
+
+// NewListHandler creates a new ListHandler.
+func NewListHandler[O any](router *Router, fn List[O]) ListHandler[O] {
+	return ListHandler[O]{
+		List:   fn,
+		Router: router,
+	}
+}
+
+// Handle handles a list request.
+func (h ListHandler[O]) Handle(rw http.ResponseWriter, _ *http.Request) {
+	out, err := h.List()
 	if err != nil {
 		respondErr(rw, err)
 		return
 	}
 
 	respond(rw, ListResponse[O]{out})
+}
+
+// ListResponse represents a generic response containing an array of items.
+type ListResponse[O any] struct {
+	Items []O `json:"items"`
 }
