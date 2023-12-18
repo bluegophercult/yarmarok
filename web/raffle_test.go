@@ -28,6 +28,10 @@ func (s *RaffleSuite) SetupTest() {
 	s.organizerService = mocks.NewMockOrganizerService(ctrl)
 	s.raffleService = mocks.NewMockRaffleService(ctrl)
 	s.organizerID = "organizer_id_1"
+
+	s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil).AnyTimes()
+	s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService).AnyTimes()
+
 	var err error
 	s.router, err = NewRouter(s.organizerService, logger.NewLogger(logger.LevelDebug))
 	s.Require().NoError(err)
@@ -51,10 +55,6 @@ func (s *RaffleSuite) TestCreate() {
 		req, err := newRequestJSON(http.MethodPost, rafflePath, s.organizerID, raffleNew)
 		s.Require().NoError(err)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		s.raffleService.EXPECT().Create(raffleNew).Return(raffleID, nil)
 
 		writer := httptest.NewRecorder()
@@ -72,10 +72,6 @@ func (s *RaffleSuite) TestCreate() {
 		req, err := newRequestJSON(http.MethodPost, rafflePath, s.organizerID, raffleNew)
 		s.Require().NoError(err)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		mockedErr := assert.AnError
 		s.raffleService.EXPECT().Create(raffleNew).Return("", mockedErr)
 
@@ -88,10 +84,6 @@ func (s *RaffleSuite) TestCreate() {
 		req, err := newRequestWithOrigin(http.MethodPost, rafflePath, bytes.NewBuffer([]byte{}))
 		s.Require().NoError(err)
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
 
 		writer := httptest.NewRecorder()
 		s.router.ServeHTTP(writer, req)
@@ -112,10 +104,6 @@ func (s *RaffleSuite) TestEdit() {
 		req, err := newRequestJSON(http.MethodPut, rafflePath, s.organizerID, raffleUpd)
 		s.Require().NoError(err)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		s.raffleService.EXPECT().Edit(raffleID, raffleUpd).Return(nil)
 
 		writer := httptest.NewRecorder()
@@ -132,10 +120,6 @@ func (s *RaffleSuite) TestEdit() {
 		req, err := newRequestJSON(http.MethodPut, rafflePath, s.organizerID, upd)
 		s.Require().NoError(err)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		mockedErr := assert.AnError
 		s.raffleService.EXPECT().Edit(raffleID, upd).Return(mockedErr)
 
@@ -149,10 +133,6 @@ func (s *RaffleSuite) TestEdit() {
 		s.Require().NoError(err)
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
 
 		writer := httptest.NewRecorder()
 		s.router.ServeHTTP(writer, req)
@@ -170,10 +150,6 @@ func (s *RaffleSuite) TestDelete() {
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		s.raffleService.EXPECT().Delete(raffleID).Return(nil)
 
 		writer := httptest.NewRecorder()
@@ -186,10 +162,6 @@ func (s *RaffleSuite) TestDelete() {
 		s.Require().NoError(err)
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
 
 		mockedErr := assert.AnError
 		s.raffleService.EXPECT().Delete(raffleID).Return(mockedErr)
@@ -231,10 +203,6 @@ func (s *RaffleSuite) TestList() {
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		s.raffleService.EXPECT().List().Return(raffles, nil)
 
 		writer := httptest.NewRecorder()
@@ -248,10 +216,6 @@ func (s *RaffleSuite) TestList() {
 		s.Require().NoError(err)
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
 
 		mockedErr := assert.AnError
 		s.raffleService.EXPECT().List().Return(nil, mockedErr)
@@ -272,10 +236,6 @@ func (s *RaffleSuite) TestDownloadXLSX() {
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
 
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
-
 		s.raffleService.EXPECT().Export(raffleID).Return(
 			&service.RaffleExportResult{
 				FileName: "raffle.xlsx",
@@ -293,10 +253,6 @@ func (s *RaffleSuite) TestDownloadXLSX() {
 		s.Require().NoError(err)
 
 		req.Header.Set(GoogleUserIDHeader, s.organizerID)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().CreateOrganizerIfNotExists(s.organizerID).Return(nil)
-
-		s.organizerService.(*mocks.MockOrganizerService).EXPECT().RaffleService(s.organizerID).Return(s.raffleService)
 
 		mockedErr := assert.AnError
 		s.raffleService.EXPECT().Export(raffleID).Return(nil, mockedErr)
