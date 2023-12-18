@@ -2,7 +2,8 @@ package web
 
 import (
 	"net/http"
-	"path"
+
+	"github.com/go-chi/chi"
 )
 
 // CRUD functions accept I/O parameters,
@@ -69,7 +70,7 @@ func NewGetHandler[O any](router *Router, fn Get[O]) GetHandler[O] {
 
 // Handle handles a get request.
 func (h GetHandler[O]) Handle(rw http.ResponseWriter, req *http.Request) {
-	id := path.Base(req.URL.String())
+	id := lastURLParam(req)
 
 	out, err := h.Get(id)
 	if err != nil {
@@ -78,6 +79,27 @@ func (h GetHandler[O]) Handle(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	h.respond(rw, out)
+}
+
+func lastURLParam(r *http.Request) string {
+	ctx := chi.RouteContext(r.Context())
+	if ctx == nil {
+		return ""
+	}
+
+	params := []string{}
+
+	for _, p := range ctx.URLParams.Values {
+		if p != "" {
+			params = append(params, p)
+		}
+	}
+
+	if len(params) == 0 {
+		return ""
+	}
+
+	return params[len(params)-1]
 }
 
 // EditHandler is a wrapper around a service method
@@ -103,7 +125,7 @@ func (h EditHandler[I]) Handle(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id := path.Base(req.URL.String())
+	id := lastURLParam(req)
 	if err := h.Edit(id, in); err != nil {
 		h.respondErr(rw, err)
 		return
@@ -127,7 +149,7 @@ func NewDeleteHandler(router *Router, fn Delete) DeleteHandler {
 
 // Handle handles a delete request.
 func (h DeleteHandler) Handle(rw http.ResponseWriter, req *http.Request) {
-	id := path.Base(req.URL.String())
+	id := lastURLParam(req)
 
 	if err := h.Delete(id); err != nil {
 		h.respondErr(rw, err)

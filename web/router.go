@@ -1,7 +1,6 @@
 package web
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -303,30 +302,7 @@ func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	prizeID, err := extractParam(req, prizeIDParam)
-	if err != nil {
-		r.respondErr(w, err)
-		return
-	}
-
-	res, err := svc.Play(prizeID)
-	if err != nil {
-		r.respondErr(w, err)
-		return
-	}
-
-	b, err := json.Marshal(res)
-	if err != nil {
-		r.respondErr(w, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	if _, err := w.Write(b); err != nil {
-		r.respondErr(w, err)
-		r.logger.WithError(err).Warn("writing prize winner list")
-	}
+	NewGetHandler(r, svc.Play).Handle(w, req)
 }
 
 func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
