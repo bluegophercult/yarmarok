@@ -57,269 +57,6 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func TestRaffle(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	osMock := mocks.NewMockOrganizerService(ctrl)
-	organizerID := "organizer_id_1"
-
-	router, err := NewRouter(osMock, logger.NewLogger(logger.LevelDebug))
-	require.NoError(t, err)
-	require.NotNil(t, router)
-
-	raffleID := "raffle_id_1"
-	rafflePath := joinPath(ApiPath, RafflesPath)
-
-	t.Run("create_raffle", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			raffleNew := &service.RaffleRequest{
-				Name: "raffle_1",
-				Note: "note_1",
-			}
-
-			encoded, err := json.Marshal(raffleNew)
-			require.NoError(t, err)
-
-			body := bytes.NewReader(encoded)
-
-			req, err := newRequestWithOrigin(http.MethodPost, rafflePath, body)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			rsMock.EXPECT().Create(raffleNew).Return(raffleID, nil)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusOK, writer.Code)
-			assertJSONResponse(t, CreateResponse{raffleID}, writer.Body)
-		})
-
-		t.Run("error", func(t *testing.T) {
-			raffleNew := &service.RaffleRequest{
-				Name: "raffle_1",
-				Note: "note_1",
-			}
-
-			encoded, err := json.Marshal(raffleNew)
-			require.NoError(t, err)
-
-			body := bytes.NewReader(encoded)
-
-			req, err := newRequestWithOrigin(http.MethodPost, rafflePath, body)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			mockedErr := assert.AnError
-			rsMock.EXPECT().Create(raffleNew).Return("", mockedErr)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-
-		t.Run("empty_body", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodPost, rafflePath, bytes.NewBuffer([]byte{}))
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-	})
-
-	t.Run("edit_raffle", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			raffleUpd := &service.RaffleRequest{
-				Name: "raffle_1",
-				Note: "note_1",
-			}
-
-			encoded, err := json.Marshal(raffleUpd)
-			require.NoError(t, err)
-
-			body := bytes.NewReader(encoded)
-
-			req, err := newRequestWithOrigin(http.MethodPut, joinPath(rafflePath, raffleID), body)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			rsMock.EXPECT().Edit(raffleID, raffleUpd).Return(nil)
-
-			rw := httptest.NewRecorder()
-			router.ServeHTTP(rw, req)
-			require.Equal(t, http.StatusOK, rw.Code)
-		})
-
-		t.Run("error", func(t *testing.T) {
-			upd := &service.RaffleRequest{
-				Name: "raffle_1",
-				Note: "note_1",
-			}
-
-			encoded, err := json.Marshal(upd)
-			require.NoError(t, err)
-
-			body := bytes.NewReader(encoded)
-
-			req, err := newRequestWithOrigin(http.MethodPut, joinPath(rafflePath, raffleID), body)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			rsMock.EXPECT().Edit(raffleID, upd).Return(errors.New("test error"))
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-
-		t.Run("empty_body", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodPut, joinPath(rafflePath, raffleID), emptyBody())
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-	})
-
-	t.Run("list_raffles", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			dummyTime := time.Now().UTC()
-			raffles := []service.Raffle{
-				{
-					ID:        "raffle_id_1",
-					Name:      "raffle_1",
-					Note:      "note_1",
-					CreatedAt: dummyTime,
-				},
-				{
-					ID:        "raffle_id_2",
-					Name:      "raffle_2",
-					Note:      "note_2",
-					CreatedAt: dummyTime,
-				},
-				{
-					ID:        "raffle_id_3",
-					Name:      "raffle_3",
-					Note:      "note_3",
-					CreatedAt: dummyTime,
-				},
-			}
-
-			req, err := newRequestWithOrigin(http.MethodGet, rafflePath, emptyBody())
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			rsMock.EXPECT().List().Return(raffles, nil)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusOK, writer.Code)
-			assertJSONResponse(t, ListResponse[service.Raffle]{raffles}, writer.Body)
-		})
-
-		t.Run("error", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodGet, rafflePath, emptyBody())
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			mockedErr := assert.AnError
-			rsMock.EXPECT().List().Return(nil, mockedErr)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-	})
-
-	t.Run("download_xlsx", func(t *testing.T) {
-		downloadPath := joinPath(rafflePath, raffleID, "/download-xlsx")
-
-		t.Run("success", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodGet, downloadPath, nil)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			rsMock.EXPECT().Export(raffleID).Return(
-				&service.RaffleExportResult{
-					FileName: "raffle.xlsx",
-					Content:  []byte("content")}, nil)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusOK, writer.Code)
-			require.Equal(t, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", writer.Header().Get("Content-Type"))
-			require.Equal(t, "attachment; filename=raffle.xlsx", writer.Header().Get("Content-Disposition"))
-		})
-
-		t.Run("error", func(t *testing.T) {
-			req, err := newRequestWithOrigin(http.MethodGet, downloadPath, nil)
-			require.NoError(t, err)
-
-			req.Header.Set(GoogleUserIDHeader, organizerID)
-			osMock.EXPECT().CreateOrganizerIfNotExists(organizerID).Return(nil)
-
-			rsMock := mocks.NewMockRaffleService(ctrl)
-			osMock.EXPECT().RaffleService(organizerID).Return(rsMock)
-
-			mockedErr := assert.AnError
-			rsMock.EXPECT().Export(raffleID).Return(nil, mockedErr)
-
-			writer := httptest.NewRecorder()
-			router.ServeHTTP(writer, req)
-			require.Equal(t, http.StatusInternalServerError, writer.Code)
-		})
-	})
-
-}
-
 func TestParticipant(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
@@ -1259,6 +996,23 @@ func assertJSONResponse(t *testing.T, expected interface{}, body io.Reader) {
 
 	assert.JSONEq(t, string(expectedJSON), string(actualJSON))
 
+}
+
+func newRequestJSON(method, url, organizerID string, raffleNew any) (*http.Request, error) {
+	encoded, err := json.Marshal(raffleNew)
+	if err != nil {
+		return nil, err
+	}
+
+	body := bytes.NewReader(encoded)
+
+	req, err := newRequestWithOrigin(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set(GoogleUserIDHeader, organizerID)
+	return req, nil
 }
 
 func newRequestWithOrigin(method, url string, body io.Reader) (*http.Request, error) {
