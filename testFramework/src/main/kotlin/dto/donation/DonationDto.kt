@@ -1,6 +1,6 @@
 package dto.donation
 
-data class Donation(
+data class DonationDto(
     val id: String,
     val prizeId: String,
     val participantId: String,

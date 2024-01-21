@@ -1,6 +1,6 @@
 package dto.raffle
 
-data class RaffleExportResult(
+data class RaffleExportResultDto(
     val fileName: String,
     val content: ByteArray
 ) {
@@ -8,7 +8,7 @@ data class RaffleExportResult(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as RaffleExportResult
+        other as RaffleExportResultDto
 
         if (fileName != other.fileName) return false
         if (!content.contentEquals(other.content)) return false

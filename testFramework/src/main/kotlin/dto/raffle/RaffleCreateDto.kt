@@ -1,6 +1,6 @@
 package dto.raffle
 
-data class RaffleCreate(
+data class RaffleCreateDto(
     val name: String,
     val note: String
 )

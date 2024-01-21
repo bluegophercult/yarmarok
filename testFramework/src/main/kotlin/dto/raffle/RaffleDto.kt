@@ -1,9 +1,9 @@
-package dto.participant
+package dto.raffle
 
-data class Participant(
+data class RaffleDto(
     val id: String,
+    val organizerId: String,
     val name: String,
-    val phone: String,
     val note: String,
     val createdAt: String
 )

@@ -2,27 +2,27 @@ package api.controller
 
 import api.BaseApi
 import dto.ResponseId
-import dto.participant.ParticipantCreate
-import dto.participant.Participant
+import dto.participant.ParticipantCreateDto
+import dto.participant.ParticipantDto
 import org.springframework.http.HttpStatus
 
 object ParticipantController : AbstractController(requestSpecification = BaseApi.requestSpecification) {
-    fun addParticipant(raffleId: String, participantCreate: ParticipantCreate): ResponseId {
+    fun addParticipant(raffleId: String, participantCreate: ParticipantCreateDto): ResponseId {
         return post("/api/raffles/$raffleId/participants", participantCreate)
             .then()
             .statusCode(HttpStatus.OK.value())
             .extract().body().`as`(ResponseId::class.java)
     }
 
-    fun getParticipant(raffleId: String): List<Participant> {
+    fun getParticipant(raffleId: String): List<ParticipantDto> {
         return get("/api/raffles/$raffleId/participants")
             .then()
             .statusCode(HttpStatus.OK.value())
             .extract().body()
-            .jsonPath().getList("items", Participant::class.java)
+            .jsonPath().getList("items", ParticipantDto::class.java)
     }
 
-    fun updateParticipant(raffleId: String, participantId: String, participant: ParticipantCreate) {
+    fun updateParticipant(raffleId: String, participantId: String, participant: ParticipantCreateDto) {
         put("/api/raffles/$raffleId/participants/$participantId", participant)
             .then()
             .statusCode(HttpStatus.OK.value())

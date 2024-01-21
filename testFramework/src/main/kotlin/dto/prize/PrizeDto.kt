@@ -1,6 +1,6 @@
 package dto.prize
 
-data class Prize (
+data class PrizeDto (
     val id: String,
     val name: String,
     val ticketCost: Int,

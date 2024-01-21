@@ -2,28 +2,28 @@ package api.controller
 
 import api.BaseApi
 import dto.ResponseId
-import dto.raffle.RaffleCreate
-import dto.raffle.RaffleExportResult
-import dto.raffle.Raffle
+import dto.raffle.RaffleCreateDto
+import dto.raffle.RaffleExportResultDto
+import dto.raffle.RaffleDto
 import org.springframework.http.HttpStatus
 
 object RaffleController : AbstractController(requestSpecification = BaseApi.requestSpecification) {
-    fun getRaffles(): List<Raffle> {
+    fun getRaffles(): List<RaffleDto> {
         return get("/api/raffles")
             .then()
             .statusCode(HttpStatus.OK.value())
             .extract().body()
-            .jsonPath().getList("items", Raffle::class.java)
+            .jsonPath().getList("items", RaffleDto::class.java)
     }
 
-    fun createRaffle(entity: RaffleCreate): ResponseId {
+    fun createRaffle(entity: RaffleCreateDto): ResponseId {
         return post("/api/raffles", entity)
             .then()
             .statusCode(HttpStatus.OK.value())
             .extract().body().`as`(ResponseId::class.java)
     }
 
-    fun updateRaffle(raffleId: String, entity: RaffleCreate) {
+    fun updateRaffle(raffleId: String, entity: RaffleCreateDto) {
         put("/api/raffles/$raffleId", entity)
             .then()
             .statusCode(HttpStatus.OK.value())
@@ -35,10 +35,10 @@ object RaffleController : AbstractController(requestSpecification = BaseApi.requ
             .statusCode(HttpStatus.OK.value())
     }
 
-    fun downloadRaffles(raffleId: String): RaffleExportResult {
+    fun downloadRaffles(raffleId: String): RaffleExportResultDto {
         return get("/api/raffles/$raffleId/download-xlsx")
             .then()
             .statusCode(HttpStatus.OK.value())
-            .extract().body().`as`(RaffleExportResult::class.java)
+            .extract().body().`as`(RaffleExportResultDto::class.java)
     }
 }
