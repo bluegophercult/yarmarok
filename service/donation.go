@@ -28,10 +28,8 @@ type DonationStorage interface {
 // Donation represents a donation of the application.
 type Donation struct {
 	ID            string    `json:"id"`
-	PrizeID       string    `json:"prizeId"`
 	ParticipantID string    `json:"participantId"`
 	Amount        int       `json:"amount"`
-	TicketsNumber int       `json:"ticketsNumber"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
 
@@ -51,14 +49,12 @@ var _ DonationService = (*DonationManager)(nil)
 // DonationManager is an implementation of DonationService.
 type DonationManager struct {
 	donationStorage DonationStorage
-	prizeStorage    PrizeStorage
 }
 
 // NewDonationManager creates a new DonationManager.
-func NewDonationManager(ds DonationStorage, ps PrizeStorage) *DonationManager {
+func NewDonationManager(ds DonationStorage) *DonationManager {
 	return &DonationManager{
 		donationStorage: ds,
-		prizeStorage:    ps,
 	}
 }
 

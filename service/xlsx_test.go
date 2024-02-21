@@ -20,8 +20,6 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 
 	type notAStruct int
 
-	type customString string
-
 	var tests = map[string]struct {
 		collections []interface{}
 		sheetIdx    int
@@ -37,7 +35,36 @@ func TestExcelManagerWriteXLSX(t *testing.T) {
 		"slice of structs": {
 			collections: []interface{}{
 				&Raffle{"raffle_id", "organizer_id", "Raffle", "Wow wow wow", time.Now()},
-				Prize{"prize_id", "Super prize", 42, "cat in the bag", time.Now()},
+				Prize{
+					ID:          "prize_id",
+					Name:        "Super prize",
+					TicketCost:  42,
+					Description: "cat in the bag",
+					CreatedAt:   time.Now(),
+					PlayResult: &PrizePlayResult{
+						Winners: []PlayParticipant{
+							{
+								Participant: Participant{
+									ID:        "participant_id_1",
+									Name:      "Bob George",
+									Phone:     "323421341",
+									Note:      "nope",
+									CreatedAt: time.Now(),
+								},
+								TotalDonation:      100,
+								TotalTicketsNumber: 10,
+								Donations: []Donation{
+									{
+										ID:            "donation_id_1",
+										ParticipantID: "participant_id_1",
+										Amount:        100,
+										CreatedAt:     time.Now(),
+									},
+								},
+							},
+						},
+					},
+				},
 				[]Participant{
 					{"participant_id_1", "Bob George", "323421341", "nope", time.Now()},
 					{"participant_id_2", "Mr Kitty", "123455", "mew mew", time.Now()},

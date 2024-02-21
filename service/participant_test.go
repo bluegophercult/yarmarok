@@ -3,77 +3,191 @@ package service
 import (
 	"errors"
 	"testing"
+	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
 )
 
-func TestParticipant(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	psMock := NewMockParticipantStorage(ctrl)
-	pm := NewParticipantManager(psMock)
+type ParticipantSuite struct {
+	suite.Suite
 
-	id := "participant_id"
-	p := &ParticipantRequest{
-		Name:  "John Doe",
-		Phone: "1234567890",
-		Note:  "Test participant",
+	ctrl     *gomock.Controller
+	storage  *MockParticipantStorage
+	manager  *ParticipantManager
+	mockUUID string
+	mockTime time.Time
+}
+
+func TestParticipant(t *testing.T) {
+	suite.Run(t, &ParticipantSuite{})
+}
+
+func (s *ParticipantSuite) SetupTest() {
+	s.mockUUID = "participant_id"
+	s.mockTime = time.Now().UTC()
+	setTimeNowMock(s.mockTime)
+	setUUIDMock(s.mockUUID)
+
+	s.ctrl = gomock.NewController(s.T())
+	s.storage = NewMockParticipantStorage(s.ctrl)
+	s.manager = NewParticipantManager(s.storage)
+}
+
+func (s *ParticipantSuite) TestCreateParticipant() {
+	participantRequest := dummyParticipantRequest()
+
+	mockedParticipant := &Participant{
+		ID:        s.mockUUID,
+		Name:      participantRequest.Name,
+		Phone:     participantRequest.Phone,
+		Note:      participantRequest.Note,
+		CreatedAt: s.mockTime,
 	}
 
-	t.Run("add", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			psMock.EXPECT().Create(gomock.Any()).Return(nil)
-			_, err := pm.Create(p)
-			require.NoError(t, err)
-		})
+	s.storage.EXPECT().Create(mockedParticipant).Return(nil)
 
-		t.Run("already_exists", func(t *testing.T) {
-			psMock.EXPECT().Create(gomock.Any()).Return(ErrAlreadyExists)
-			_, err := pm.Create(p)
-			require.ErrorIs(t, err, ErrAlreadyExists)
-		})
+	resID, err := s.manager.Create(participantRequest)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), mockedParticipant.ID, resID)
+
+	s.Run("error", func() {
+		s.storage.EXPECT().Create(mockedParticipant).Return(errors.New("test error"))
+
+		_, err := s.manager.Create(participantRequest)
+		require.Error(s.T(), err)
 	})
 
-	t.Run("edit", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			psMock.EXPECT().Get(gomock.Any()).Return(&Participant{}, nil)
-			psMock.EXPECT().Update(gomock.Any()).Return(nil)
-			err := pm.Edit(id, p)
-			require.NoError(t, err)
-		})
+	s.Run("invalid name", func() {
+		participantRequest := dummyParticipantRequest()
+		participantRequest.Name = "a"
 
-		t.Run("not_found", func(t *testing.T) {
-			psMock.EXPECT().Get(gomock.Any()).Return(nil, ErrNotFound)
-			err := pm.Edit(id, p)
-			require.ErrorIs(t, err, ErrNotFound)
-		})
+		_, err := s.manager.Create(participantRequest)
+		require.Error(s.T(), err)
 	})
 
-	t.Run("delete", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			psMock.EXPECT().Delete(gomock.Any()).Return(nil)
-			err := pm.Delete(id)
-			require.NoError(t, err)
-		})
+	s.Run("invalid phone", func() {
+		participantRequest := dummyParticipantRequest()
+		participantRequest.Phone = "123"
 
-		t.Run("not_found", func(t *testing.T) {
-			psMock.EXPECT().Delete(gomock.Any()).Return(ErrNotFound)
-			err := pm.Delete(id)
-			require.ErrorIs(t, err, ErrNotFound)
-		})
+		_, err := s.manager.Create(participantRequest)
+		require.Error(s.T(), err)
 	})
 
-	t.Run("list", func(t *testing.T) {
-		t.Run("success", func(t *testing.T) {
-			psMock.EXPECT().GetAll().Return([]Participant{}, nil)
-			_, err := pm.List()
-			require.NoError(t, err)
-		})
+	s.Run("invalid note", func() {
+		participantRequest := dummyParticipantRequest()
+		participantRequest.Note = "///"
 
-		t.Run("error", func(t *testing.T) {
-			psMock.EXPECT().GetAll().Return(nil, errors.New("test error"))
-			_, err := pm.List()
-			require.Error(t, err)
-		})
+		_, err := s.manager.Create(participantRequest)
+		require.Error(s.T(), err)
 	})
+}
+
+func (s *ParticipantSuite) TestEditParticipant() {
+	participantRequest := dummyParticipantRequest()
+	participant := &Participant{
+		ID:        s.mockUUID,
+		Name:      participantRequest.Name,
+		Phone:     participantRequest.Phone,
+		Note:      participantRequest.Note,
+		CreatedAt: s.mockTime,
+	}
+
+	s.storage.EXPECT().Get(participant.ID).Return(participant, nil)
+	s.storage.EXPECT().Update(participant).Return(nil)
+
+	err := s.manager.Edit(participant.ID, participantRequest)
+	require.NoError(s.T(), err)
+
+	s.Run("error", func() {
+		s.storage.EXPECT().Get(participant.ID).Return(nil, errors.New("test error"))
+
+		err := s.manager.Edit(participant.ID, participantRequest)
+		require.Error(s.T(), err)
+	})
+
+	s.Run("error_in_update", func() {
+		s.storage.EXPECT().Get(participant.ID).Return(participant, nil)
+		s.storage.EXPECT().Update(participant).Return(errors.New("test error"))
+
+		err := s.manager.Edit(participant.ID, participantRequest)
+		require.Error(s.T(), err)
+	})
+
+	s.Run("invalid name", func() {
+		participantRequest := dummyParticipantRequest()
+		participantRequest.Name = "a"
+
+		err := s.manager.Edit(participant.ID, participantRequest)
+		require.Error(s.T(), err)
+	})
+
+	s.Run("invalid phone", func() {
+		participantRequest := dummyParticipantRequest()
+		participantRequest.Phone = "123"
+
+		err := s.manager.Edit(participant.ID, participantRequest)
+		require.Error(s.T(), err)
+	})
+
+	s.Run("invalid note", func() {
+		participantRequest := dummyParticipantRequest()
+		participantRequest.Note = "///"
+
+		err := s.manager.Edit(participant.ID, participantRequest)
+		require.Error(s.T(), err)
+	})
+}
+
+func (s *ParticipantSuite) TestDeleteParticipant() {
+	participant := dummyParticipant()
+
+	s.storage.EXPECT().Delete(participant.ID).Return(nil)
+
+	err := s.manager.Delete(participant.ID)
+	require.NoError(s.T(), err)
+
+	s.Run("error", func() {
+		s.storage.EXPECT().Delete(participant.ID).Return(errors.New("test error"))
+
+		err := s.manager.Delete(participant.ID)
+		require.Error(s.T(), err)
+	})
+}
+
+func (s *ParticipantSuite) TestListParticipant() {
+	participant := dummyParticipant()
+	participants := []Participant{*participant}
+
+	s.storage.EXPECT().GetAll().Return(participants, nil)
+
+	res, err := s.manager.List()
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), participants, res)
+
+	s.Run("error", func() {
+		s.storage.EXPECT().GetAll().Return(nil, errors.New("test error"))
+
+		_, err := s.manager.List()
+		require.Error(s.T(), err)
+	})
+}
+
+func dummyParticipantRequest() *ParticipantRequest {
+	return &ParticipantRequest{
+		Name:  "John Doe",
+		Phone: "+380123456789",
+		Note:  "Test participant",
+	}
+}
+
+func dummyParticipant() *Participant {
+	return &Participant{
+		ID:        stringUUID(),
+		Name:      "John Doe",
+		Phone:     "+380123456789",
+		Note:      "Test participant",
+		CreatedAt: timeNow(),
+	}
 }

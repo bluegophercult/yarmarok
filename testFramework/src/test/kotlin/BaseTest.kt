@@ -1,44 +1,47 @@
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import utils.Utils
 import java.io.File
-import org.assertj.core.api.Assertions.assertThat
 
 
 abstract class BaseTest {
-    // TODO try to rewrite killing process and uncomment code
-//    companion object {
-//        private lateinit var connection: Process
-//
-//        @JvmStatic
-//        @BeforeAll
-//        fun init() {
-//            connection = ProcessBuilder(
-//                "go",
-//                "test",
-//                "-tags",
-//                "local",
-//                "-timeout",
-//                "0",
-//                "-count=1",
-//                "-v",
-//                "./testinfra/local/run_test.go"
-//            )
-//                .directory(File("./../"))
-//                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-//                .redirectError(ProcessBuilder.Redirect.INHERIT)
-//                .start()
-//            Thread.sleep(15_000)
-//
-//        }
-//
-//        @JvmStatic
-//        @AfterAll
-//        fun after() {
-//            assertThat(utils.Utils.isPortInUse(8080)).isTrue()
-//            assertThat(utils.Utils.isPortInUse(8081)).isTrue()
-//            connection.destroy()
-//            Thread.sleep(5_000)
-//
-//        }
-//    }
+    companion object {
+        private lateinit var connection: Process
+
+        @JvmStatic
+        @BeforeAll
+        fun init() {
+            val pb = ProcessBuilder(
+                "go",
+                "run",
+                "-tags",
+                "local",
+                "./testinfra/local/run.go"
+            ).directory(File("./../"))
+            pb.inheritIO()
+
+            connection = pb.start()
+
+            Thread.sleep(8_000)
+            assertThat(Utils.isPortInUse(8081)).isTrue()
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun after() {
+            println("Stopping main: ${connection.pid()}")
+
+            connection.children().forEach {
+                println("Stopping child: ${it.pid()}")
+                if (it.isAlive) {
+                    it.destroy()
+                }
+            }
+
+            connection.destroy()
+            connection.waitFor()
+            println("Stopped ${connection.exitValue()}")
+        }
+    }
 }

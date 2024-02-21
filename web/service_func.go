@@ -58,7 +58,7 @@ func (r *Router) getDonationService(req *http.Request) (service.DonationService,
 		return nil, errors.Join(ErrMissingID, err)
 	}
 
-	return prizeService.DonationService(prizeID), nil
+	return prizeService.DonationService(prizeID)
 }
 
 func extractOrganizerID(r *http.Request) (id string, err error) {

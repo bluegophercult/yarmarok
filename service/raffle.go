@@ -2,10 +2,15 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrAllWinnersFound = errors.New("all winners already found")
 )
 
 // stringUUID is a plumbing function for generating UUIDs.
@@ -69,16 +74,20 @@ func NewRaffleManager(rs RaffleStorage) *RaffleManager {
 }
 
 // Create initializes a raffle.
-func (rm *RaffleManager) Create(raf *RaffleRequest) (string, error) {
+func (rm *RaffleManager) Create(request *RaffleRequest) (string, error) {
+	if err := request.Validate(); err != nil {
+		return "", errors.Join(err, ErrInvalidRequest)
+	}
+
 	raffle := Raffle{
 		ID:        stringUUID(),
-		Name:      raf.Name,
-		Note:      raf.Note,
+		Name:      request.Name,
+		Note:      request.Note,
 		CreatedAt: timeNow(),
 	}
 
 	if err := rm.raffleStorage.Create(&raffle); err != nil {
-		return "", err
+		return "", fmt.Errorf("create raffle: %w", err)
 	}
 
 	return raffle.ID, nil
@@ -91,6 +100,10 @@ func (rm *RaffleManager) Get(id string) (*Raffle, error) {
 
 // Edit edits a raffle.
 func (rm *RaffleManager) Edit(id string, r *RaffleRequest) error {
+	if err := r.Validate(); err != nil {
+		return errors.Join(err, ErrInvalidRequest)
+	}
+
 	raffle, err := rm.Get(id)
 	if err != nil {
 		return fmt.Errorf("get raffle: %w", err)
@@ -163,13 +176,20 @@ func (rm *RaffleManager) ParticipantService(id string) ParticipantService {
 
 // PrizeService is a service for prizes.
 func (rm *RaffleManager) PrizeService(id string) PrizeService {
-	return NewPrizeManager(rm.raffleStorage.PrizeStorage(id))
+	return NewPrizeManager(
+		rm.raffleStorage.PrizeStorage(id),
+		rm.raffleStorage.ParticipantStorage(id),
+	)
 }
 
 // RaffleRequest is a request for initializing a raffle.
 type RaffleRequest struct {
-	Name string `json:"name"`
-	Note string `json:"note"`
+	Name string `json:"name" validate:"required,min=3,max=50,charsValidation"`
+	Note string `json:"note" validate:"lte=1000,charsValidation"`
+}
+
+func (r *RaffleRequest) Validate() error {
+	return defaultValidator().Struct(r)
 }
 
 // RaffleExportResult is a response for exporting a raffle sub-collections.

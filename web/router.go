@@ -17,6 +17,7 @@ const (
 	ParticipantsPath = "/participants"
 	PrizesPath       = "/prizes"
 	DonationsPath    = "/donations"
+	PlayPath         = "/play"
 )
 
 const (
@@ -110,6 +111,11 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 						r.Put("/", router.editPrize)
 						r.Delete("/", router.deletePrize)
 
+						// "/api/raffles/{raffle_id}/prizes/{prize_id}/play"
+						r.Route(PlayPath, func(r chi.Router) {
+							r.Get("/", router.playPrize)
+						})
+
 						// "/api/raffles/{raffle_id}/prizes/{prize_id}/donations"
 						r.Route(DonationsPath, func(r chi.Router) {
 							r.Post("/", router.createDonation)
@@ -135,59 +141,59 @@ func NewRouter(os service.OrganizerService, log *logger.Logger) (*Router, error)
 func (r *Router) createRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newCreate(svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) editRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newEdit(svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deleteRaffle(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newDelete(svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listRaffles(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newList(svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getRaffleService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	id, err := extractParam(req, raffleIDParam)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
 	res, err := svc.Export(id)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
@@ -195,147 +201,156 @@ func (r *Router) downloadRaffleXLSX(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename="+res.FileName)
 
 	if _, err := w.Write(res.Content); err != nil {
-		respondErr(w, err)
-		r.logger.WithError(err).Error("writing xlsx")
+		r.respondErr(w, err)
 	}
 }
 
 func (r *Router) createParticipant(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newCreate(svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) editParticipant(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newEdit(svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deleteParticipant(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newDelete(svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listParticipants(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getParticipantService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newList(svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) createPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newCreate(svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) getPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newGet(svc.Get).Handle(w, req)
+	NewGetHandler(r, svc.Get).Handle(w, req)
 }
 
 func (r *Router) editPrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newEdit(svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deletePrize(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newDelete(svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }
 
 func (r *Router) listPrizes(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getPrizeService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newList(svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
+}
+
+func (r *Router) playPrize(w http.ResponseWriter, req *http.Request) {
+	svc, err := r.getPrizeService(req)
+	if err != nil {
+		r.respondErr(w, err)
+		return
+	}
+
+	NewGetHandler(r, svc.Play).Handle(w, req)
 }
 
 func (r *Router) createDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newCreate(svc.Create).Handle(w, req)
+	NewCreateHandler(r, svc.Create).Handle(w, req)
 }
 
 func (r *Router) getDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newGet(svc.Get).Handle(w, req)
+	NewGetHandler(r, svc.Get).Handle(w, req)
 }
 
 func (r *Router) listDonations(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newList(svc.List).Handle(w, req)
+	NewListHandler(r, svc.List).Handle(w, req)
 }
 
 func (r *Router) editDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newEdit(svc.Edit).Handle(w, req)
+	NewEditHandler(r, svc.Edit).Handle(w, req)
 }
 
 func (r *Router) deleteDonation(w http.ResponseWriter, req *http.Request) {
 	svc, err := r.getDonationService(req)
 	if err != nil {
-		respondErr(w, err)
+		r.respondErr(w, err)
 		return
 	}
 
-	newDelete(svc.Delete).Handle(w, req)
+	NewDeleteHandler(r, svc.Delete).Handle(w, req)
 }

@@ -110,7 +110,6 @@ erDiagram
 
     Donation {
         string ID
-        string PrizeID
         string ContributorID
         int Amount
         time CreatedAt
@@ -130,7 +129,7 @@ erDiagram
 - [Go](https://golang.org/doc/install)
 - [Task](https://taskfile.dev/#/installation)
 - [Docker](https://docs.docker.com/get-docker/)
-- [Mockgen](https://github.com/golang/mock#installation)
+- [Mockgen](https://github.com/uber-go/mock)
 
 Quick installation of go Task:
 
