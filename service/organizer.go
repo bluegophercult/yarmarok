@@ -20,7 +20,7 @@ type Organizer struct {
 
 // OrganizerStorage is a storage for organizers.
 //
-//go:generate mockgen -destination=mock_organizer_storage_test.go -package=service github.com/kaznasho/yarmarok/service OrganizerStorage
+//go:generate mockgen -destination=mock_organizer_storage_test.go -package=service  github.com/bluegophercult/yarmarok/service OrganizerStorage
 type OrganizerStorage interface {
 	Create(*Organizer) error
 	Exists(id string) (bool, error)
