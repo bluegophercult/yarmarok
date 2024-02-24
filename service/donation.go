@@ -16,7 +16,7 @@ type DonationService interface {
 
 // DonationStorage is a storage for donations.
 //
-//go:generate mockgen -destination=mock_donation_storage_test.go -package=service github.com/kaznasho/yarmarok/service DonationStorage
+//go:generate mockgen -destination=mock_donation_storage_test.go -package=service  github.com/bluegophercult/yarmarok/service DonationStorage
 type DonationStorage interface {
 	Create(*Donation) error
 	Get(id string) (*Donation, error)

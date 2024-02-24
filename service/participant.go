@@ -35,7 +35,7 @@ type ParticipantService interface {
 
 // ParticipantStorage is a storage for participants.
 //
-//go:generate mockgen -destination=mock_participant_storage_test.go -package=service github.com/kaznasho/yarmarok/service ParticipantStorage
+//go:generate mockgen -destination=mock_participant_storage_test.go -package=service  github.com/bluegophercult/yarmarok/service ParticipantStorage
 type ParticipantStorage interface {
 	Create(*Participant) error
 	Get(id string) (*Participant, error)

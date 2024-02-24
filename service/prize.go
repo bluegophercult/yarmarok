@@ -65,7 +65,7 @@ type PrizeService interface {
 
 // PrizeStorage is a storage for prizes.
 
-//go:generate mockgen -destination=mock_prize_storage_test.go -package=service github.com/kaznasho/yarmarok/service PrizeStorage
+//go:generate mockgen -destination=mock_prize_storage_test.go -package=service  github.com/bluegophercult/yarmarok/service PrizeStorage
 type PrizeStorage interface {
 	Create(*Prize) error
 	Get(id string) (*Prize, error)

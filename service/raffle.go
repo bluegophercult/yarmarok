@@ -48,7 +48,7 @@ type RaffleService interface {
 
 // RaffleStorage is a storage for raffles.
 //
-//go:generate mockgen -destination=mock_raffle_storage_test.go -package=service github.com/kaznasho/yarmarok/service RaffleStorage
+//go:generate mockgen -destination=mock_raffle_storage_test.go -package=service  github.com/bluegophercult/yarmarok/service RaffleStorage
 type RaffleStorage interface {
 	Create(*Raffle) error
 	Get(id string) (*Raffle, error)
