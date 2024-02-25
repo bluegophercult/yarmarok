@@ -1,5 +1,7 @@
 <template>
-    <TheButton @click="openModal" :disabled="!selectedRaffle || !selectedPrize || participants.length === 0" full-width>
+    <TheButton @click="openModal"
+               :disabled="!selectedRaffle || !selectedPrize || selectedPrize.playResult != null || participants.length === 0"
+               full-width>
         Додати внесок
     </TheButton>
 

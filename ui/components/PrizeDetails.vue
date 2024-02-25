@@ -24,20 +24,18 @@
                 </div>
             </div>
             <div>
-                <div v-if="selectedPrize.playResults != null" class="mb-2">
-                    <span class="mr-2">Переможці:</span>
-                    <span v-for="(result, resultIdx) in selectedPrize.playResults" :key="resultIdx">
-                        <span v-for="(winner, winnerIdx) in result.winners" :key="winnerIdx"
-                              @click="openParticipantView(winner.participant)"
-                              class="rounded-md bg-gray-100 px-1 shadow ring-1 ring-gray-600 ring-opacity-5 mr-2 cursor-pointer">
+                <div v-if="selectedPrize.playResult != null" class="mb-2">
+                    <span class="mr-2">Переможець:</span>
+                    <span v-for="(winner, winnerIdx) in selectedPrize.playResult.winners" :key="winnerIdx"
+                          @click="openParticipantView(winner.participant)"
+                          class="rounded-md bg-gray-100 px-1 shadow ring-1 ring-gray-600 ring-opacity-5 mr-2 cursor-pointer">
                             {{ winner.participant.name }}
                         </span>
-                        <span v-if="selectedPrize.playResults!.length - 1 != resultIdx" class="mr-1">| </span>
-                    </span>
                 </div>
 
-                <TheButton class="mb-1" :click="playPrize" :disabled="donations.length == 0">
-                    {{ selectedPrize.playResults != null ? "Розіграти знову" : "Розіграти приз" }}
+                <TheButton class="mb-1" :click="playPrize"
+                           :disabled="donations.length == 0 || selectedPrize.playResult != null && selectedPrize.playResult.winners.length >= uniqueDonations">
+                    {{ selectedPrize.playResult != null ? "Розіграти знову" : "Розіграти приз" }}
                 </TheButton>
 
                 <p>Загальна кількість купонів: {{ totalTickets }}</p>
@@ -77,6 +75,19 @@ const { donations } = storeToRefs(donationStore)
 const totalTickets = computed(() => donations.value.reduce((acc, d) => {
     return acc + d.ticketsNumber
 }, 0))
+
+function countUniqueObjects(array: any[]): number {
+    let uniqueObjects = new Set()
+    for (let obj of array) {
+        let objString = JSON.stringify(obj)
+        uniqueObjects.add(objString)
+    }
+    return uniqueObjects.size
+}
+
+const uniqueDonations = computed(() => {
+    return countUniqueObjects(donations.value.map(d => d.participantId))
+})
 
 async function playPrize() {
     await prizeStore.playPrize(selectedRaffle.value!.id, selectedPrize.value!.id)
