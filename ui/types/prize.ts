@@ -7,15 +7,13 @@ export type Prize = {
     name: string,
     ticketCost: number,
     description: string,
-    playResults: PlayResults | null,
+    playResult: PlayResult | null,
 }
 
 export type PlayResult = {
     winners: PlayParticipant[]
     participants: PlayParticipant[]
 }
-
-export type PlayResults = PlayResult[]
 
 export type PlayParticipant = {
     participant: Participant
