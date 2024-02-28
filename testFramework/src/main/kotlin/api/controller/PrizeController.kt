@@ -40,4 +40,9 @@ object PrizeController : AbstractController(requestSpecification = BaseApi.reque
             .then()
             .statusCode(HttpStatus.OK.value())
     }
+
+    fun playPrize(){
+        get("{{base_url}}/{{raffles}}/:raffle_id/{{prizes}}/:prize_id/play")
+    }
+
 }

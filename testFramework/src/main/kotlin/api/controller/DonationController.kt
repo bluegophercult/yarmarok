@@ -14,7 +14,7 @@ object DonationController : AbstractController(requestSpecification = BaseApi.re
             .extract().body().`as`(ResponseId::class.java)
     }
 
-    fun getAllDonations(raffleId: String, prizeId: String): List<DonationDto> {
+    fun getDonations(raffleId: String, prizeId: String): List<DonationDto> {
         return get("/api/raffles/$raffleId/prizes/$prizeId/donations")
             .then()
             .statusCode(HttpStatus.OK.value())

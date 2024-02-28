@@ -3,8 +3,9 @@ package api.controller
 import api.BaseApi
 import dto.ResponseId
 import dto.raffle.RaffleCreateDto
-import dto.raffle.RaffleExportResultDto
 import dto.raffle.RaffleDto
+import dto.raffle.RaffleExportResultDto
+import io.restassured.response.ValidatableResponse
 import org.springframework.http.HttpStatus
 
 object RaffleController : AbstractController(requestSpecification = BaseApi.requestSpecification) {
@@ -23,16 +24,14 @@ object RaffleController : AbstractController(requestSpecification = BaseApi.requ
             .extract().body().`as`(ResponseId::class.java)
     }
 
-    fun updateRaffle(raffleId: String, entity: RaffleCreateDto) {
-        put("/api/raffles/$raffleId", entity)
+    fun updateRaffle(raffleId: String, entity: RaffleCreateDto): ValidatableResponse {
+        return put("/api/raffles/$raffleId", entity)
             .then()
-            .statusCode(HttpStatus.OK.value())
     }
 
-    fun deleteRaffle(raffleId: String) {
-        delete("/api/raffles/$raffleId")
+    fun deleteRaffle(raffleId: String): ValidatableResponse {
+        return delete("/api/raffles/$raffleId")
             .then()
-            .statusCode(HttpStatus.OK.value())
     }
 
     fun downloadRaffles(raffleId: String): RaffleExportResultDto {
@@ -40,5 +39,10 @@ object RaffleController : AbstractController(requestSpecification = BaseApi.requ
             .then()
             .statusCode(HttpStatus.OK.value())
             .extract().body().`as`(RaffleExportResultDto::class.java)
+    }
+
+    fun createRaffleWithoutValidation(entity: RaffleCreateDto): ValidatableResponse {
+        return post("/api/raffles", entity)
+            .then()
     }
 }
