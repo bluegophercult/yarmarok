@@ -147,6 +147,7 @@ func TestDeveloperUsecases(t *testing.T) {
 		withValue := WithLabels(err, KV("key1", "value1"), KV("key2", "value2"))
 		assert.Equal(t, "key1=value1, key2=value2: code: test error", withValue.Error())
 	})
+
 }
 
 type Coder interface {
@@ -226,14 +227,14 @@ func (e *LabeledError) formatValues() string {
 
 type Label struct {
 	Key   string
-	Value string
+	Value any
 }
 
 func (l Label) String() string {
 	return fmt.Sprintf("%s=%s", l.Key, l.Value)
 }
 
-func KV(key, value string) Label {
+func KV(key string, value any) Label {
 	return Label{Key: key, Value: value}
 }
 
