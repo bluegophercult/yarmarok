@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,24 +13,6 @@ import (
 func TestNew(t *testing.T) {
 	err := New("code", "test error")
 	assert.Error(t, err)
-}
-
-func TestCoder(t *testing.T) {
-	t.Run("Normal", func(t *testing.T) {
-		err := New("code", "test error")
-
-		var coder Coder = Coder(nil)
-		require.True(t, errors.As(err, &coder))
-		assert.Equal(t, "code", coder.Code())
-	})
-
-	t.Run("No code", func(t *testing.T) {
-		err := New("", "test error")
-
-		var coder Coder = Coder(nil)
-		require.True(t, errors.As(err, &coder))
-		assert.Equal(t, "", coder.Code())
-	})
 }
 
 func TestError(t *testing.T) {
@@ -147,101 +128,28 @@ func TestDeveloperUsecases(t *testing.T) {
 		withValue := WithLabels(err, KV("key1", "value1"), KV("key2", "value2"))
 		assert.Equal(t, "key1=value1, key2=value2: code: test error", withValue.Error())
 	})
-
 }
 
-type Coder interface {
-	Code() string
-}
+func TestAPIUsecases(t *testing.T) {
+	t.Run("JSON", func(t *testing.T) {
+		err := New("code", "test error")
+		expected := `{"code":"code","error":"test error"}`
 
-type CodeError struct {
-	error
-	code string
-}
+		data, jErr := AsJSON(err)
+		require.NoError(t, jErr)
 
-func New(code, format string, args ...any) error {
-	return &CodeError{code: code, error: fmt.Errorf(format, args...)}
-}
+		assert.JSONEq(t, expected, string(data))
+	})
 
-func (e *CodeError) Error() string {
-	if e.code == "" {
-		return e.error.Error()
-	}
+	t.Run("Wrapped JSON", func(t *testing.T) {
+		base := New("code", "test error")
+		wrapped := fmt.Errorf("wrapped error: %w", base)
 
-	if e.error.Error() == "" {
-		return e.code
-	}
+		expected := `{"code":"code","error":"test error"}`
 
-	return e.code + ": " + e.error.Error()
-}
+		data, jErr := AsJSON(wrapped)
+		require.NoError(t, jErr)
 
-func (e *CodeError) Unwrap() error {
-	return e.error
-}
-
-func (e *CodeError) Code() string {
-	return e.code
-}
-
-func WithCode(code string, err error) error {
-	if err == nil {
-		return nil
-	}
-	return &CodeError{code: code, error: err}
-}
-
-type LabeledError struct {
-	error
-	labels []Label
-}
-
-func WithLabel(err error, key, value string) *LabeledError {
-	if err == nil {
-		return nil
-	}
-
-	labels := []Label{{Key: key, Value: value}}
-
-	return &LabeledError{error: err, labels: labels}
-}
-
-func (e *LabeledError) Error() string {
-	if len(e.labels) == 0 {
-		return e.error.Error()
-	}
-
-	return fmt.Sprintf("%s: %s", e.formatValues(), e.error.Error())
-}
-
-func (e *LabeledError) Unwrap() error {
-	return e.error
-}
-
-func (e *LabeledError) formatValues() string {
-	strs := make([]string, 0, len(e.labels))
-	for _, label := range e.labels {
-		strs = append(strs, label.String())
-	}
-	return strings.Join(strs, ", ")
-}
-
-type Label struct {
-	Key   string
-	Value any
-}
-
-func (l Label) String() string {
-	return fmt.Sprintf("%s=%s", l.Key, l.Value)
-}
-
-func KV(key string, value any) Label {
-	return Label{Key: key, Value: value}
-}
-
-func WithLabels(err error, labels ...Label) *LabeledError {
-	if err == nil {
-		return nil
-	}
-
-	return &LabeledError{error: err, labels: labels}
+		assert.JSONEq(t, expected, string(data))
+	})
 }
