@@ -3,7 +3,9 @@ package structerror
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -89,7 +91,8 @@ func TestWrap(t *testing.T) {
 
 	t.Run("unwrap", func(t *testing.T) {
 		t.Run("base", func(t *testing.T) {
-			assert.Equal(t, base, errors.Unwrap(structured))
+			fmtWrapped := errors.Unwrap(structured)
+			assert.Equal(t, base, errors.Unwrap(fmtWrapped))
 		})
 
 		t.Run("wrapper", func(t *testing.T) {
@@ -99,7 +102,7 @@ func TestWrap(t *testing.T) {
 
 	t.Run("wrap nil", func(t *testing.T) {
 		err := WithCode("code", nil)
-		assert.Equal(t, "code", err.Error())
+		assert.Nil(t, err)
 	})
 
 	t.Run("double wrap", func(t *testing.T) {
@@ -114,7 +117,7 @@ func TestWrap(t *testing.T) {
 		})
 
 		t.Run("is", func(t *testing.T) {
-			assert.False(t, errors.Is(e2, e1))
+			assert.True(t, errors.Is(e2, e1))
 		})
 
 		t.Run("join", func(t *testing.T) {
@@ -122,7 +125,6 @@ func TestWrap(t *testing.T) {
 			assert.True(t, errors.Is(e3, e1))
 			assert.True(t, errors.Is(e3, e2))
 		})
-
 	})
 }
 
@@ -132,14 +134,14 @@ func TestDeveloperUsecases(t *testing.T) {
 		assert.Equal(t, "code: test error", err.Error())
 	})
 
-	// t.Run("with value", func(t *testing.T) {
-	// 	err := New("code", "test error")
-	// 	withValue := WithValue(err, "key1", "value1")
-	// 	withValue = WithValue(err, "key2", "value2")
+	t.Run("with value", func(t *testing.T) {
+		err := New("code", "test error")
+		withValue := WithValue(err, "key1", "value1")
+		withValue = WithValue(withValue, "key2", "value2")
 
-	// 	assert.Equal(t, "code: test error: key1=value1, key2=value2", withValue.Error())
-	// 	assert.ErrorIs(t, withValue, err)
-	// })
+		assert.Equal(t, "key2=value2: key1=value1: code: test error", withValue.Error())
+		assert.ErrorIs(t, withValue, err)
+	})
 
 }
 
@@ -148,8 +150,8 @@ type Coder interface {
 }
 
 type CodeError struct {
-	code string
 	error
+	code string
 }
 
 func New(code, format string, args ...any) error {
@@ -169,7 +171,7 @@ func (e *CodeError) Error() string {
 }
 
 func (e *CodeError) Unwrap() error {
-	return errors.Unwrap(e.error)
+	return e.error
 }
 
 func (e *CodeError) Code() string {
@@ -178,7 +180,7 @@ func (e *CodeError) Code() string {
 
 func WithCode(code string, err error) error {
 	if err == nil {
-		return &CodeError{code: code, error: errors.New("")}
+		return nil
 	}
 	return &CodeError{code: code, error: err}
 }
@@ -188,6 +190,43 @@ type ValueError struct {
 	values map[string]string
 }
 
-func WithValue(err error, key, value string) error {
-	return err
+func WithValue(err error, key, value string) *ValueError {
+	if err == nil {
+		return nil
+	}
+
+	return &ValueError{error: err, values: map[string]string{key: value}}
+}
+
+func (e *ValueError) Error() string {
+	if len(e.values) == 0 {
+		return e.error.Error()
+	}
+
+	return fmt.Sprintf("%s: %s", e.formatValues(), e.error.Error())
+}
+
+func (e *ValueError) Unwrap() error {
+	return e.error
+}
+
+func (e *ValueError) formatValues() string {
+	strs := make([]string, 0, len(e.values))
+	for k, v := range e.values {
+		strs = append(strs, fmt.Sprintf("%s=%s", k, v))
+	}
+	return strings.Join(strs, ", ")
+}
+
+func (e *ValueError) Values() map[string]string {
+	values := maps.Clone(e.values)
+	var valueErr *ValueError
+
+	if !errors.As(e.error, &valueErr) {
+		return values
+	}
+
+	maps.Copy(values, valueErr.Values())
+
+	return values
 }
