@@ -3,7 +3,6 @@ package structerror
 import (
 	"errors"
 	"fmt"
-	"maps"
 	"net"
 	"strings"
 	"testing"
@@ -134,15 +133,20 @@ func TestDeveloperUsecases(t *testing.T) {
 		assert.Equal(t, "code: test error", err.Error())
 	})
 
-	t.Run("with value", func(t *testing.T) {
+	t.Run("with label", func(t *testing.T) {
 		err := New("code", "test error")
-		withValue := WithValue(err, "key1", "value1")
-		withValue = WithValue(withValue, "key2", "value2")
+		withValue := WithLabel(err, "key1", "value1")
+		withValue = WithLabel(withValue, "key2", "value2")
 
 		assert.Equal(t, "key2=value2: key1=value1: code: test error", withValue.Error())
 		assert.ErrorIs(t, withValue, err)
 	})
 
+	t.Run("with labels", func(t *testing.T) {
+		err := New("code", "test error")
+		withValue := WithLabels(err, KV("key1", "value1"), KV("key2", "value2"))
+		assert.Equal(t, "key1=value1, key2=value2: code: test error", withValue.Error())
+	})
 }
 
 type Coder interface {
@@ -185,48 +189,58 @@ func WithCode(code string, err error) error {
 	return &CodeError{code: code, error: err}
 }
 
-type ValueError struct {
+type LabeledError struct {
 	error
-	values map[string]string
+	labels []Label
 }
 
-func WithValue(err error, key, value string) *ValueError {
+func WithLabel(err error, key, value string) *LabeledError {
 	if err == nil {
 		return nil
 	}
 
-	return &ValueError{error: err, values: map[string]string{key: value}}
+	labels := []Label{{Key: key, Value: value}}
+
+	return &LabeledError{error: err, labels: labels}
 }
 
-func (e *ValueError) Error() string {
-	if len(e.values) == 0 {
+func (e *LabeledError) Error() string {
+	if len(e.labels) == 0 {
 		return e.error.Error()
 	}
 
 	return fmt.Sprintf("%s: %s", e.formatValues(), e.error.Error())
 }
 
-func (e *ValueError) Unwrap() error {
+func (e *LabeledError) Unwrap() error {
 	return e.error
 }
 
-func (e *ValueError) formatValues() string {
-	strs := make([]string, 0, len(e.values))
-	for k, v := range e.values {
-		strs = append(strs, fmt.Sprintf("%s=%s", k, v))
+func (e *LabeledError) formatValues() string {
+	strs := make([]string, 0, len(e.labels))
+	for _, label := range e.labels {
+		strs = append(strs, label.String())
 	}
 	return strings.Join(strs, ", ")
 }
 
-func (e *ValueError) Values() map[string]string {
-	values := maps.Clone(e.values)
-	var valueErr *ValueError
+type Label struct {
+	Key   string
+	Value string
+}
 
-	if !errors.As(e.error, &valueErr) {
-		return values
+func (l Label) String() string {
+	return fmt.Sprintf("%s=%s", l.Key, l.Value)
+}
+
+func KV(key, value string) Label {
+	return Label{Key: key, Value: value}
+}
+
+func WithLabels(err error, labels ...Label) *LabeledError {
+	if err == nil {
+		return nil
 	}
 
-	maps.Copy(values, valueErr.Values())
-
-	return values
+	return &LabeledError{error: err, labels: labels}
 }
