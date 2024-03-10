@@ -9,10 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-var (
-	ErrAllWinnersFound = errors.New("all winners already found")
-)
-
 // stringUUID is a plumbing function for generating UUIDs.
 // It is overridden in tests.
 var stringUUID = func() string {

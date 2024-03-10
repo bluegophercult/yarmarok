@@ -1,16 +1,16 @@
 package service
 
 import (
-	"errors"
 	"regexp"
 
 	"github.com/go-playground/validator"
+	"github.com/kaznasho/yarmarok/structerror"
 )
 
 var (
-	ErrParticipantPhoneOnlyDigits = errors.New("phone should contain only digits")
-	ErrNameTooShort               = errors.New("name is too short")
-	ErrInvalidRequest             = errors.New("invalid request")
+	ErrParticipantPhoneOnlyDigits = structerror.New("PhoneContainsLetters")
+	ErrNameTooShort               = structerror.New("NameTooShort")
+	ErrInvalidRequest             = structerror.New("InvalidRequest")
 )
 
 // Acceptable characters are the English alphabet, numbers,

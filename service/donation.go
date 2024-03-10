@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"fmt"
 	"time"
 )
 
@@ -39,11 +39,6 @@ type DonationRequest struct {
 	ParticipantID string `json:"participantId"`
 }
 
-var (
-	ErrDonationAlreadyExists = errors.New("donation already exists")
-	ErrDonationNotFound      = errors.New("donation not found")
-)
-
 var _ DonationService = (*DonationManager)(nil)
 
 // DonationManager is an implementation of DonationService.
@@ -61,19 +56,14 @@ func NewDonationManager(ds DonationStorage) *DonationManager {
 // Create creates a new Donation.
 func (dm *DonationManager) Create(d *DonationRequest) (string, error) {
 	donation := toDonation(d)
-
-	if err := dm.donationStorage.Create(donation); err != nil {
-		return "", err
-	}
-
-	return donation.ID, nil
+	return donation.ID, dm.donationStorage.Create(donation)
 }
 
 // Edit updates a Donation.
 func (dm *DonationManager) Edit(id string, d *DonationRequest) error {
 	donation, err := dm.donationStorage.Get(id)
 	if err != nil {
-		return err
+		return fmt.Errorf("get donation: %w", err)
 	}
 
 	donation.Amount = d.Amount
@@ -88,31 +78,17 @@ func (dm *DonationManager) Edit(id string, d *DonationRequest) error {
 
 // List returns a Donation list.
 func (dm *DonationManager) List() ([]Donation, error) {
-	donations, err := dm.donationStorage.GetAll()
-	if err != nil {
-		return nil, err
-	}
-
-	return donations, nil
+	return dm.donationStorage.GetAll()
 }
 
 // Get returns a Donation.
 func (dm *DonationManager) Get(id string) (*Donation, error) {
-	donation, err := dm.donationStorage.Get(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return donation, nil
+	return dm.donationStorage.Get(id)
 }
 
 // Delete deletes a Donation.
 func (dm *DonationManager) Delete(id string) error {
-	if err := dm.donationStorage.Delete(id); err != nil {
-		return err
-	}
-
-	return nil
+	return dm.donationStorage.Delete(id)
 }
 
 func toDonation(d *DonationRequest) *Donation {

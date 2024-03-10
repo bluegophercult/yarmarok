@@ -23,15 +23,15 @@ func TestDonationManagerCreateDonation(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("Add already existing donation", func(t *testing.T) {
+	t.Run("Create error", func(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		storageMock.EXPECT().Create(gomock.Any()).Return(ErrDonationAlreadyExists)
+		storageMock.EXPECT().Create(gomock.Any()).Return(assert.AnError)
 
 		donationManager := NewDonationManager(storageMock)
 		_, err := donationManager.Create(&DonationRequest{Amount: 777, ParticipantID: stringUUID()})
-		require.ErrorIs(t, err, ErrDonationAlreadyExists)
+		require.ErrorIs(t, err, assert.AnError)
 	})
 }
 

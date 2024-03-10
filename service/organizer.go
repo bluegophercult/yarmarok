@@ -2,15 +2,15 @@
 package service
 
 import (
-	"errors"
+	"github.com/kaznasho/yarmarok/structerror"
 )
 
 var (
 	// ErrAlreadyExists is returned when a raffle already exists.
-	ErrAlreadyExists = errors.New("item already exists")
+	ErrAlreadyExists = structerror.New("AlreadyExists")
 
 	// ErrNotFound is returned when a raffle already exists.
-	ErrNotFound = errors.New("item not found")
+	ErrNotFound = structerror.New("NotFound")
 )
 
 // Organizer represents an organizer of the application.

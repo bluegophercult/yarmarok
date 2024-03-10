@@ -1,13 +1,18 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"reflect"
 	"strconv"
 
+	"github.com/kaznasho/yarmarok/structerror"
 	"github.com/xuri/excelize/v2"
+)
+
+var (
+	// ErrNoDataToCollect is an error that is returned when the collection is empty.
+	ErrNoDataToCollect = structerror.New("NoDataToCollect")
 )
 
 // XLSXManager represents a manager for xlsx files, using the excelize package.
@@ -117,7 +122,7 @@ func isValidValue(collection interface{}) (*reflect.Value, error) {
 	}
 
 	if val.Len() == 0 {
-		return nil, errors.New("empty collection")
+		return nil, ErrNoDataToCollect
 	}
 
 	return &val, nil
