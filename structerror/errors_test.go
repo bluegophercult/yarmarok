@@ -11,40 +11,40 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	err := New("code", "test error")
+	err := NewCodeError("code", "test error")
 	assert.Error(t, err)
 }
 
 func TestError(t *testing.T) {
 	t.Run("normal format", func(t *testing.T) {
-		err := New("code", "test error")
+		err := NewCodeError("code", "test error")
 		assert.Equal(t, "code: test error", err.Error())
 	})
 
 	t.Run("empty code", func(t *testing.T) {
-		err := New("", "test error")
+		err := NewCodeError("", "test error")
 		assert.Equal(t, "test error", err.Error())
 	})
 
 	t.Run("empty error", func(t *testing.T) {
-		err := New("code", "")
+		err := NewCodeError("code", "")
 		assert.Equal(t, "code", err.Error())
 	})
 
 	t.Run("empty code and error", func(t *testing.T) {
-		err := New("", "")
+		err := NewCodeError("", "")
 		assert.Equal(t, "", err.Error())
 	})
 
 	t.Run("fmt", func(t *testing.T) {
-		err := New("code", "test error: %s", "param")
+		err := NewCodeError("code", "test error: %s", "param")
 		assert.Equal(t, "code: test error: param", err.Error())
 	})
 }
 
 func TestWrap(t *testing.T) {
 	base := &net.AddrError{Err: "test error", Addr: "test addr"}
-	structured := New("code", "test error: %w", base)
+	structured := NewCodeError("code", "test error: %w", base)
 	wrapper := fmt.Errorf("wrapped error: %w", structured)
 
 	t.Run("as", func(t *testing.T) {
@@ -115,7 +115,7 @@ func TestDeveloperUsecases(t *testing.T) {
 	})
 
 	t.Run("with label", func(t *testing.T) {
-		err := New("code", "test error")
+		err := NewCodeError("code", "test error")
 		withValue := WithLabel(err, "key1", "value1")
 		withValue = WithLabel(withValue, "key2", "value2")
 
@@ -124,15 +124,20 @@ func TestDeveloperUsecases(t *testing.T) {
 	})
 
 	t.Run("with labels", func(t *testing.T) {
-		err := New("code", "test error")
+		err := NewCodeError("code", "test error")
 		withValue := WithLabels(err, KV("key1", "value1"), KV("key2", "value2"))
 		assert.Equal(t, "key1=value1, key2=value2: code: test error", withValue.Error())
+
+		t.Run("nil", func(t *testing.T) {
+			withValue := WithLabels(nil, KV("key1", "value1"))
+			assert.Nil(t, withValue)
+		})
 	})
 }
 
 func TestAPIUsecases(t *testing.T) {
 	t.Run("JSON", func(t *testing.T) {
-		err := New("code", "test error")
+		err := NewCodeError("code", "test error")
 		expected := `{"code":"code","error":"test error"}`
 
 		data, jErr := AsJSON(err)
@@ -142,7 +147,7 @@ func TestAPIUsecases(t *testing.T) {
 	})
 
 	t.Run("Wrapped JSON", func(t *testing.T) {
-		base := New("code", "test error")
+		base := NewCodeError("code", "test error")
 		wrapped := fmt.Errorf("wrapped error: %w", base)
 
 		expected := `{"code":"code","error":"test error"}`
@@ -151,5 +156,55 @@ func TestAPIUsecases(t *testing.T) {
 		require.NoError(t, jErr)
 
 		assert.JSONEq(t, expected, string(data))
+	})
+
+	t.Run("Response", func(t *testing.T) {
+		t.Run("Code error", func(t *testing.T) {
+			err := NewCodeError("code", "test error")
+			expected := Response{
+				Code:    "code",
+				Message: DefaultMessage,
+			}
+
+			response := AsResponse(err)
+			assert.Equal(t, expected, response)
+		})
+
+		t.Run("Wrapped code error", func(t *testing.T) {
+			base := NewCodeError("code", "test error")
+			wrapped := fmt.Errorf("wrapped error: %w", base)
+
+			expected := Response{
+				Code:    "code",
+				Message: DefaultMessage,
+			}
+
+			response := AsResponse(wrapped)
+			assert.Equal(t, expected, response)
+		})
+
+		t.Run("Default error", func(t *testing.T) {
+			err := fmt.Errorf("test error")
+			expected := Response{
+				Code:    DefaultCode,
+				Message: DefaultMessage,
+			}
+
+			response := AsResponse(err)
+			assert.Equal(t, expected, response)
+		})
+
+		t.Run("Wrapped default error", func(t *testing.T) {
+			base := fmt.Errorf("test error")
+			wrapped := fmt.Errorf("wrapped error: %w", base)
+
+			expected := Response{
+				Code:    DefaultCode,
+				Message: DefaultMessage,
+			}
+
+			response := AsResponse(wrapped)
+			assert.Equal(t, expected, response)
+		})
 	})
 }

@@ -1,3 +1,5 @@
+// Package structerror provides extended errors functionality.
+// It allows to attach a code and labels to an error.
 package structerror
 
 import (
@@ -5,6 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+)
+
+const (
+	DefaultCode    = "UnexpectedError"
+	DefaultMessage = "An unexpected error occurred"
 )
 
 // AsJSON returns the JSON representation of the error.
@@ -17,43 +24,109 @@ func AsJSON(err error) ([]byte, error) {
 	return marshaler.MarshalJSON()
 }
 
+// APIError is a type of error that handles its API representation.
+type APIError interface {
+	error
+	Code() string
+	Message() string
+}
+
+// Response is an API friendly error response.
+type Response struct {
+	Code    string `json:"code"`
+	Message string `json:"error"`
+}
+
+// DefaultResponse returns a new response with the default values.
+func DefaultResponse() Response {
+	return Response{
+		Code:    DefaultCode,
+		Message: DefaultMessage,
+	}
+}
+
+// Coder Is an interface that errors should implement
+// to make AsResponse function unpack the code from the error.
+type Coder interface {
+	Code() string
+}
+
+// Messager Is an interface that errors should implement
+// to make AsResponse function unpack the message from the error.
+type Messager interface {
+	Message() string
+}
+
+// AsResponse returns the API representation of the error.
+// It tries to unpack the code and message from the error.
+// If the error does not implement the Coder or Messager interfaces,
+// it returns the default response.
+func AsResponse(err error) Response {
+	response := DefaultResponse()
+
+	var coder Coder
+	if errors.As(err, &coder) {
+		response.Code = coder.Code()
+	}
+
+	var messager Messager
+	if errors.As(err, &messager) {
+		response.Message = messager.Message()
+	}
+
+	return response
+}
+
+type base struct {
+	error
+}
+
+func newBase(err error) *base {
+	return &base{error: err}
+}
+
+func (b *base) Unwrap() error {
+	return b.error
+}
+
 // CodeError is an error that can have a code attached to it.
 type CodeError struct {
-	error
+	*base
 	code string
 }
 
-// New returns a new error with the given code and message.
-func New(code, format string, args ...any) error {
-	return &CodeError{code: code, error: fmt.Errorf(format, args...)}
+// NewCodeError returns a new error with the given code and message.
+func NewCodeError(code, format string, args ...any) error {
+	return &CodeError{
+		code: code,
+		base: newBase(
+			fmt.Errorf(format, args...),
+		),
+	}
 }
 
 // Error returns the error message with the attached code.
 func (e *CodeError) Error() string {
 	if e.code == "" {
-		return e.error.Error()
+		return e.base.Error()
 	}
 
-	if e.error.Error() == "" {
+	if e.base.Error() == "" {
 		return e.code
 	}
 
-	return e.code + ": " + e.error.Error()
+	return e.code + ": " + e.base.Error()
 }
 
 // MarshalJSON returns the JSON representation of the error.
 func (e *CodeError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]string{
 		"code":  e.code,
-		"error": e.error.Error(),
+		"error": e.base.Error(),
 	})
 }
 
-// Unwrap returns the wrapped error.
-func (e *CodeError) Unwrap() error {
-	return e.error
-}
-
+// Code returns the attached code.
 func (e *CodeError) Code() string {
 	return e.code
 }
@@ -63,12 +136,12 @@ func WithCode(code string, err error) error {
 	if err == nil {
 		return nil
 	}
-	return &CodeError{code: code, error: err}
+	return &CodeError{code: code, base: newBase(err)}
 }
 
 // LabeledError is an error that can have labels attached to it.
 type LabeledError struct {
-	error
+	*base
 	labels []Label
 }
 
@@ -80,21 +153,16 @@ func WithLabel(err error, key, value string) *LabeledError {
 
 	labels := []Label{{Key: key, Value: value}}
 
-	return &LabeledError{error: err, labels: labels}
+	return &LabeledError{base: newBase(err), labels: labels}
 }
 
 // Error returns the error message with the attached labels.
 func (e *LabeledError) Error() string {
 	if len(e.labels) == 0 {
-		return e.error.Error()
+		return e.base.Error()
 	}
 
-	return fmt.Sprintf("%s: %s", e.formatLabels(), e.error.Error())
-}
-
-// Unwrap returns the wrapped error.
-func (e *LabeledError) Unwrap() error {
-	return e.error
+	return fmt.Sprintf("%s: %s", e.formatLabels(), e.base.Error())
 }
 
 func (e *LabeledError) formatLabels() string {
@@ -127,5 +195,5 @@ func WithLabels(err error, labels ...Label) *LabeledError {
 		return nil
 	}
 
-	return &LabeledError{error: err, labels: labels}
+	return &LabeledError{base: newBase(err), labels: labels}
 }
