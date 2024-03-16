@@ -4,12 +4,12 @@ import api.BaseApi
 import dto.ResponseId
 import dto.participant.ParticipantCreateDto
 import dto.participant.ParticipantDto
+import io.restassured.response.ValidatableResponse
 import org.springframework.http.HttpStatus
 
 object ParticipantController : AbstractController(requestSpecification = BaseApi.requestSpecification) {
     fun addParticipant(raffleId: String, participantCreate: ParticipantCreateDto): ResponseId {
-        return post("/api/raffles/$raffleId/participants", participantCreate)
-            .then()
+        return addParticipantWithoutValidation(raffleId, participantCreate)
             .statusCode(HttpStatus.OK.value())
             .extract().body().`as`(ResponseId::class.java)
     }
@@ -32,5 +32,13 @@ object ParticipantController : AbstractController(requestSpecification = BaseApi
         delete("/api/raffles/$raffleId/participants/$participantId")
             .then()
             .statusCode(HttpStatus.OK.value())
+    }
+
+    fun addParticipantWithoutValidation(
+        raffleId: String,
+        participantCreate: ParticipantCreateDto
+    ): ValidatableResponse {
+        return post("/api/raffles/$raffleId/participants", participantCreate)
+            .then()
     }
 }
