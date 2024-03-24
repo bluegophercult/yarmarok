@@ -3,6 +3,7 @@ package storage
 import (
 	"cloud.google.com/go/firestore"
 
+	"github.com/kaznasho/yarmarok/auditlog"
 	"github.com/kaznasho/yarmarok/service"
 )
 
@@ -33,10 +34,15 @@ func (rs *FirestoreRaffleStorage) Create(r *service.Raffle) error {
 
 // PrizeStorage returns a prize storage.
 func (rs *FirestoreRaffleStorage) PrizeStorage(raffleID string) service.PrizeStorage {
-	return NewFirestorePrizeStorage(rs.collectionReference.Doc(raffleID).Collection(prizeCollection), raffleID)
+	return NewFirestorePrizeStorage(rs.collectionReference.Doc(raffleID).Collection(prizeCollection))
 }
 
 // ParticipantStorage returns a participant storage.
 func (rs *FirestoreRaffleStorage) ParticipantStorage(raffleID string) service.ParticipantStorage {
-	return NewFirestoreParticipantStorage(rs.collectionReference.Doc(raffleID).Collection(participantCollection), raffleID)
+	return NewFirestoreParticipantStorage(rs.collectionReference.Doc(raffleID).Collection(participantCollection))
+}
+
+// AuditLogStorage returns an audit log storage.
+func (rs *FirestoreRaffleStorage) AuditLogStorage(raffleID string) auditlog.AuditLogStorage {
+	return NewFirestoreAuditLogStorage(rs.collectionReference.Doc(raffleID).Collection(auditLogCollection))
 }

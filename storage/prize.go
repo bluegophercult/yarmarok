@@ -8,12 +8,11 @@ import (
 
 // FirestorePrizeStorage is a storage for prizes based on Firestore.
 type FirestorePrizeStorage struct {
-	raffleID string
 	*StorageBase[service.Prize]
 }
 
 // NewFirestorePrizeStorage creates a new FirestorePrizeStorage.
-func NewFirestorePrizeStorage(client *firestore.CollectionRef, raffleID string) *FirestorePrizeStorage {
+func NewFirestorePrizeStorage(client *firestore.CollectionRef) *FirestorePrizeStorage {
 	prizeIDExtractor := IDExtractor[service.Prize](
 		func(p *service.Prize) string {
 			return p.ID
@@ -21,12 +20,11 @@ func NewFirestorePrizeStorage(client *firestore.CollectionRef, raffleID string) 
 	)
 
 	return &FirestorePrizeStorage{
-		raffleID:    raffleID,
 		StorageBase: NewStorageBase(client, prizeIDExtractor),
 	}
 }
 
 // DonationStorage returns a donation storage.
 func (ps *FirestorePrizeStorage) DonationStorage(prizeID string) service.DonationStorage {
-	return NewFirestoreDonationStorage(ps.collectionReference.Doc(prizeID).Collection(donationCollection), ps, prizeID)
+	return NewFirestoreDonationStorage(ps.collectionReference.Doc(prizeID).Collection(donationCollection))
 }

@@ -7,7 +7,6 @@ require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.7.3
 	github.com/go-chi/chi v1.5.4
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/rs/cors v1.9.0
 	github.com/sirupsen/logrus v1.9.2
@@ -15,6 +14,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.22.0
 	github.com/xuri/excelize/v2 v2.7.1
 	go.uber.org/mock v0.3.0
+	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea
 	google.golang.org/grpc v1.57.0
 )
 
@@ -70,7 +70,6 @@ require (
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/exp v0.0.0-20230510235704-dd950f8aeaea // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect

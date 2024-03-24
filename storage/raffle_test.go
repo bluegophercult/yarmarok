@@ -89,4 +89,26 @@ func TestRaffle(t *testing.T) {
 		require.Len(t, raffles, 2)
 		require.Equal(t, created, raffles)
 	})
+
+	t.Run("update", func(t *testing.T) {
+		raf.Name = "updated_name"
+		raf.Note = "updated_note"
+
+		err = rs.Update(raf)
+		require.NoError(t, err)
+
+		raf2, err := rs.Get(raf.ID)
+		require.NoError(t, err)
+		require.Equal(t, raf, raf2)
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		err = rs.Delete(raf.ID)
+		require.NoError(t, err)
+
+		_, err = rs.Get(raf.ID)
+		require.ErrorIs(t, err, service.ErrNotFound)
+	})
 }
+
+var _ service.RaffleStorage = &FirestoreRaffleStorage{}

@@ -6,14 +6,6 @@ import (
 	"cloud.google.com/go/firestore"
 )
 
-const (
-	organizerCollection   = "organizers"
-	raffleCollection      = "raffles"
-	participantCollection = "participants"
-	prizeCollection       = "prizes"
-	donationCollection    = "donations"
-)
-
 // FirestoreOrganizerStorage is a storage for organizers based on Firestore.
 type FirestoreOrganizerStorage struct {
 	*StorageBase[service.Organizer]
