@@ -23,14 +23,12 @@ object ParticipantController : AbstractController(requestSpecification = BaseApi
     }
 
     fun updateParticipant(raffleId: String, participantId: String, participant: ParticipantCreateDto) {
-        put("/api/raffles/$raffleId/participants/$participantId", participant)
-            .then()
+        updateParticipantWithoutValidation(raffleId, participantId, participant)
             .statusCode(HttpStatus.OK.value())
     }
 
     fun deleteParticipant(raffleId: String, participantId: String) {
-        delete("/api/raffles/$raffleId/participants/$participantId")
-            .then()
+        deleteParticipantWithoutValidation(raffleId, participantId)
             .statusCode(HttpStatus.OK.value())
     }
 
@@ -39,6 +37,20 @@ object ParticipantController : AbstractController(requestSpecification = BaseApi
         participantCreate: ParticipantCreateDto
     ): ValidatableResponse {
         return post("/api/raffles/$raffleId/participants", participantCreate)
+            .then()
+    }
+
+    fun deleteParticipantWithoutValidation(raffleId: String, participantId: String): ValidatableResponse {
+        return delete("/api/raffles/$raffleId/participants/$participantId")
+            .then()
+    }
+
+    fun updateParticipantWithoutValidation(
+        raffleId: String,
+        participantId: String,
+        participant: ParticipantCreateDto
+    ): ValidatableResponse {
+        return put("/api/raffles/$raffleId/participants/$participantId", participant)
             .then()
     }
 }

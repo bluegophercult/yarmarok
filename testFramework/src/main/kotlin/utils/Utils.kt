@@ -13,4 +13,8 @@ object Utils {
         }
         return true
     }
+
+    fun generatePhoneNumber():String{
+        return "+380${(99999999..999999999).random()}"
+    }
 }

@@ -23,3 +23,12 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+task<Test>("itTest") {
+    useJUnitPlatform()
+
+    systemProperties["junit.jupiter.execution.parallel.enabled"] = true
+    systemProperties["junit.jupiter.execution.parallel.config.strategy"] = "fixed"
+    systemProperties["junit.jupiter.execution.parallel.config.fixed.parallelism"] = 8
+    systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+}
