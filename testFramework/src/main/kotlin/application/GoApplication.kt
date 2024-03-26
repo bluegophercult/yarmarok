@@ -1,20 +1,15 @@
 package application
 
+import org.assertj.core.api.Assertions.assertThat
+import utils.EnvProperties
+import utils.Logger
 import utils.Utils
 import java.io.File
-import org.assertj.core.api.Assertions.assertThat
-import utils.Logger
 
 object GoApplication {
     private lateinit var connection: Process
-
-    fun getHost(): String {
-        return "localhost"
-    }
-
-    fun getPort(): Int {
-        return 8081
-    }
+    val HOST = EnvProperties.getHost()
+    val PORT = EnvProperties.getPort()
 
     fun runApplication(){
         val pb = ProcessBuilder(
@@ -29,7 +24,7 @@ object GoApplication {
         connection = pb.start()
 
         Thread.sleep(8_000)
-        assertThat(Utils.isPortInUse(getPort())).isTrue()
+        assertThat(Utils.isPortInUse(PORT)).isTrue()
     }
 
     fun stopApplication(){

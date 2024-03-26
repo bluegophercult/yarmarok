@@ -12,8 +12,8 @@ object BaseApi {
         RequestSpecBuilder()
             .addFilter(RequestLoggingFilter())
             .addFilter(ResponseLoggingFilter())
-            .setBaseUri("http://" + GoApplication.getHost())
-            .setPort(GoApplication.getPort())
+            .setBaseUri("http://" + GoApplication.HOST)
+            .setPort(GoApplication.PORT)
             .setContentType(ContentType.JSON)
             .build()
 }
